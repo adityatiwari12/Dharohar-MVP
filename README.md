@@ -312,13 +312,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Indigenous Communities** across India for sharing their traditional knowledge
 - **AWS** for providing cloud infrastructure and AI services
 - **Open Source Community** for tools and libraries
-- **Hackathon Organizers** for the opportunity to build impactful technology
+- ** AI For Bharat Hackathon Organizers** for the opportunity to build impactful technology
 
 ---
 
 ## 📞 **Contact & Support**
 
-- **GitHub Issues**: For bug reports and feature requests
+- **Team MLOps 4.0**: Aditya Tiwari, Akshay Khanna, Aryan Singh bhadoria, Anvesh Trivedi
 - **Documentation**: Check `.kiro/specs/` for detailed specifications
 - **Local Development**: Use LocalStack for testing without AWS costs
 
@@ -327,4 +327,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Built with ❤️ for India's cultural heritage preservation**
 
 *Last Updated: January 2026*#
+
 
