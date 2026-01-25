@@ -1,6 +1,6 @@
-# Dharohar Heritage Platform 🏛️
+# Dharohar (धरोहर)🏛️
 
-> **Transforming India's intangible cultural heritage into legally defensible, economically viable digital assets.**
+> **DHAROHAR (धरोहर) - Safeguarding India’s Wisdom with Digital Sovereignty**
 
 [![AWS](https://img.shields.io/badge/AWS-Cloud-orange)](https://aws.amazon.com/)
 [![React Native](https://img.shields.io/badge/React%20Native-Mobile-blue)](https://reactnative.dev/)
@@ -327,3 +327,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Built with ❤️ for India's cultural heritage preservation**
 
 *Last Updated: January 2026*#
+
