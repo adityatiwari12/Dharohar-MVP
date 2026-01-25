@@ -2,7 +2,7 @@
 
 # 🏛️ Dharohar Platform Requirements Document
 
-### *Protecting India's Traditional Medicine & Audio Heritage*
+### *Safeguarding India’s Wisdom with Digital Sovereignty*
 
 [![AWS](https://img.shields.io/badge/AWS-Powered-orange?style=for-the-badge&logo=amazon-aws)](https://aws.amazon.com/)
 [![AI/ML](https://img.shields.io/badge/AI%2FML-AWS%20Bedrock-blue?style=for-the-badge)](https://aws.amazon.com/bedrock/)
@@ -71,6 +71,7 @@ Create the world's first **"Heritage-as-an-Asset"** infrastructure that enables 
 - 🗣️ **80%** of tribal medicinal knowledge exists only orally
 - 💊 Global pharmaceutical companies patent traditional remedies **without compensation**
 - 📉 Communities lose ownership of ancestral wisdom due to **lack of documentation**
+- 🌿 **5,000+ medicinal plants** used in India, but only **10%** documented in TKDL
 
 </td>
 <td width="50%">
@@ -79,10 +80,65 @@ Create the world's first **"Heritage-as-an-Asset"** infrastructure that enables 
 - **₹50,000 Crores** annual losses to Indian communities
 - **Turmeric Patent Case (1995)**: US patent on wound healing - took 2 years to overturn
 - **Neem Patent Case (2000)**: European patent on fungicidal properties - 10-year legal battle
+- **Basmati Rice (1997)**: RiceTec Inc. patented Basmati varieties - 3-year legal battle
 
 </td>
 </tr>
 </table>
+
+#### 📊 Existing Initiatives & Their Limitations
+
+<table>
+<tr>
+<th width="30%">Initiative</th>
+<th width="35%">Strengths</th>
+<th width="35%">Limitations</th>
+</tr>
+<tr>
+<td><b>TKDL (Traditional Knowledge Digital Library)</b><br/>🔗 <a href="http://www.tkdl.res.in">tkdl.res.in</a></td>
+<td>
+• 400,000+ formulations documented<br/>
+• Patent office integration<br/>
+• Prevented 200+ bio-piracy cases
+</td>
+<td>
+• ❌ No community monetization<br/>
+• ❌ Limited to documented knowledge<br/>
+• ❌ No real-time updates<br/>
+• ❌ Centralized, government-only access
+</td>
+</tr>
+<tr>
+<td><b>People's Biodiversity Register (PBR)</b><br/>🔗 Biodiversity Board</td>
+<td>
+• Community-level documentation<br/>
+• Biodiversity conservation focus<br/>
+• Local governance
+</td>
+<td>
+• ❌ Paper-based, not digital<br/>
+• ❌ No AI validation<br/>
+• ❌ No licensing mechanism<br/>
+• ❌ Limited accessibility
+</td>
+</tr>
+<tr>
+<td><b>CSIR Knowledge Portal</b><br/>🔗 CSIR India</td>
+<td>
+• Scientific validation<br/>
+• Research integration<br/>
+• Academic credibility
+</td>
+<td>
+• ❌ No community participation<br/>
+• ❌ No revenue sharing<br/>
+• ❌ Complex submission process<br/>
+• ❌ Limited to scientific community
+</td>
+</tr>
+</table>
+
+> **💡 Dharohar's Innovation**: We combine TKDL's legal protection + PBR's community focus + blockchain monetization + AI validation = **Complete Heritage-as-an-Asset Platform**
 
 
 
@@ -117,18 +173,74 @@ Create the world's first **"Heritage-as-an-Asset"** infrastructure that enables 
 - 🎶 **90%** of traditional music and oral stories exist only in memory
 - 📻 Modern media displaces traditional audio heritage
 - 🎭 Folk songs, rituals, and storytelling traditions disappearing rapidly
+- 🗣️ **196 endangered languages** in India (UNESCO Atlas)
 
 </td>
 <td width="50%">
 
 **Real-World Impact**
-- **UNESCO**: 2,500+ languages at risk of extinction
+- **UNESCO**: 2,500+ languages at risk of extinction globally
 - **Oral Traditions**: 80% of indigenous music undocumented
 - **Cultural Loss**: Traditional knowledge dies with elders every year
+- **Economic Loss**: ₹5,000+ Crores potential cultural tourism revenue lost
 
 </td>
 </tr>
 </table>
+
+#### 🎵 Existing Audio Heritage Initiatives
+
+<table>
+<tr>
+<th width="30%">Initiative</th>
+<th width="35%">Strengths</th>
+<th width="35%">Limitations</th>
+</tr>
+<tr>
+<td><b>Sangeet Natak Akademi Archives</b><br/>🔗 <a href="http://sangeetnatak.gov.in">sangeetnatak.gov.in</a></td>
+<td>
+• 50,000+ audio recordings<br/>
+• Classical music focus<br/>
+• Government backing
+</td>
+<td>
+• ❌ Limited to classical forms<br/>
+• ❌ No tribal/folk focus<br/>
+• ❌ No monetization for artists<br/>
+• ❌ Centralized access only
+</td>
+</tr>
+<tr>
+<td><b>Archives and Research Centre for Ethnomusicology (ARCE)</b><br/>🔗 American Institute of Indian Studies</td>
+<td>
+• 12,000+ hours of recordings<br/>
+• Academic research<br/>
+• Ethnomusicology focus
+</td>
+<td>
+• ❌ Academic access only<br/>
+• ❌ No community ownership<br/>
+• ❌ No AI transcription<br/>
+• ❌ Limited discoverability
+</td>
+</tr>
+<tr>
+<td><b>Sahapedia</b><br/>🔗 <a href="https://www.sahapedia.org">sahapedia.org</a></td>
+<td>
+• Open access platform<br/>
+• Multimedia content<br/>
+• Cultural context
+</td>
+<td>
+• ❌ No blockchain protection<br/>
+• ❌ No revenue sharing<br/>
+• ❌ Manual curation only<br/>
+• ❌ Limited scale
+</td>
+</tr>
+</table>
+
+> **💡 Dharohar's Innovation**: We provide **AI-powered transcription** + **UNESCO-compliant archival** + **blockchain ownership** + **fair revenue distribution** = **Complete Audio Heritage Preservation & Monetization**
 
 > **💡 Key Insight**: The problem isn't lack of value—it's lack of infrastructure to capture, protect, and monetize that value.
 
@@ -154,6 +266,99 @@ graph LR
 ```
 
 </div>
+
+### 🌟 Competitive Advantage Matrix
+
+<table>
+<tr>
+<th width="20%">Feature</th>
+<th width="16%">TKDL</th>
+<th width="16%">PBR</th>
+<th width="16%">Sangeet Natak</th>
+<th width="16%">Sahapedia</th>
+<th width="16%"><b>🏛️ Dharohar</b></th>
+</tr>
+<tr>
+<td><b>Community Ownership</b></td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td><b>✅✅</b></td>
+</tr>
+<tr>
+<td><b>AI Validation</b></td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td><b>✅✅</b></td>
+</tr>
+<tr>
+<td><b>Blockchain Protection</b></td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td><b>✅✅</b></td>
+</tr>
+<tr>
+<td><b>Revenue Sharing</b></td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td><b>✅ 80%</b></td>
+</tr>
+<tr>
+<td><b>Real-time Updates</b></td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td><b>✅✅</b></td>
+</tr>
+<tr>
+<td><b>Multi-Modal (Voice+Audio)</b></td>
+<td>❌</td>
+<td>❌</td>
+<td>Partial</td>
+<td>Partial</td>
+<td><b>✅✅</b></td>
+</tr>
+<tr>
+<td><b>Offline Support</b></td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td><b>✅✅</b></td>
+</tr>
+<tr>
+<td><b>B2B Marketplace</b></td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td><b>✅✅</b></td>
+</tr>
+<tr>
+<td><b>Legal Timestamping</b></td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td><b>✅✅ QLDB</b></td>
+</tr>
+<tr>
+<td><b>Voice-First UX</b></td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td><b>✅✅</b></td>
+</tr>
+</table>
 
 ### 🎯 Two Integrated Modules
 
@@ -222,9 +427,134 @@ sequenceDiagram
     Market->>Vault: Record transaction
 ```
 
+### 🔄 Detailed User Journey Flows
+
+#### 📱 Heritage Creator Journey
+
+```mermaid
+graph TD
+    A[Download Dharohar App] --> B{First Time User?}
+    B -->|Yes| C[Voice-Based Registration]
+    B -->|No| D[Login with Biometric]
+    C --> E[Create Digital Wallet]
+    D --> F[Choose Module]
+    E --> F
+    F --> G{Bio or Sonic?}
+    G -->|Bio| H[Record Traditional Remedy]
+    G -->|Sonic| I[Record Folk Song/Story]
+    H --> J[AI Transcription]
+    I --> J
+    J --> K{Confidence > 85%?}
+    K -->|Yes| L[Auto-Generate Passport]
+    K -->|No| M[Expert Review Queue]
+    M --> N[Expert Validates]
+    N --> L
+    L --> O[QLDB Timestamping]
+    O --> P[Receive QR Certificate]
+    P --> Q[List on Marketplace]
+    Q --> R[Earn 80% Royalties]
+    
+    style A fill:#4CAF50,stroke:#2E7D32,color:#fff
+    style L fill:#FF9800,stroke:#E65100,color:#fff
+    style R fill:#9C27B0,stroke:#6A1B9A,color:#fff
+```
+
+#### 💼 License Buyer Journey
+
+```mermaid
+graph TD
+    A[Visit Marketplace] --> B[Browse by Category]
+    B --> C{Search Filter}
+    C -->|Region| D[Filter by State/Tribe]
+    C -->|Type| E[Filter by Medicine/Music]
+    C -->|License| F[Filter by Tier]
+    D --> G[View Asset Details]
+    E --> G
+    F --> G
+    G --> H[Scan QR for Authenticity]
+    H --> I[View Creator Story]
+    I --> J[Check QLDB Timestamp]
+    J --> K{Purchase Decision}
+    K -->|Yes| L[Select License Tier]
+    K -->|No| B
+    L --> M[Payment Gateway]
+    M --> N[Smart Contract Execution]
+    N --> O[80% to Creator]
+    N --> P[20% to Platform]
+    O --> Q[Access Full Documentation]
+    P --> Q
+    Q --> R[Download Prior Art/Archive]
+    
+    style A fill:#2196F3,stroke:#1565C0,color:#fff
+    style N fill:#FF9800,stroke:#E65100,color:#fff
+    style R fill:#4CAF50,stroke:#2E7D32,color:#fff
+```
+
 ---
 
 ## 🛠️ Technical Foundation
+
+### 🌐 Reference Architecture Inspirations
+
+<table>
+<tr>
+<th width="25%">Platform</th>
+<th width="35%">What We Learned</th>
+<th width="40%">How Dharohar Improves</th>
+</tr>
+<tr>
+<td><b>Spotify for Artists</b><br/>🔗 artists.spotify.com</td>
+<td>
+• Creator dashboard<br/>
+• Revenue analytics<br/>
+• Direct payments
+</td>
+<td>
+✅ Added blockchain verification<br/>
+✅ 80% vs 70% revenue share<br/>
+✅ Community ownership model
+</td>
+</tr>
+<tr>
+<td><b>OpenSea (NFT Marketplace)</b><br/>🔗 opensea.io</td>
+<td>
+• Digital asset marketplace<br/>
+• Blockchain provenance<br/>
+• Creator royalties
+</td>
+<td>
+✅ Added AI validation<br/>
+✅ Legal compliance (TKDL integration)<br/>
+✅ UNESCO archival standards
+</td>
+</tr>
+<tr>
+<td><b>Coursera</b><br/>🔗 coursera.org</td>
+<td>
+• Content licensing model<br/>
+• Tiered access<br/>
+• Certificate verification
+</td>
+<td>
+✅ Added voice-first interface<br/>
+✅ Offline-first architecture<br/>
+✅ Zero literacy barriers
+</td>
+</tr>
+<tr>
+<td><b>GitHub</b><br/>🔗 github.com</td>
+<td>
+• Version control<br/>
+• Contribution tracking<br/>
+• Open collaboration
+</td>
+<td>
+✅ Added QLDB immutability<br/>
+✅ Community consent protocols<br/>
+✅ Fair revenue distribution
+</td>
+</tr>
+</table>
 
 ### AWS Services Stack
 
@@ -319,6 +649,11 @@ sequenceDiagram
 - **Text**: OCR for historical documents
 - **Transcription**: Real-time and batch processing
 
+**AWS Bedrock Models Used:**
+- 🤖 **Claude 3 Sonnet**: Dialect transcription
+- 🤖 **Titan Embeddings**: Semantic search
+- 🤖 **Stable Diffusion**: Certificate generation
+
 </td>
 <td width="50%">
 
@@ -328,16 +663,26 @@ sequenceDiagram
 - **Smart Contracts**: Automated royalty distribution
 - **Interoperability**: Cross-chain asset portability
 
+**Blockchain Architecture:**
+- ⛓️ **Layer 1**: Amazon QLDB (legal records)
+- ⛓️ **Layer 2**: Polygon (NFT marketplace)
+- ⛓️ **Bridge**: Chainlink oracles for data sync
+
 </td>
 </tr>
 <tr>
 <td width="50%">
 
-#### 📡 Offline-First Architecture
+#### � Offline-First Architecture
 - **Local Storage**: IndexedDB for mobile, SQLite for native
 - **Sync Queue**: Automatic upload when connectivity returns
 - **Conflict Resolution**: Last-write-wins with version tracking
 - **Progressive Enhancement**: Core features work offline
+
+**Inspired by:**
+- 📱 **WhatsApp**: Offline message queue
+- 📱 **Google Maps**: Offline map caching
+- 📱 **Pocket**: Offline content sync
 
 </td>
 <td width="50%">
@@ -348,6 +693,86 @@ sequenceDiagram
 - **Audio Feedback**: Spoken confirmations and guidance
 - **Accessibility**: WCAG 2.1 AA compliant
 
+**Voice Technology Stack:**
+- 🎤 **AWS Bedrock**: Multi-dialect ASR
+- 🎤 **Amazon Polly**: Text-to-speech feedback
+- 🎤 **Expo Audio**: Native recording APIs
+
+</td>
+</tr>
+</table>
+
+### 🔐 Security & Compliance Framework
+
+<table>
+<tr>
+<th width="25%">Compliance</th>
+<th width="35%">Requirements</th>
+<th width="40%">Implementation</th>
+</tr>
+<tr>
+<td><b>Nagoya Protocol</b><br/>🔗 CBD ABS</td>
+<td>
+• Access & Benefit Sharing<br/>
+• Prior Informed Consent<br/>
+• Fair & Equitable Sharing
+</td>
+<td>
+✅ Community consent workflows<br/>
+✅ 80% revenue to creators<br/>
+✅ Transparent licensing terms
+</td>
+</tr>
+<tr>
+<td><b>Biological Diversity Act 2002</b><br/>🔗 NBA India</td>
+<td>
+• Biodiversity conservation<br/>
+• Traditional knowledge protection<br/>
+• Benefit sharing
+</td>
+<td>
+✅ Integration with PBR<br/>
+✅ NBA approval workflows<br/>
+✅ Community biodiversity registers
+</td>
+</tr>
+<tr>
+<td><b>TRIPS Agreement</b><br/>🔗 WTO</td>
+<td>
+• IP protection<br/>
+• Patent disclosure<br/>
+• Traditional knowledge rights
+</td>
+<td>
+✅ TKDL integration<br/>
+✅ Prior art documentation<br/>
+✅ Patent office compliance
+</td>
+</tr>
+<tr>
+<td><b>UNESCO 2003 Convention</b><br/>🔗 Intangible Heritage</td>
+<td>
+• Cultural heritage safeguarding<br/>
+• Community participation<br/>
+• International cooperation
+</td>
+<td>
+✅ UNESCO archival standards<br/>
+✅ Community-led documentation<br/>
+✅ Global accessibility
+</td>
+</tr>
+<tr>
+<td><b>GDPR & Data Privacy</b><br/>🔗 EU Regulation</td>
+<td>
+• Data protection<br/>
+• Right to be forgotten<br/>
+• Consent management
+</td>
+<td>
+✅ AES-256 encryption<br/>
+✅ Granular consent controls<br/>
+✅ Data sovereignty options
 </td>
 </tr>
 </table>
@@ -565,23 +990,572 @@ sequenceDiagram
 
 # Success Metrics & KPIs
 
-## Impact Metrics (3-Year Goals)
-- **Community Reach**: 10,000+ heritage creators onboarded
-- **Economic Impact**: ₹100 crores direct revenue to communities
-- **Knowledge Preservation**: 50,000+ traditional practices documented
-- **Legal Protection**: 1,000+ prior art dossiers filed, 100+ bio-piracy cases prevented
+## 📊 Comprehensive Impact Dashboard
+
+### Phase 1: MVP Launch (Months 1-6)
+
+```mermaid
+gantt
+    title Dharohar Platform Rollout Timeline
+    dateFormat  YYYY-MM-DD
+    section Infrastructure
+    AWS Setup & CDK           :2026-01-01, 30d
+    LocalStack Testing        :2026-01-15, 20d
+    Production Deployment     :2026-02-01, 15d
+    section AI Services
+    Bedrock Integration       :2026-02-01, 30d
+    Model Fine-tuning         :2026-02-15, 45d
+    Dialect Training          :2026-03-01, 60d
+    section Mobile App
+    React Native Development  :2026-01-15, 45d
+    UI/UX Testing            :2026-02-15, 30d
+    Beta Release             :2026-03-01, 15d
+    section Blockchain
+    QLDB Setup               :2026-02-15, 20d
+    Smart Contracts          :2026-03-01, 30d
+    Polygon Integration      :2026-03-15, 30d
+    section Community
+    Pilot Communities        :2026-03-01, 90d
+    Training Programs        :2026-03-15, 75d
+    Feedback Integration     :2026-04-01, 60d
+```
+
+### Impact Metrics (3-Year Goals)
+
+<table>
+<tr>
+<th width="20%">Metric</th>
+<th width="15%">Year 1</th>
+<th width="15%">Year 2</th>
+<th width="15%">Year 3</th>
+<th width="35%">Measurement Method</th>
+</tr>
+<tr>
+<td><b>👥 Heritage Creators</b></td>
+<td>1,000</td>
+<td>5,000</td>
+<td>10,000+</td>
+<td>Active user accounts with verified profiles</td>
+</tr>
+<tr>
+<td><b>💵 Direct Revenue</b></td>
+<td>₹10 Cr</td>
+<td>₹50 Cr</td>
+<td>₹100 Cr</td>
+<td>Total royalty payments to creators</td>
+</tr>
+<tr>
+<td><b>📚 Practices Documented</b></td>
+<td>5,000</td>
+<td>25,000</td>
+<td>50,000+</td>
+<td>Verified heritage assets with Digital Passports</td>
+</tr>
+<tr>
+<td><b>⚖️ Legal Protections</b></td>
+<td>100</td>
+<td>500</td>
+<td>1,000+</td>
+<td>Prior art dossiers filed + bio-piracy cases prevented</td>
+</tr>
+<tr>
+<td><b>🌍 Global Reach</b></td>
+<td>10</td>
+<td>30</td>
+<td>50+</td>
+<td>Countries with active license buyers</td>
+</tr>
+<tr>
+<td><b>🎓 Research Papers</b></td>
+<td>50</td>
+<td>200</td>
+<td>500+</td>
+<td>Academic publications using Dharohar data</td>
+</tr>
+<tr>
+<td><b>🏛️ Institutional Partners</b></td>
+<td>5</td>
+<td>20</td>
+<td>50+</td>
+<td>Universities, pharma companies, cultural institutions</td>
+</tr>
+<tr>
+<td><b>🗣️ Languages Supported</b></td>
+<td>5</td>
+<td>15</td>
+<td>25+</td>
+<td>Indian languages with >90% transcription accuracy</td>
+</tr>
+</table>
+
+### Comparison with Existing Platforms
+
+<table>
+<tr>
+<th width="20%">Platform</th>
+<th width="15%">Users</th>
+<th width="15%">Assets</th>
+<th width="15%">Revenue/Year</th>
+<th width="35%">Model</th>
+</tr>
+<tr>
+<td><b>TKDL</b></td>
+<td>~100 (govt)</td>
+<td>400,000</td>
+<td>₹0 (govt funded)</td>
+<td>Government documentation, no monetization</td>
+</tr>
+<tr>
+<td><b>Sahapedia</b></td>
+<td>~500 contributors</td>
+<td>~10,000</td>
+<td>₹0 (grants)</td>
+<td>Open access, grant-funded</td>
+</tr>
+<tr>
+<td><b>Sangeet Natak</b></td>
+<td>~200 (artists)</td>
+<td>50,000</td>
+<td>₹0 (govt)</td>
+<td>Government archive, no creator revenue</td>
+</tr>
+<tr>
+<td><b>🏛️ Dharohar (Target)</b></td>
+<td><b>10,000+</b></td>
+<td><b>50,000+</b></td>
+<td><b>₹100 Cr</b></td>
+<td><b>Community-owned, 80% creator revenue</b></td>
+</tr>
+</table>
 
 ## Platform Metrics
-- **User Engagement**: 80%+ monthly active users, 60+ minutes average session
-- **Content Quality**: 95%+ AI accuracy, 90%+ expert approval rate
-- **Transaction Volume**: ₹10 crores annual marketplace transactions
-- **Global Reach**: 50+ countries accessing licensed content
+
+### 📈 User Engagement Analytics
+
+<table>
+<tr>
+<th width="25%">Metric</th>
+<th width="15%">Target</th>
+<th width="30%">Benchmark</th>
+<th width="30%">Tracking Method</th>
+</tr>
+<tr>
+<td><b>Monthly Active Users (MAU)</b></td>
+<td>80%+</td>
+<td>Spotify: 75%, YouTube: 85%</td>
+<td>CloudWatch + Amplify Analytics</td>
+</tr>
+<tr>
+<td><b>Average Session Duration</b></td>
+<td>60+ min</td>
+<td>Educational apps: 45 min</td>
+<td>User behavior tracking</td>
+</tr>
+<tr>
+<td><b>Content Upload Rate</b></td>
+<td>5/user/month</td>
+<td>Instagram: 3/user/month</td>
+<td>S3 upload metrics</td>
+</tr>
+<tr>
+<td><b>AI Accuracy Rate</b></td>
+<td>95%+</td>
+<td>Google Speech: 92%, AWS Transcribe: 90%</td>
+<td>Bedrock confidence scores</td>
+</tr>
+<tr>
+<td><b>Expert Approval Rate</b></td>
+<td>90%+</td>
+<td>Wikipedia: 85%, Stack Overflow: 88%</td>
+<td>Verification workflow metrics</td>
+</tr>
+<tr>
+<td><b>Transaction Success Rate</b></td>
+<td>99%+</td>
+<td>Stripe: 99.5%, PayPal: 99.2%</td>
+<td>Payment gateway logs</td>
+</tr>
+<tr>
+<td><b>User Retention (90 days)</b></td>
+<td>70%+</td>
+<td>Mobile apps: 40%, SaaS: 60%</td>
+<td>Cohort analysis</td>
+</tr>
+<tr>
+<td><b>Net Promoter Score (NPS)</b></td>
+<td>50+</td>
+<td>Industry average: 30-40</td>
+<td>In-app surveys</td>
+</tr>
+</table>
+
+### 💰 Marketplace Economics
+
+<table>
+<tr>
+<th width="25%">Metric</th>
+<th width="15%">Year 1</th>
+<th width="15%">Year 2</th>
+<th width="15%">Year 3</th>
+<th width="30%">Revenue Model</th>
+</tr>
+<tr>
+<td><b>Transaction Volume</b></td>
+<td>₹1 Cr</td>
+<td>₹5 Cr</td>
+<td>₹10 Cr</td>
+<td>License purchases</td>
+</tr>
+<tr>
+<td><b>Average License Price</b></td>
+<td>₹10,000</td>
+<td>₹15,000</td>
+<td>₹20,000</td>
+<td>Tiered pricing model</td>
+</tr>
+<tr>
+<td><b>Creator Earnings (80%)</b></td>
+<td>₹8,000</td>
+<td>₹12,000</td>
+<td>₹16,000</td>
+<td>Per asset licensed</td>
+</tr>
+<tr>
+<td><b>Platform Revenue (20%)</b></td>
+<td>₹20 L</td>
+<td>₹1 Cr</td>
+<td>₹2 Cr</td>
+<td>Sustainability fund</td>
+</tr>
+<tr>
+<td><b>Repeat Buyers</b></td>
+<td>30%</td>
+<td>50%</td>
+<td>70%</td>
+<td>Customer retention</td>
+</tr>
+<tr>
+<td><b>Institutional Licenses</b></td>
+<td>10</td>
+<td>50</td>
+<td>100</td>
+<td>Bulk licensing deals</td>
+</tr>
+</table>
+
+### 🌍 Global Reach Metrics
+
+<table>
+<tr>
+<th width="25%">Region</th>
+<th width="15%">Target Users</th>
+<th width="30%">Key Partners</th>
+<th width="30%">Use Cases</th>
+</tr>
+<tr>
+<td><b>🇮🇳 India</b></td>
+<td>8,000</td>
+<td>CSIR, NBA, State Biodiversity Boards</td>
+<td>Traditional medicine, folk music</td>
+</tr>
+<tr>
+<td><b>🇺🇸 North America</b></td>
+<td>500</td>
+<td>Universities, Pharma companies</td>
+<td>Research, drug discovery</td>
+</tr>
+<tr>
+<td><b>🇪🇺 Europe</b></td>
+<td>400</td>
+<td>UNESCO, Cultural institutions</td>
+<td>Heritage preservation, research</td>
+</tr>
+<tr>
+<td><b>🇨🇳 East Asia</b></td>
+<td>300</td>
+<td>TCM institutes, Universities</td>
+<td>Comparative medicine studies</td>
+</tr>
+<tr>
+<td><b>🌍 Africa</b></td>
+<td>200</td>
+<td>WHO, African Union</td>
+<td>Traditional medicine exchange</td>
+</tr>
+<tr>
+<td><b>🌎 Latin America</b></td>
+<td>200</td>
+<td>Indigenous organizations</td>
+<td>Knowledge sharing, collaboration</td>
+</tr>
+<tr>
+<td><b>🌏 Southeast Asia</b></td>
+<td>400</td>
+<td>ASEAN cultural bodies</td>
+<td>Regional heritage networks</td>
+</tr>
+</table>
 
 ## Technical Metrics
-- **Performance**: <2s page load, 99.9% API uptime
-- **Accuracy**: 95%+ voice transcription, 90%+ authenticity detection
-- **Cost Efficiency**: <₹10 per asset processed
-- **Security**: Zero data breaches, 100% compliance audits passed
+
+### ⚡ Performance Benchmarks
+
+<table>
+<tr>
+<th width="25%">Metric</th>
+<th width="15%">Target</th>
+<th width="30%">Industry Standard</th>
+<th width="30%">Monitoring Tool</th>
+</tr>
+<tr>
+<td><b>API Response Time</b></td>
+<td><200ms</td>
+<td>Google: <100ms, AWS: <200ms</td>
+<td>CloudWatch, X-Ray</td>
+</tr>
+<tr>
+<td><b>Page Load Time</b></td>
+<td><2s</td>
+<td>Google PageSpeed: <3s</td>
+<td>Lighthouse, WebPageTest</td>
+</tr>
+<tr>
+<td><b>API Uptime</b></td>
+<td>99.9%</td>
+<td>AWS SLA: 99.95%, Azure: 99.9%</td>
+<td>CloudWatch Alarms</td>
+</tr>
+<tr>
+<td><b>Voice Transcription</b></td>
+<td><30s</td>
+<td>Google Speech: 20s, AWS: 25s</td>
+<td>Bedrock metrics</td>
+</tr>
+<tr>
+<td><b>Audio Processing</b></td>
+<td><2min</td>
+<td>Industry: 3-5 min</td>
+<td>Lambda duration logs</td>
+</tr>
+<tr>
+<td><b>QR Generation</b></td>
+<td><1s</td>
+<td>Industry: 1-2s</td>
+<td>Lambda cold start metrics</td>
+</tr>
+<tr>
+<td><b>Payment Processing</b></td>
+<td><5s</td>
+<td>Stripe: 3s, Razorpay: 4s</td>
+<td>Payment gateway logs</td>
+</tr>
+<tr>
+<td><b>Blockchain Confirmation</b></td>
+<td><30s</td>
+<td>Polygon: 2-5s, Ethereum: 15s</td>
+<td>QLDB + Polygon metrics</td>
+</tr>
+<tr>
+<td><b>Mobile App Launch</b></td>
+<td><3s</td>
+<td>Industry: 3-5s</td>
+<td>Expo performance monitoring</td>
+</tr>
+<tr>
+<td><b>Offline Sync</b></td>
+<td><10s</td>
+<td>WhatsApp: 5s, Pocket: 8s</td>
+<td>Custom sync metrics</td>
+</tr>
+</table>
+
+### 🎯 AI Model Performance
+
+<table>
+<tr>
+<th width="20%">Model</th>
+<th width="15%">Accuracy</th>
+<th width="15%">Latency</th>
+<th width="25%">Use Case</th>
+<th width="25%">Benchmark</th>
+</tr>
+<tr>
+<td><b>Claude 3 Sonnet</b></td>
+<td>95%+</td>
+<td>2-5s</td>
+<td>Multi-dialect transcription</td>
+<td>Google Speech: 92%, Whisper: 94%</td>
+</tr>
+<tr>
+<td><b>Titan Embeddings</b></td>
+<td>90%+</td>
+<td><1s</td>
+<td>Semantic search</td>
+<td>OpenAI Ada: 88%, Cohere: 89%</td>
+</tr>
+<tr>
+<td><b>Custom Fine-tuned</b></td>
+<td>97%+</td>
+<td>3-7s</td>
+<td>Botanical taxonomy</td>
+<td>GPT-4: 95%, Custom models: 90%</td>
+</tr>
+<tr>
+<td><b>Audio Classification</b></td>
+<td>92%+</td>
+<td>1-3s</td>
+<td>Music genre detection</td>
+<td>Spotify: 90%, Shazam: 95%</td>
+</tr>
+<tr>
+<td><b>Confidence Scoring</b></td>
+<td>85%+</td>
+<td><1s</td>
+<td>Expert routing</td>
+<td>Industry: 80-85%</td>
+</tr>
+</table>
+
+### 💾 Data & Storage Metrics
+
+<table>
+<tr>
+<th width="25%">Metric</th>
+<th width="15%">Target</th>
+<th width="30%">Capacity Planning</th>
+<th width="30%">Cost Optimization</th>
+</tr>
+<tr>
+<td><b>S3 Storage</b></td>
+<td>100 TB</td>
+<td>50,000 assets × 2 GB avg</td>
+<td>Intelligent-Tiering, Glacier</td>
+</tr>
+<tr>
+<td><b>DynamoDB Throughput</b></td>
+<td>10K RCU/WCU</td>
+<td>1000 concurrent users</td>
+<td>On-demand pricing, auto-scaling</td>
+</tr>
+<tr>
+<td><b>QLDB Records</b></td>
+<td>50K+</td>
+<td>1 record per asset</td>
+<td>Immutable, append-only</td>
+</tr>
+<tr>
+<td><b>CloudFront Bandwidth</b></td>
+<td>10 TB/month</td>
+<td>100K monthly users</td>
+<td>Edge caching, compression</td>
+</tr>
+<tr>
+<td><b>Lambda Invocations</b></td>
+<td>10M/month</td>
+<td>AI processing + API calls</td>
+<td>Reserved concurrency</td>
+</tr>
+<tr>
+<td><b>Backup Retention</b></td>
+<td>7 years</td>
+<td>Legal compliance</td>
+<td>S3 Glacier Deep Archive</td>
+</tr>
+</table>
+
+### 🔒 Security Metrics
+
+<table>
+<tr>
+<th width="25%">Metric</th>
+<th width="15%">Target</th>
+<th width="30%">Standard</th>
+<th width="30%">Audit Frequency</th>
+</tr>
+<tr>
+<td><b>Data Breaches</b></td>
+<td>0</td>
+<td>Industry: <0.1%</td>
+<td>Continuous monitoring</td>
+</tr>
+<tr>
+<td><b>Encryption Coverage</b></td>
+<td>100%</td>
+<td>AES-256 at rest, TLS 1.3 in transit</td>
+<td>Quarterly audit</td>
+</tr>
+<tr>
+<td><b>MFA Adoption</b></td>
+<td>90%+</td>
+<td>Industry: 60-70%</td>
+<td>Monthly tracking</td>
+</tr>
+<tr>
+<td><b>Vulnerability Patching</b></td>
+<td><24h</td>
+<td>Industry: 48-72h</td>
+<td>Automated scanning</td>
+</tr>
+<tr>
+<td><b>Compliance Audits</b></td>
+<td>100%</td>
+<td>ISO 27001, SOC 2, GDPR</td>
+<td>Annual certification</td>
+</tr>
+<tr>
+<td><b>Incident Response</b></td>
+<td><1h</td>
+<td>Industry: 2-4h</td>
+<td>24/7 monitoring</td>
+</tr>
+</table>
+
+### 💰 Cost Efficiency
+
+<table>
+<tr>
+<th width="25%">Service</th>
+<th width="15%">Cost/Asset</th>
+<th width="30%">Optimization Strategy</th>
+<th width="30%">Target Reduction</th>
+</tr>
+<tr>
+<td><b>AWS Bedrock</b></td>
+<td>₹5</td>
+<td>Batch processing, caching</td>
+<td>30% by Year 2</td>
+</tr>
+<tr>
+<td><b>S3 Storage</b></td>
+<td>₹2</td>
+<td>Intelligent-Tiering, compression</td>
+<td>40% by Year 2</td>
+</tr>
+<tr>
+<td><b>Lambda</b></td>
+<td>₹1</td>
+<td>Reserved concurrency, ARM</td>
+<td>25% by Year 2</td>
+</tr>
+<tr>
+<td><b>DynamoDB</b></td>
+<td>₹1</td>
+<td>On-demand, DAX caching</td>
+<td>20% by Year 2</td>
+</tr>
+<tr>
+<td><b>QLDB</b></td>
+<td>₹0.50</td>
+<td>Optimized queries</td>
+<td>15% by Year 2</td>
+</tr>
+<tr>
+<td><b>Total/Asset</b></td>
+<td><b>₹10</b></td>
+<td><b>Multi-service optimization</b></td>
+<td><b>₹7 by Year 3</b></td>
+</tr>
+</table>
 
 # Hackathon MVP Scope
 
