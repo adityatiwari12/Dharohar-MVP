@@ -1,0 +1,66 @@
+{
+  "expo": {
+    "name": "Dharohar",
+    "slug": "dharohar-heritage",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.dharohar.heritage",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app needs access to camera to record craft videos and scan QR codes.",
+        "NSMicrophoneUsageDescription": "This app needs access to microphone to record traditional knowledge.",
+        "NSLocationWhenInUseUsageDescription": "This app needs location access to tag heritage assets with GPS coordinates.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to photo library to save and retrieve heritage content."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.dharohar.heritage",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Dharohar to access your camera to record craft videos and scan QR codes."
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow Dharohar to access your microphone to record traditional knowledge."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationForegroundPermission": "Allow Dharohar to use your location to tag heritage assets with GPS coordinates."
+        }
+      ]
+    ]
+  }
+}
