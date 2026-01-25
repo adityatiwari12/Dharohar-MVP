@@ -22,10 +22,10 @@ const HomeScreen: React.FC = () => {
       color: '#4CAF50',
     },
     {
-      title: 'Authenticate Handicrafts',
-      description: 'Verify authenticity of handmade products',
-      icon: 'videocam',
-      screen: 'Craft',
+      title: 'Audio Heritage Recording',
+      description: 'Preserve folk songs, music, and oral stories',
+      icon: 'music-note',
+      screen: 'AudioHeritage',
       color: '#2196F3',
     },
     {
@@ -50,7 +50,7 @@ const HomeScreen: React.FC = () => {
         <View style={styles.header}>
           <Text style={styles.title}>Welcome to Dharohar</Text>
           <Text style={styles.subtitle}>
-            Protecting and monetizing India's cultural heritage
+            Protecting India's traditional medicine and audio heritage
           </Text>
         </View>
 

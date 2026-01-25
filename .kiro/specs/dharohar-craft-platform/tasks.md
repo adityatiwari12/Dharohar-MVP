@@ -60,32 +60,28 @@ The plan follows an incremental development strategy where each task builds on p
     - **Property 2: Prior Art Dossier Generation**
     - **Validates: Requirements FR-1.1.3**
 
-- [ ] 4. Heritage-Craft Service Implementation
-  - [ ] 4.1 Create craft video upload and processing
-    - Implement React Native video recording with quality guidelines
-    - Set up S3 video storage with automatic compression
-    - Create Lambda function for video processing pipeline
-    - _Requirements: FR-2.1.1, FR-5.1.3_
+- [ ] 4. Heritage-Sonic Service Implementation
+  - [ ] 4.1 Create audio recording and upload functionality
+    - Implement React Native audio recording for music and storytelling
+    - Set up S3 upload with automatic metadata capture (GPS, timestamp)
+    - Create Lambda function for processing audio uploads
+    - _Requirements: FR-2.1.1, FR-2.1.5, FR-5.1.3_
 
-  - [ ] 4.2 Integrate Amazon Rekognition for authenticity analysis
-    - Configure Rekognition Custom Labels for handloom detection
-    - Implement frame extraction and analysis pipeline
-    - Create authenticity scoring algorithm (0-100% scale)
-    - _Requirements: FR-2.1.1, FR-2.1.2_
+  - [ ] 4.2 Integrate AWS Bedrock for audio transcription
+    - Configure Bedrock for audio transcription and analysis
+    - Implement cultural context documentation workflow
+    - Create UNESCO-compliant archival formatting
+    - _Requirements: FR-2.1.2, FR-2.1.4_
 
-  - [ ]* 4.3 Write property test for video analysis
-    - **Property 6: Video Analysis and Authenticity Scoring**
+  - [ ]* 4.3 Write property test for audio processing
+    - **Property: Audio Heritage Processing Pipeline**
     - **Validates: Requirements FR-2.1.1, FR-2.1.2**
 
-  - [ ] 4.4 Implement automatic certification logic
-    - Create GI-tagged product certificate generator
-    - Implement threshold-based auto-certification (85%+ score)
-    - Add manual review queue for borderline cases
-    - _Requirements: FR-2.1.5_
-
-  - [ ]* 4.5 Write property test for certification threshold
-    - **Property 7: Automatic Certification Threshold**
-    - **Validates: Requirements FR-2.1.5**
+  - [ ] 4.4 Implement cultural archive generation
+    - Create archive generation service for UNESCO compliance
+    - Implement template system for cultural documentation
+    - Add metadata extraction and formatting logic
+    - _Requirements: FR-2.1.4_
 
 - [ ] 5. Digital Passport Service
   - [ ] 5.1 Implement Digital Passport generation
@@ -109,8 +105,8 @@ The plan follows an incremental development strategy where each task builds on p
     - **Validates: Requirements FR-2.2.5**
 
 - [ ] 6. Checkpoint - Core AI Features Complete
-  - Ensure all tests pass, verify voice transcription and craft authentication work end-to-end
-  - Test mobile app with real voice recordings and craft videos
+  - Ensure all tests pass, verify voice transcription and audio heritage processing work end-to-end
+  - Test mobile app with real voice recordings and audio heritage
   - Ask the user if questions arise about AI accuracy or user experience
 
 - [ ] 7. Sovereignty Vault Implementation
@@ -181,10 +177,10 @@ The plan follows an incremental development strategy where each task builds on p
     - Create offline mode with sync indicators
     - _Requirements: FR-5.1.1, FR-5.1.2, FR-5.1.5_
 
-  - [ ] 10.2 Build craft documentation interface
-    - Create video recording interface with quality guidelines
+  - [ ] 10.2 Build audio heritage documentation interface
+    - Create audio recording interface with quality guidelines
     - Implement real-time feedback for recording quality
-    - Add progress tracking for authentication process
+    - Add progress tracking for transcription process
     - _Requirements: FR-5.1.2_
 
   - [ ] 10.3 Implement QR scanning and verification
@@ -248,5 +244,5 @@ The plan follows an incremental development strategy where each task builds on p
 - Checkpoints ensure incremental validation and user feedback
 - Property tests validate universal correctness properties using fast-check framework
 - Unit tests validate specific examples and edge cases
-- Focus on core AI features (voice transcription, craft authentication) for maximum hackathon impact
+- Focus on core AI features (voice transcription, audio heritage preservation) for maximum hackathon impact
 - Marketplace and legal features can be simplified for MVP if time constraints arise

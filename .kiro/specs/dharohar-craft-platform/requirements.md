@@ -2,13 +2,15 @@
 
 # 🏛️ Dharohar Platform Requirements Document
 
-### *Transforming India's Intangible Cultural Heritage into Digital Assets*
+### *Protecting India's Traditional Medicine & Audio Heritage*
 
 [![AWS](https://img.shields.io/badge/AWS-Powered-orange?style=for-the-badge&logo=amazon-aws)](https://aws.amazon.com/)
-[![AI/ML](https://img.shields.io/badge/AI%2FML-Bedrock%20%26%20Rekognition-blue?style=for-the-badge)](https://aws.amazon.com/bedrock/)
-[![Blockchain](https://img.shields.io/badge/Blockchain-QLDB%20%26%20Polygon-green?style=for-the-badge)](https://aws.amazon.com/qldb/)
+[![AI/ML](https://img.shields.io/badge/AI%2FML-AWS%20Bedrock-blue?style=for-the-badge)](https://aws.amazon.com/bedrock/)
+[![Blockchain](https://img.shields.io/badge/Blockchain-QLDB-green?style=for-the-badge)](https://aws.amazon.com/qldb/)
 
-**Document Version:** 1.0 | **Last Updated:** January 2026 | **Status:** 🟢 Active Development
+**Document Version:** 2.0 | **Last Updated:** January 2026 | **Status:** 🟢 Active Development
+
+> **🎯 Current Scope**: This platform focuses on **Dharohar-Bio** (traditional medicine/oral knowledge) and **Dharohar-Sonic** (audio heritage/music) modules using AWS Bedrock for AI processing.
 
 </div>
 
@@ -36,7 +38,7 @@
 
 ### Mission
 Create the world's first **"Heritage-as-an-Asset"** infrastructure that enables indigenous communities to:
-- 📝 **Digitize** traditional knowledge and crafts
+- 📝 **Digitize** traditional medicine knowledge and audio heritage
 - ✅ **Validate** authenticity using AI and expert verification
 - 💰 **Monetize** through ethical licensing and fair revenue distribution
 
@@ -82,30 +84,7 @@ Create the world's first **"Heritage-as-an-Asset"** infrastructure that enables 
 </tr>
 </table>
 
-### 🧵 The Counterfeit Epidemic
 
-<table>
-<tr>
-<td width="50%">
-
-**The Challenge**
-- 🏭 Machine-made products flood markets as "handmade" at **90% lower cost**
-- 💔 Genuine artisans cannot compete and abandon traditional crafts
-- ⚠️ Cultural extinction accelerates as economic incentives disappear
-
-</td>
-<td width="50%">
-
-**Real-World Impact**
-- **300%** price premium for authenticated handmade products
-- **Banarasi Saree Industry**: 80% of "Banarasi" sarees are powerloom counterfeits
-- **Artisan Income**: Authentic weavers earn 10x more than counterfeit producers
-
-</td>
-</tr>
-</table>
-
-### 💸 The Liquidity Gap
 
 <table>
 <tr>
@@ -123,6 +102,29 @@ Create the world's first **"Heritage-as-an-Asset"** infrastructure that enables 
 - **$1.2 Trillion** global traditional medicine market (WHO, 2023)
 - **₹1,000+ Crores** potential annual licensing revenue for Indian communities
 - **50+ Countries** actively seeking ethical traditional knowledge partnerships
+
+</td>
+</tr>
+</table>
+
+### 🎵 The Audio Heritage Loss
+
+<table>
+<tr>
+<td width="50%">
+
+**The Challenge**
+- 🎶 **90%** of traditional music and oral stories exist only in memory
+- 📻 Modern media displaces traditional audio heritage
+- 🎭 Folk songs, rituals, and storytelling traditions disappearing rapidly
+
+</td>
+<td width="50%">
+
+**Real-World Impact**
+- **UNESCO**: 2,500+ languages at risk of extinction
+- **Oral Traditions**: 80% of indigenous music undocumented
+- **Cultural Loss**: Traditional knowledge dies with elders every year
 
 </td>
 </tr>
@@ -153,13 +155,12 @@ graph LR
 
 </div>
 
-### 🎯 Three Integrated Modules
+### 🎯 Two Integrated Modules
 
 <table>
 <tr>
-<th width="33%">🧬 Dharohar-Bio</th>
-<th width="33%">🧵 Dharohar-Craft</th>
-<th width="33%">🏛️ Sovereignty Vault</th>
+<th width="50%">🧬 Dharohar-Bio</th>
+<th width="50%">🎵 Dharohar-Sonic</th>
 </tr>
 <tr>
 <td>
@@ -167,29 +168,30 @@ graph LR
 **Oral Knowledge → Prior Art Dossiers**
 
 - Voice recording in native dialects
-- AWS Bedrock AI transcription
+- AWS Bedrock AI transcription & analysis
 - Botanical taxonomy mapping
 - Patent Office-compliant documentation
+- Traditional medicine preservation
 
 </td>
 <td>
 
-**Physical Products → Authenticity Certificates**
+**Audio Heritage → Digital Archives**
 
-- Video-based craft documentation
-- Amazon Rekognition analysis
-- Handmade vs. machine-made detection
-- GI-tagged product certification
+- Traditional music & storytelling recording
+- AWS Bedrock audio transcription & analysis
+- Cultural context documentation
+- UNESCO-compliant archival
+- Folk song and ritual preservation
 
 </td>
-<td>
+</tr>
+<tr>
+<td colspan="2" align="center">
 
-**All Assets → Legal Protection + Monetization**
+**🏛️ Sovereignty Vault** (Shared Infrastructure)
 
-- Amazon QLDB immutable records
-- Blockchain timestamping
-- Smart contract royalty distribution
-- B2B licensing marketplace
+Amazon QLDB immutable records • Blockchain timestamping • Smart contract royalty distribution • B2B licensing marketplace
 
 </td>
 </tr>
@@ -201,12 +203,12 @@ graph LR
 sequenceDiagram
     participant Creator as 👤 Heritage Creator
     participant Mobile as 📱 Mobile App
-    participant AI as 🤖 AI Services
+    participant AI as 🤖 AWS Bedrock
     participant Vault as 🏛️ Sovereignty Vault
     participant Market as 🏪 Marketplace
     participant Buyer as 💼 License Buyer
     
-    Creator->>Mobile: Record voice/video
+    Creator->>Mobile: Record voice/audio
     Mobile->>AI: Upload for processing
     AI->>AI: Transcribe & Analyze
     AI->>Vault: Create immutable record
@@ -234,15 +236,10 @@ sequenceDiagram
 <th>Why This Choice</th>
 </tr>
 <tr>
-<td rowspan="3">🤖 <b>AI/ML</b></td>
+<td rowspan="2">🤖 <b>AI/ML</b></td>
 <td><b>AWS Bedrock</b></td>
-<td>Multi-dialect transcription</td>
-<td>Foundation models for 100+ languages, fine-tuning capability</td>
-</tr>
-<tr>
-<td><b>Amazon Rekognition</b></td>
-<td>Computer vision analysis</td>
-<td>Custom Labels for handmade detection, 99%+ accuracy</td>
+<td>Multi-dialect transcription & audio analysis</td>
+<td>Foundation models for 100+ languages, audio processing, fine-tuning capability</td>
 </tr>
 <tr>
 <td><b>Amazon Textract</b></td>
@@ -318,9 +315,9 @@ sequenceDiagram
 
 #### 🎙️ Multi-Modal AI Processing
 - **Voice**: 95%+ accuracy in 10+ Indian dialects
-- **Video**: Frame-by-frame analysis at 30 FPS
-- **Image**: Pattern recognition with custom ML models
+- **Audio**: Music and storytelling analysis
 - **Text**: OCR for historical documents
+- **Transcription**: Real-time and batch processing
 
 </td>
 <td width="50%">
@@ -391,20 +388,12 @@ sequenceDiagram
 <td>Voice-first AI agent recording oral remedies in native dialects and mapping local plant names to scientific taxonomy using AWS Bedrock Knowledge Bases.</td>
 </tr>
 <tr>
-<td><b>Dharohar_Craft</b> 🧵</td>
-<td>Computer vision system analyzing weave topology, thread patterns, and timing variations to distinguish handmade from machine-made products using Amazon Rekognition Custom Labels.</td>
+<td><b>Dharohar_Sonic</b> 🎵</td>
+<td>Audio heritage preservation system recording traditional music, folk songs, and oral storytelling using AWS Bedrock for transcription and cultural context analysis.</td>
 </tr>
 <tr>
 <td><b>License_Marketplace</b> 🏪</td>
 <td>B2B portal enabling ethical licensing of heritage assets with tiered access (research, commercial, exclusive) and automated smart contract royalty distribution (80% creator, 20% platform).</td>
-</tr>
-<tr>
-<td><b>GI_Tagged_Product</b> 🏷️</td>
-<td>Geographically Indicated product with verified origin, traditional methods, and authenticity score >85%. Eligible for premium pricing and legal protection.</td>
-</tr>
-<tr>
-<td><b>Authenticity_Score</b> 📊</td>
-<td>AI-generated percentage (0-100%) indicating likelihood of traditional production. Based on pattern analysis, timing variations, tool marks, and expert validation.</td>
 </tr>
 <tr>
 <td><b>Heritage_Creator</b> 👤</td>
@@ -454,27 +443,27 @@ sequenceDiagram
 4. **Feedback Loop**: WHEN expert rejects, THE System SHALL provide specific improvement guidance
 5. **Accuracy Tracking**: THE System SHALL monitor verifier accuracy and adjust AI thresholds accordingly
 
-## 🧵 Module 2: Dharohar-Craft (Authenticity Validation)
+## 🎵 Module 2: Dharohar-Sonic (Audio Heritage Preservation)
 
-### FR-2.1: Computer Vision Authentication
-**User Story:** As a handloom weaver, I want to prove my products are genuinely handmade, so that I can command premium pricing and protect against machine-made counterfeits.
+### FR-2.1: Audio Heritage Capture
+**User Story:** As a traditional musician, I want to record and preserve my folk songs and oral stories, so that my cultural heritage is documented for future generations.
 
-**Business Value:** Enables 300%+ price premiums for authenticated handmade products.
+**Business Value:** Preserves 90% of undocumented traditional music and oral traditions before they disappear.
 
 #### Acceptance Criteria
-1. **Weave Analysis**: WHEN craft video uploads, THE Dharohar_Craft SHALL analyze weave topology using Amazon Rekognition Custom Labels
-2. **Authenticity Scoring**: WHEN analysis completes, THE System SHALL generate Authenticity_Score distinguishing Handloom vs. Powerloom
-3. **Pattern Recognition**: WHEN handmade markers detected, THE System SHALL identify thread irregularities, timing variations, tool marks
-4. **Counterfeit Detection**: WHEN machine patterns found, THE System SHALL flag counterfeits with specific evidence
-5. **Auto-Certification**: WHERE Authenticity_Score > 85%, THE System SHALL auto-generate GI_Tagged_Product certificate
+1. **Audio Recording**: WHEN a creator records audio, THE Dharohar_Sonic SHALL capture high-quality audio with metadata
+2. **Transcription**: WHEN audio uploads, THE System SHALL transcribe using AWS Bedrock with 95%+ accuracy
+3. **Cultural Context**: WHEN transcription completes, THE System SHALL prompt for cultural significance and historical context
+4. **UNESCO Compliance**: WHEN documentation is complete, THE System SHALL format records according to UNESCO archival standards
+5. **Offline Capability**: THE System SHALL support offline audio recording with automatic sync when connectivity returns
 
 ### FR-2.2: Digital Passport Creation
-**User Story:** As a buyer, I want to verify a handicraft's authenticity and creation story, so that I can confidently purchase genuine traditional products.
+**User Story:** As a cultural researcher, I want to verify the authenticity and origin of traditional audio heritage, so that I can confidently use it for research and preservation.
 
 #### Acceptance Criteria
-1. **Unique Identification**: WHEN craft passes validation, THE System SHALL create unique Digital_Passport with QR code
-2. **Creation Documentation**: WHEN passport generates, THE System SHALL link to creator video, GPS coordinates, timestamp
-3. **Buyer Verification**: WHEN QR scanned, THE System SHALL display creator profile, authenticity certificate, creation story
+1. **Unique Identification**: WHEN audio passes validation, THE System SHALL create unique Digital_Passport with QR code
+2. **Creation Documentation**: WHEN passport generates, THE System SHALL link to creator profile, GPS coordinates, timestamp, cultural context
+3. **Researcher Verification**: WHEN QR scanned, THE System SHALL display creator profile, audio samples, cultural significance
 4. **Immutable Record**: WHEN displaying info, THE System SHALL show cryptographically verified authenticity data
 5. **Lifetime Validity**: THE Digital_Passport SHALL remain scannable and verifiable permanently
 
@@ -516,15 +505,15 @@ sequenceDiagram
 4. **Full Documentation**: WHEN access granted, THE System SHALL provide complete Prior_Art_Dossiers and creation records
 5. **Usage Tracking**: THE System SHALL monitor license usage and enforce terms automatically
 
-### FR-4.2: Corporate Partnership Portal
-**User Story:** As a fashion brand, I want to source authentic traditional designs, so that I can create ethical collections while supporting artisan communities.
+### FR-4.2: Cultural Partnership Portal
+**User Story:** As a cultural institution, I want to source authentic traditional audio heritage, so that I can create ethical archives while supporting indigenous communities.
 
 #### Acceptance Criteria
-1. **Brand Verification**: WHEN corporates register, THE System SHALL verify business credentials and ethical standards
-2. **Bulk Licensing**: WHEN brands purchase, THE System SHALL support bulk licensing with volume discounts
-3. **Attribution Requirements**: WHEN using designs, THE System SHALL enforce proper attribution and origin labeling
-4. **Impact Reporting**: WHEN partnerships active, THE System SHALL provide community impact metrics to brands
-5. **Sustainability Tracking**: THE System SHALL monitor and report environmental and social impact of partnerships
+1. **Institution Verification**: WHEN institutions register, THE System SHALL verify credentials and ethical standards
+2. **Bulk Licensing**: WHEN institutions purchase, THE System SHALL support bulk licensing with volume discounts
+3. **Attribution Requirements**: WHEN using content, THE System SHALL enforce proper attribution and origin labeling
+4. **Impact Reporting**: WHEN partnerships active, THE System SHALL provide community impact metrics to institutions
+5. **Sustainability Tracking**: THE System SHALL monitor and report cultural and social impact of partnerships
 
 ## 🔧 Module 5: Platform Infrastructure
 
@@ -599,13 +588,13 @@ sequenceDiagram
 ## Phase 1: Core Demo (48 Hours)
 **Priority Features for Judging:**
 1. **Dharohar-Bio**: Voice recording → AWS Bedrock transcription → Prior Art PDF
-2. **Dharohar-Craft**: Video upload → Rekognition analysis → Authenticity score
+2. **Dharohar-Sonic**: Audio recording → AWS Bedrock transcription → Cultural archive
 3. **Digital Passport**: QR code generation with basic asset information
-4. **Simple UI**: React Native app with voice commands and camera integration
+4. **Simple UI**: React Native app with voice commands and audio recording
 
 **Demo Flow:**
 1. Record traditional remedy in Hindi/English (Bio module)
-2. Upload craft video showing weaving process (Craft module)  
+2. Record folk song or oral story (Sonic module)
 3. Generate Digital Passport with QR code
 4. Show marketplace preview with licensing options
 
@@ -614,7 +603,7 @@ sequenceDiagram
 - Amazon QLDB integration
 - Smart contract automation
 - Expert verification workflow
-- Advanced computer vision models
+- Advanced audio analysis models
 
 # Risk Mitigation
 

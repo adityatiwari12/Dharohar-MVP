@@ -9,9 +9,11 @@
 
 ## 🎯 Mission Statement
 
-Create the world's first **"Heritage-as-an-Asset"** infrastructure that enables indigenous communities to digitize, validate, and monetize their traditional knowledge while preventing bio-piracy and counterfeiting.
+Create the world's first **"Heritage-as-an-Asset"** infrastructure that enables indigenous communities to digitize, validate, and monetize their traditional knowledge and audio heritage while preventing bio-piracy.
 
 **Impact Goal**: Protect 10,000+ traditional knowledge holders and generate ₹100 crores in direct community revenue within 3 years.
+
+**Current Focus**: Dharohar-Bio (traditional medicine) and Dharohar-Sonic (audio heritage) modules using AWS Bedrock for AI processing.
 
 ---
 
@@ -66,12 +68,11 @@ Create the world's first **"Heritage-as-an-Asset"** infrastructure that enables 
 - [ ] **3.5** Generate Prior Art Dossiers
 - [ ] **3.6** Write property test for dossier generation
 
-### 🧵 **Task 4: Heritage-Craft Service Implementation**
-- [ ] **4.1** Create craft video upload and processing
-- [ ] **4.2** Integrate Amazon Rekognition for authenticity analysis
-- [ ] **4.3** Write property test for video analysis
-- [ ] **4.4** Implement automatic certification logic
-- [ ] **4.5** Write property test for certification threshold
+### 🎵 **Task 4: Heritage-Sonic Service Implementation**
+- [ ] **4.1** Create audio recording and upload functionality
+- [ ] **4.2** Integrate AWS Bedrock for audio transcription
+- [ ] **4.3** Write property test for audio processing
+- [ ] **4.4** Implement cultural archive generation
 
 ### 🎫 **Task 5: Digital Passport Service**
 - [ ] **5.1** Implement Digital Passport generation
@@ -98,7 +99,7 @@ Create the world's first **"Heritage-as-an-Asset"** infrastructure that enables 
 
 ### 📱 **Task 9: Mobile App UI/UX Enhancement**
 - [ ] **10.1** Create voice-first interface for heritage creators
-- [ ] **10.2** Build craft documentation interface
+- [ ] **10.2** Build audio heritage documentation interface
 - [ ] **10.3** Implement QR scanning and verification
 
 ### 🧪 **Task 10: Testing and Quality Assurance**
@@ -125,11 +126,11 @@ graph TB
     A[Heritage Creator] --> B[Mobile App]
     B --> C{Content Type}
     C -->|Voice| D[Dharohar-Bio Service]
-    C -->|Video| E[Dharohar-Craft Service]
+    C -->|Audio| E[Dharohar-Sonic Service]
     D --> F[AWS Bedrock AI]
-    E --> G[Amazon Rekognition]
+    E --> G[AWS Bedrock AI]
     F --> H[Prior Art Dossier]
-    G --> I[Authenticity Certificate]
+    G --> I[Cultural Archive]
     H --> J[Digital Passport]
     I --> J
     J --> K[Sovereignty Vault - QLDB]
@@ -144,8 +145,7 @@ graph TB
 - **AWS Lambda** - Serverless compute
 - **Amazon S3** - Media storage
 - **DynamoDB** - NoSQL database
-- **AWS Bedrock** - GenAI for transcription
-- **Amazon Rekognition** - Computer vision
+- **AWS Bedrock** - GenAI for transcription and audio analysis
 - **Amazon QLDB** - Immutable ledger
 - **API Gateway** - REST API management
 
@@ -219,13 +219,13 @@ npm start
 
 ### **Phase 1: Core Demo (48 Hours)**
 1. **Dharohar-Bio**: Voice recording → AWS Bedrock transcription → Prior Art PDF
-2. **Dharohar-Craft**: Video upload → Rekognition analysis → Authenticity score
+2. **Dharohar-Sonic**: Audio recording → AWS Bedrock transcription → Cultural archive
 3. **Digital Passport**: QR code generation with basic asset information
-4. **Mobile UI**: React Native app with voice commands and camera integration
+4. **Mobile UI**: React Native app with voice commands and audio recording
 
 ### **Demo Flow**
 1. Record traditional remedy in Hindi/English
-2. Upload craft video showing weaving process
+2. Record folk song or oral story
 3. Generate Digital Passport with QR code
 4. Show marketplace preview with licensing options
 

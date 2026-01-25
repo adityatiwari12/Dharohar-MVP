@@ -39,23 +39,15 @@ Dharohar is a **serverless, multi-modal AI platform** built on AWS that transfor
 
 <table>
 <tr>
-<td width="33%" align="center">
+<td width="50%" align="center">
 
 ### 🎤 AWS Bedrock
-**Dialect Processing**
+**Multi-Modal Processing**
 
-Multi-language transcription with 95%+ accuracy in 10+ Indian dialects
-
-</td>
-<td width="33%" align="center">
-
-### 👁️ Amazon Rekognition
-**Authenticity Validation**
-
-Computer vision analysis distinguishing handmade from machine-made products
+Multi-language transcription and audio analysis with 95%+ accuracy in 10+ Indian dialects
 
 </td>
-<td width="33%" align="center">
+<td width="50%" align="center">
 
 ### 🏛️ Amazon QLDB
 **Immutable Records**
@@ -81,7 +73,7 @@ graph LR
     style D fill:#9C27B0,stroke:#6A1B9A,color:#fff
 ```
 
-The platform operates on a **"Digitize → Validate → Monetize"** workflow, processing voice recordings, craft videos, and cultural artifacts through AI pipelines that generate **Digital Passports** for global licensing.
+The platform operates on a **"Digitize → Validate → Monetize"** workflow, processing voice recordings and audio heritage through AI pipelines that generate **Digital Passports** for global licensing.
 
 ---
 
@@ -104,15 +96,14 @@ graph TB
     
     subgraph "⚡ Processing Layer"
         F[λ Bio Processing<br/>Voice → Dossier]
-        G[λ Craft Analysis<br/>Video → Certificate]
+        G[λ Sonic Processing<br/>Audio → Archive]
         H[λ Passport Gen<br/>QR + Metadata]
         I[λ Marketplace<br/>Licensing + Payments]
     end
     
     subgraph "🤖 AI Services"
         J[AWS Bedrock<br/>GenAI Transcription]
-        K[Amazon Rekognition<br/>Computer Vision]
-        L[Amazon Textract<br/>OCR Processing]
+        K[Amazon Textract<br/>OCR Processing]
     end
     
     subgraph "💾 Data Layer"
@@ -137,8 +128,8 @@ graph TB
     D --> H
     D --> I
     F --> J
-    G --> K
-    H --> L
+    G --> J
+    H --> K
     F --> M
     G --> M
     H --> N
@@ -164,7 +155,7 @@ graph TB
 
 ### 🎯 Microservices Architecture
 
-The platform follows a **serverless microservices pattern** with five core services:
+The platform follows a **serverless microservices pattern** with four core services:
 
 <table>
 <tr>
@@ -178,9 +169,9 @@ The platform follows a **serverless microservices pattern** with five core servi
 <td>AWS Bedrock, Knowledge Bases, Lambda, S3</td>
 </tr>
 <tr>
-<td><b>🧵 Heritage-Craft</b></td>
-<td>Validates authenticity using Amazon Rekognition Custom Labels for handmade detection</td>
-<td>Amazon Rekognition, Custom Labels, Lambda, S3</td>
+<td><b>🎵 Heritage-Sonic</b></td>
+<td>Preserves audio heritage using AWS Bedrock for transcription and cultural context analysis</td>
+<td>AWS Bedrock, Lambda, S3, DynamoDB</td>
 </tr>
 <tr>
 <td><b>🏛️ Sovereignty</b></td>
@@ -236,30 +227,30 @@ GET /api/bio/dossier/{id}
 4. Expert validation → Prior Art Dossier
 5. QLDB timestamping → Legal protection
 
-### 2. Heritage-Craft Service
+### 2. Heritage-Sonic Service
 
-**Purpose**: Authenticate handicrafts using computer vision to distinguish handmade from machine-made products.
+**Purpose**: Preserve traditional audio heritage including folk songs, oral stories, and cultural rituals.
 
 **Core Components**:
-- **Video Analyzer**: Amazon Rekognition Custom Labels
-- **Pattern Detector**: Weave topology analysis
-- **Authenticity Scorer**: ML model for handmade probability
-- **Certificate Generator**: GI-tagged product certificates
+- **Audio Processor**: AWS Bedrock for audio transcription
+- **Cultural Mapper**: Context and significance documentation
+- **Archive Generator**: UNESCO-compliant archival formatting
+- **Validation Queue**: Expert review workflow
 
 **API Endpoints**:
 ```typescript
-POST /api/craft/upload-video
-GET /api/craft/analysis/{id}
-POST /api/craft/validate-authenticity
-GET /api/craft/certificate/{id}
+POST /api/sonic/upload-audio
+GET /api/sonic/transcription/{id}
+POST /api/sonic/validate-heritage
+GET /api/sonic/archive/{id}
 ```
 
-**Computer Vision Pipeline**:
-1. Video upload → Frame extraction
-2. Rekognition analysis → Feature detection
-3. Custom model inference → Authenticity scoring
-4. Pattern matching → Handmade indicators
-5. Certificate generation → Digital passport
+**Data Flow**:
+1. Audio recording → S3 storage
+2. Bedrock transcription → DynamoDB metadata
+3. Cultural context → Documentation
+4. Expert validation → Cultural archive
+5. QLDB timestamping → Legal protection
 
 ### 3. Sovereignty Service
 
@@ -335,7 +326,7 @@ PUT /api/passport/update-metadata
 ```typescript
 interface HeritageAsset {
   id: string;
-  type: 'bio' | 'craft' | 'sonic';
+  type: 'bio' | 'sonic';
   creator: CreatorProfile;
   metadata: AssetMetadata;
   validation: ValidationStatus;

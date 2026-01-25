@@ -10,7 +10,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 // Import screens
 import HomeScreen from './src/screens/HomeScreen';
 import VoiceRecordingScreen from './src/screens/VoiceRecordingScreen';
-import CraftVideoScreen from './src/screens/CraftVideoScreen';
+import AudioHeritageScreen from './src/screens/AudioHeritageScreen';
 import QRScannerScreen from './src/screens/QRScannerScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import MarketplaceScreen from './src/screens/MarketplaceScreen';
@@ -60,8 +60,8 @@ function MainTabs() {
             case 'Voice':
               iconName = 'mic';
               break;
-            case 'Craft':
-              iconName = 'videocam';
+            case 'AudioHeritage':
+              iconName = 'music-note';
               break;
             case 'Scanner':
               iconName = 'qr-code-scanner';
@@ -100,9 +100,9 @@ function MainTabs() {
         options={{ title: 'Record Knowledge' }}
       />
       <Tab.Screen 
-        name="Craft" 
-        component={CraftVideoScreen} 
-        options={{ title: 'Document Craft' }}
+        name="AudioHeritage" 
+        component={AudioHeritageScreen} 
+        options={{ title: 'Audio Heritage' }}
       />
       <Tab.Screen 
         name="Scanner" 
