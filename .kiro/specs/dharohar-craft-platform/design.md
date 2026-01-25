@@ -1,52 +1,131 @@
-# Dharohar Platform Design Document
+<div align="center">
 
-## Overview
+# 🏗️ Dharohar Platform Design Document
 
-Dharohar is a serverless, multi-modal AI platform built on AWS that transforms India's intangible cultural heritage into legally defensible digital assets. The system combines AWS Bedrock for dialect processing, Amazon Rekognition for authenticity validation, and Amazon QLDB for immutable legal records, creating a comprehensive "Heritage-as-an-Asset" infrastructure.
+### *Technical Architecture & Implementation Specifications*
 
-The platform operates on a **"Digitize → Validate → Monetize"** workflow, processing voice recordings, craft videos, and cultural artifacts through AI pipelines that generate Digital Passports for global licensing.
+[![AWS CDK](https://img.shields.io/badge/Infrastructure-AWS%20CDK-orange?style=for-the-badge&logo=amazon-aws)](https://aws.amazon.com/cdk/)
+[![TypeScript](https://img.shields.io/badge/Language-TypeScript-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Serverless](https://img.shields.io/badge/Architecture-Serverless-green?style=for-the-badge)](https://aws.amazon.com/serverless/)
 
-## Architecture
+**Document Version:** 1.0 | **Last Updated:** January 2026 | **Status:** 🟢 Implementation Ready
 
-### High-Level System Architecture
+</div>
+
+---
+
+## 📋 Table of Contents
+
+1. [Overview](#overview)
+2. [System Architecture](#system-architecture)
+3. [Components and Interfaces](#components-and-interfaces)
+4. [Data Models](#data-models)
+5. [Correctness Properties](#correctness-properties)
+6. [Error Handling](#error-handling)
+7. [Testing Strategy](#testing-strategy)
+8. [Performance Benchmarks](#performance-benchmarks)
+
+---
+
+## 🎯 Overview
+
+<div align="center">
+
+### *Serverless, Multi-Modal AI Platform for Heritage Asset Management*
+
+</div>
+
+Dharohar is a **serverless, multi-modal AI platform** built on AWS that transforms India's intangible cultural heritage into legally defensible digital assets. The system combines:
+
+<table>
+<tr>
+<td width="33%" align="center">
+
+### 🎤 AWS Bedrock
+**Dialect Processing**
+
+Multi-language transcription with 95%+ accuracy in 10+ Indian dialects
+
+</td>
+<td width="33%" align="center">
+
+### 👁️ Amazon Rekognition
+**Authenticity Validation**
+
+Computer vision analysis distinguishing handmade from machine-made products
+
+</td>
+<td width="33%" align="center">
+
+### 🏛️ Amazon QLDB
+**Immutable Records**
+
+Cryptographically verifiable legal proof of "First Use"
+
+</td>
+</tr>
+</table>
+
+### 🔄 Core Workflow
+
+```mermaid
+graph LR
+    A[📱 Digitize] -->|AI Processing| B[✅ Validate]
+    B -->|Legal Protection| C[💰 Monetize]
+    C -->|Revenue| D[👤 Creator]
+    D -->|New Content| A
+    
+    style A fill:#2196F3,stroke:#1565C0,color:#fff
+    style B fill:#4CAF50,stroke:#2E7D32,color:#fff
+    style C fill:#FF9800,stroke:#E65100,color:#fff
+    style D fill:#9C27B0,stroke:#6A1B9A,color:#fff
+```
+
+The platform operates on a **"Digitize → Validate → Monetize"** workflow, processing voice recordings, craft videos, and cultural artifacts through AI pipelines that generate **Digital Passports** for global licensing.
+
+---
+
+## 🏗️ System Architecture
+
+### High-Level Architecture Diagram
 
 ```mermaid
 graph TB
-    subgraph "User Layer"
-        A[Mobile App - React Native]
-        B[Web Portal - React]
-        C[Voice Interface - Alexa Skills]
+    subgraph "👥 User Layer"
+        A[📱 Mobile App<br/>React Native]
+        B[🌐 Web Portal<br/>React]
+        C[🗣️ Voice Interface<br/>Alexa Skills]
     end
     
-    subgraph "API Gateway Layer"
-        D[AWS API Gateway]
-        E[AWS Cognito - Auth]
+    subgraph "🚪 API Gateway Layer"
+        D[AWS API Gateway<br/>REST + WebSocket]
+        E[🔐 AWS Cognito<br/>Authentication]
     end
     
-    subgraph "Processing Layer"
-        F[Lambda - Bio Processing]
-        G[Lambda - Craft Analysis]
-        H[Lambda - Passport Generation]
-        I[Lambda - Marketplace]
+    subgraph "⚡ Processing Layer"
+        F[λ Bio Processing<br/>Voice → Dossier]
+        G[λ Craft Analysis<br/>Video → Certificate]
+        H[λ Passport Gen<br/>QR + Metadata]
+        I[λ Marketplace<br/>Licensing + Payments]
     end
     
-    subgraph "AI Services"
-        J[AWS Bedrock - GenAI]
-        K[Amazon Rekognition - CV]
-        L[Amazon Textract - OCR]
+    subgraph "🤖 AI Services"
+        J[AWS Bedrock<br/>GenAI Transcription]
+        K[Amazon Rekognition<br/>Computer Vision]
+        L[Amazon Textract<br/>OCR Processing]
     end
     
-    subgraph "Data Layer"
-        M[Amazon S3 - Media Storage]
-        N[DynamoDB - Metadata]
-        O[QLDB - Legal Records]
-        P[OpenSearch - Search]
+    subgraph "💾 Data Layer"
+        M[Amazon S3<br/>Media Storage]
+        N[DynamoDB<br/>Metadata + Assets]
+        O[QLDB<br/>Legal Records]
+        P[OpenSearch<br/>Search + Analytics]
     end
     
-    subgraph "External Integrations"
-        Q[Payment Gateway - Razorpay]
-        R[Blockchain - Polygon]
-        S[SMS/Email - SNS]
+    subgraph "🔌 External Integrations"
+        Q[💳 Razorpay<br/>Payment Gateway]
+        R[⛓️ Polygon<br/>Blockchain NFTs]
+        S[📧 SNS<br/>Notifications]
     end
     
     A --> D
@@ -68,17 +147,67 @@ graph TB
     I --> Q
     O --> R
     H --> S
+    
+    style A fill:#4CAF50,stroke:#2E7D32,color:#fff
+    style B fill:#4CAF50,stroke:#2E7D32,color:#fff
+    style C fill:#4CAF50,stroke:#2E7D32,color:#fff
+    style D fill:#2196F3,stroke:#1565C0,color:#fff
+    style E fill:#2196F3,stroke:#1565C0,color:#fff
+    style F fill:#FF9800,stroke:#E65100,color:#fff
+    style G fill:#FF9800,stroke:#E65100,color:#fff
+    style H fill:#FF9800,stroke:#E65100,color:#fff
+    style I fill:#FF9800,stroke:#E65100,color:#fff
+    style J fill:#9C27B0,stroke:#6A1B9A,color:#fff
+    style K fill:#9C27B0,stroke:#6A1B9A,color:#fff
+    style L fill:#9C27B0,stroke:#6A1B9A,color:#fff
 ```
 
-### Microservices Architecture
+### 🎯 Microservices Architecture
 
-The platform follows a serverless microservices pattern with five core services:
+The platform follows a **serverless microservices pattern** with five core services:
 
-1. **Heritage-Bio Service**: Processes oral knowledge using AWS Bedrock
-2. **Heritage-Craft Service**: Validates authenticity using Amazon Rekognition  
-3. **Sovereignty Service**: Manages legal records on Amazon QLDB
-4. **Marketplace Service**: Handles licensing and payments
-5. **Passport Service**: Generates and manages Digital Passports
+<table>
+<tr>
+<th width="20%">Service</th>
+<th width="40%">Purpose</th>
+<th width="40%">Key Technologies</th>
+</tr>
+<tr>
+<td><b>🧬 Heritage-Bio</b></td>
+<td>Processes oral knowledge using AWS Bedrock for transcription and botanical taxonomy mapping</td>
+<td>AWS Bedrock, Knowledge Bases, Lambda, S3</td>
+</tr>
+<tr>
+<td><b>🧵 Heritage-Craft</b></td>
+<td>Validates authenticity using Amazon Rekognition Custom Labels for handmade detection</td>
+<td>Amazon Rekognition, Custom Labels, Lambda, S3</td>
+</tr>
+<tr>
+<td><b>🏛️ Sovereignty</b></td>
+<td>Manages immutable legal records on Amazon QLDB with blockchain integration</td>
+<td>Amazon QLDB, Polygon, Lambda, EventBridge</td>
+</tr>
+<tr>
+<td><b>🏪 Marketplace</b></td>
+<td>Handles licensing and automated royalty distribution via smart contracts</td>
+<td>DynamoDB, Razorpay, Smart Contracts, Lambda</td>
+</tr>
+<tr>
+<td><b>🎫 Passport</b></td>
+<td>Generates and manages Digital Passports with QR codes and verification</td>
+<td>DynamoDB, S3, QR Generation, Lambda</td>
+</tr>
+</table>
+
+### 📊 Architecture Principles
+
+| Principle | Implementation | Benefit |
+|-----------|---------------|---------|
+| **🔄 Event-Driven** | EventBridge, SQS, SNS | Loose coupling, async processing, scalability |
+| **⚡ Serverless-First** | Lambda, API Gateway, DynamoDB | Zero server management, auto-scaling, cost optimization |
+| **🔒 Security-by-Design** | Cognito, KMS, WAF, VPC | Zero-trust, encryption everywhere, compliance |
+| **📈 Observable** | CloudWatch, X-Ray, Logs Insights | Real-time monitoring, distributed tracing, debugging |
+| **🌍 Multi-Region** | Global Tables, CloudFront, Route 53 | Low latency, disaster recovery, high availability |
 
 ## Components and Interfaces
 

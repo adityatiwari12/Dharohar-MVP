@@ -1,70 +1,434 @@
-# Dharohar Platform Requirements
+<div align="center">
 
-## Executive Summary
+# 🏛️ Dharohar Platform Requirements Document
 
-**Vision:** Transform India's intangible cultural heritage into legally defensible, economically viable digital assets.
+### *Transforming India's Intangible Cultural Heritage into Digital Assets*
 
-**Mission:** Create the world's first "Heritage-as-an-Asset" infrastructure that enables indigenous communities to digitize, validate, and monetize their traditional knowledge while preventing bio-piracy and counterfeiting.
+[![AWS](https://img.shields.io/badge/AWS-Powered-orange?style=for-the-badge&logo=amazon-aws)](https://aws.amazon.com/)
+[![AI/ML](https://img.shields.io/badge/AI%2FML-Bedrock%20%26%20Rekognition-blue?style=for-the-badge)](https://aws.amazon.com/bedrock/)
+[![Blockchain](https://img.shields.io/badge/Blockchain-QLDB%20%26%20Polygon-green?style=for-the-badge)](https://aws.amazon.com/qldb/)
 
-**Impact Goal:** Protect 10,000+ traditional knowledge holders and generate ₹100 crores in direct community revenue within 3 years.
+**Document Version:** 1.0 | **Last Updated:** January 2026 | **Status:** 🟢 Active Development
 
-## Problem Statement
+</div>
 
-### The Bio-Piracy Crisis
-- 80% of tribal medicinal knowledge exists only orally
-- Global pharmaceutical companies patent traditional remedies without compensation
-- Communities lose ownership of their ancestral wisdom due to lack of documentation
+---
 
-### The Counterfeit Epidemic  
-- Machine-made products flood markets as "handmade" at 90% lower cost
-- Genuine artisans cannot compete and abandon traditional crafts
-- Cultural extinction accelerates as economic incentives disappear
+## 📋 Table of Contents
 
-### The Liquidity Gap
-- Communities hold billions in potential IP value but have zero liquidity
-- No mechanism exists to license traditional knowledge to global industries
-- "Asset Rich, Cash Poor" - the rural economy's fundamental challenge
+1. [Executive Summary](#executive-summary)
+2. [Problem Statement](#problem-statement)
+3. [Solution Architecture](#solution-architecture)
+4. [Technical Foundation](#technical-foundation)
+5. [System Glossary](#system-glossary)
+6. [Functional Requirements](#functional-requirements)
+7. [Non-Functional Requirements](#non-functional-requirements)
+8. [Success Metrics & KPIs](#success-metrics--kpis)
+9. [Hackathon MVP Scope](#hackathon-mvp-scope)
+10. [Risk Mitigation](#risk-mitigation)
 
-## Solution Architecture
+---
 
-Dharohar operates on a **"Digitize → Validate → Monetize"** framework across three integrated modules:
+## 🎯 Executive Summary
 
-1. **Dharohar-Bio**: Oral knowledge → Prior Art Dossiers
-2. **Dharohar-Craft**: Physical products → Authenticity Certificates  
-3. **Sovereignty Vault**: All assets → Legal Protection + Monetization
+### Vision Statement
+> **Transform India's intangible cultural heritage into legally defensible, economically viable digital assets.**
 
-## Technical Foundation
+### Mission
+Create the world's first **"Heritage-as-an-Asset"** infrastructure that enables indigenous communities to:
+- 📝 **Digitize** traditional knowledge and crafts
+- ✅ **Validate** authenticity using AI and expert verification
+- 💰 **Monetize** through ethical licensing and fair revenue distribution
+
+### Impact Goals (3-Year Horizon)
+
+| Metric | Target | Impact |
+|--------|--------|--------|
+| 👥 **Heritage Creators** | 10,000+ | Communities empowered |
+| 💵 **Direct Revenue** | ₹100 Crores | Economic transformation |
+| 📚 **Practices Documented** | 50,000+ | Cultural preservation |
+| ⚖️ **Legal Protections** | 1,000+ | Bio-piracy prevention |
+
+---
+
+## 🚨 Problem Statement
+
+<div align="center">
+
+### *"India's cultural heritage is being lost, stolen, and undervalued"*
+
+</div>
+
+### 🧬 The Bio-Piracy Crisis
+
+<table>
+<tr>
+<td width="50%">
+
+**The Challenge**
+- 🗣️ **80%** of tribal medicinal knowledge exists only orally
+- 💊 Global pharmaceutical companies patent traditional remedies **without compensation**
+- 📉 Communities lose ownership of ancestral wisdom due to **lack of documentation**
+
+</td>
+<td width="50%">
+
+**Real-World Impact**
+- **₹50,000 Crores** annual losses to Indian communities
+- **Turmeric Patent Case (1995)**: US patent on wound healing - took 2 years to overturn
+- **Neem Patent Case (2000)**: European patent on fungicidal properties - 10-year legal battle
+
+</td>
+</tr>
+</table>
+
+### 🧵 The Counterfeit Epidemic
+
+<table>
+<tr>
+<td width="50%">
+
+**The Challenge**
+- 🏭 Machine-made products flood markets as "handmade" at **90% lower cost**
+- 💔 Genuine artisans cannot compete and abandon traditional crafts
+- ⚠️ Cultural extinction accelerates as economic incentives disappear
+
+</td>
+<td width="50%">
+
+**Real-World Impact**
+- **300%** price premium for authenticated handmade products
+- **Banarasi Saree Industry**: 80% of "Banarasi" sarees are powerloom counterfeits
+- **Artisan Income**: Authentic weavers earn 10x more than counterfeit producers
+
+</td>
+</tr>
+</table>
+
+### 💸 The Liquidity Gap
+
+<table>
+<tr>
+<td width="50%">
+
+**The Challenge**
+- 🏦 Communities hold **billions** in potential IP value but have **zero liquidity**
+- 🚫 No mechanism exists to license traditional knowledge to global industries
+- 📊 **"Asset Rich, Cash Poor"** - the rural economy's fundamental challenge
+
+</td>
+<td width="50%">
+
+**Market Opportunity**
+- **$1.2 Trillion** global traditional medicine market (WHO, 2023)
+- **₹1,000+ Crores** potential annual licensing revenue for Indian communities
+- **50+ Countries** actively seeking ethical traditional knowledge partnerships
+
+</td>
+</tr>
+</table>
+
+> **💡 Key Insight**: The problem isn't lack of value—it's lack of infrastructure to capture, protect, and monetize that value.
+
+---
+
+## 🏗️ Solution Architecture
+
+<div align="center">
+
+### **"Digitize → Validate → Monetize"** Framework
+
+```mermaid
+graph LR
+    A[📱 Heritage Creator] -->|Records| B[🎤 Digitize]
+    B -->|AI Processing| C[✅ Validate]
+    C -->|Legal Protection| D[💰 Monetize]
+    D -->|Revenue| A
+    
+    style A fill:#4CAF50,stroke:#2E7D32,color:#fff
+    style B fill:#2196F3,stroke:#1565C0,color:#fff
+    style C fill:#FF9800,stroke:#E65100,color:#fff
+    style D fill:#9C27B0,stroke:#6A1B9A,color:#fff
+```
+
+</div>
+
+### 🎯 Three Integrated Modules
+
+<table>
+<tr>
+<th width="33%">🧬 Dharohar-Bio</th>
+<th width="33%">🧵 Dharohar-Craft</th>
+<th width="33%">🏛️ Sovereignty Vault</th>
+</tr>
+<tr>
+<td>
+
+**Oral Knowledge → Prior Art Dossiers**
+
+- Voice recording in native dialects
+- AWS Bedrock AI transcription
+- Botanical taxonomy mapping
+- Patent Office-compliant documentation
+
+</td>
+<td>
+
+**Physical Products → Authenticity Certificates**
+
+- Video-based craft documentation
+- Amazon Rekognition analysis
+- Handmade vs. machine-made detection
+- GI-tagged product certification
+
+</td>
+<td>
+
+**All Assets → Legal Protection + Monetization**
+
+- Amazon QLDB immutable records
+- Blockchain timestamping
+- Smart contract royalty distribution
+- B2B licensing marketplace
+
+</td>
+</tr>
+</table>
+
+### 🔄 End-to-End Workflow
+
+```mermaid
+sequenceDiagram
+    participant Creator as 👤 Heritage Creator
+    participant Mobile as 📱 Mobile App
+    participant AI as 🤖 AI Services
+    participant Vault as 🏛️ Sovereignty Vault
+    participant Market as 🏪 Marketplace
+    participant Buyer as 💼 License Buyer
+    
+    Creator->>Mobile: Record voice/video
+    Mobile->>AI: Upload for processing
+    AI->>AI: Transcribe & Analyze
+    AI->>Vault: Create immutable record
+    Vault->>Mobile: Generate Digital Passport
+    Mobile->>Creator: QR code certificate
+    
+    Buyer->>Market: Browse heritage assets
+    Market->>Buyer: Show authenticated content
+    Buyer->>Market: Purchase license
+    Market->>Creator: 80% royalty payment
+    Market->>Vault: Record transaction
+```
+
+---
+
+## 🛠️ Technical Foundation
 
 ### AWS Services Stack
-- **AI/ML**: AWS Bedrock (GenAI), Amazon Rekognition (Computer Vision)
-- **Data**: Amazon S3 (Storage), DynamoDB (NoSQL), QLDB (Immutable Ledger)
-- **Compute**: AWS Lambda (Serverless), EC2 (Training)
-- **Security**: AWS Cognito (Auth), KMS (Encryption)
-- **Frontend**: React Native + AWS Amplify
 
-### Core Capabilities
-- **Multi-Modal AI**: Voice, Video, Image processing at scale
-- **Blockchain Integration**: Immutable timestamping and smart contracts
-- **Offline-First**: Works in remote areas with poor connectivity
-- **Voice-First UX**: Zero literacy barriers, local dialect support
+<table>
+<tr>
+<th>Category</th>
+<th>Service</th>
+<th>Purpose</th>
+<th>Why This Choice</th>
+</tr>
+<tr>
+<td rowspan="3">🤖 <b>AI/ML</b></td>
+<td><b>AWS Bedrock</b></td>
+<td>Multi-dialect transcription</td>
+<td>Foundation models for 100+ languages, fine-tuning capability</td>
+</tr>
+<tr>
+<td><b>Amazon Rekognition</b></td>
+<td>Computer vision analysis</td>
+<td>Custom Labels for handmade detection, 99%+ accuracy</td>
+</tr>
+<tr>
+<td><b>Amazon Textract</b></td>
+<td>Document processing</td>
+<td>Extract text from historical documents and certificates</td>
+</tr>
+<tr>
+<td rowspan="4">💾 <b>Data</b></td>
+<td><b>Amazon S3</b></td>
+<td>Media storage</td>
+<td>99.999999999% durability, lifecycle policies, versioning</td>
+</tr>
+<tr>
+<td><b>DynamoDB</b></td>
+<td>NoSQL database</td>
+<td>Single-digit millisecond latency, auto-scaling, global tables</td>
+</tr>
+<tr>
+<td><b>Amazon QLDB</b></td>
+<td>Immutable ledger</td>
+<td>Cryptographically verifiable, SQL-like queries, audit trail</td>
+</tr>
+<tr>
+<td><b>OpenSearch</b></td>
+<td>Search & analytics</td>
+<td>Full-text search, faceted navigation, real-time indexing</td>
+</tr>
+<tr>
+<td rowspan="2">⚡ <b>Compute</b></td>
+<td><b>AWS Lambda</b></td>
+<td>Serverless functions</td>
+<td>Pay-per-use, auto-scaling, 15-minute max execution</td>
+</tr>
+<tr>
+<td><b>API Gateway</b></td>
+<td>REST API management</td>
+<td>Throttling, caching, API versioning, CORS support</td>
+</tr>
+<tr>
+<td rowspan="3">🔒 <b>Security</b></td>
+<td><b>AWS Cognito</b></td>
+<td>Authentication</td>
+<td>User pools, MFA, social login, custom attributes</td>
+</tr>
+<tr>
+<td><b>AWS KMS</b></td>
+<td>Encryption</td>
+<td>FIPS 140-2 validated, automatic key rotation</td>
+</tr>
+<tr>
+<td><b>AWS WAF</b></td>
+<td>Web firewall</td>
+<td>DDoS protection, bot mitigation, rate limiting</td>
+</tr>
+<tr>
+<td rowspan="2">📱 <b>Frontend</b></td>
+<td><b>React Native</b></td>
+<td>Mobile app</td>
+<td>Cross-platform, native performance, large ecosystem</td>
+</tr>
+<tr>
+<td><b>AWS Amplify</b></td>
+<td>Frontend framework</td>
+<td>Authentication, API, storage integration out-of-the-box</td>
+</tr>
+</table>
 
-## System Glossary
+### 🎯 Core Capabilities
 
-| Term | Definition |
-|------|------------|
-| **Digital_Passport** | Immutable certificate combining authenticity validation, GPS coordinates, and creation documentation |
-| **Prior_Art_Dossier** | Legal documentation of traditional knowledge formatted for patent office submission |
-| **Sovereignty_Vault** | Amazon QLDB-based immutable ledger for legal proof of "First Use" |
-| **Dharohar_Bio** | Voice-first agent recording oral remedies and mapping to scientific taxonomy |
-| **Dharohar_Craft** | Computer vision scanner analyzing weave topology for authenticity |
-| **License_Marketplace** | B2B portal for purchasing heritage asset licenses via smart contracts |
-| **GI_Tagged_Product** | Geographically Indicated product with verified origin and methods |
-| **Authenticity_Score** | AI-generated percentage (0-100%) indicating traditional production likelihood |
-| **Heritage_Creator** | Traditional knowledge holder (healer, weaver, storyteller, artisan) |
-| **Expert_Verifier** | Domain specialist validating AI assessments (botanist, textile expert) |
-| **License_Buyer** | Researcher, company, or institution purchasing heritage asset access |
+<table>
+<tr>
+<td width="50%">
 
-# Functional Requirements
+#### 🎙️ Multi-Modal AI Processing
+- **Voice**: 95%+ accuracy in 10+ Indian dialects
+- **Video**: Frame-by-frame analysis at 30 FPS
+- **Image**: Pattern recognition with custom ML models
+- **Text**: OCR for historical documents
+
+</td>
+<td width="50%">
+
+#### 🔗 Blockchain Integration
+- **QLDB**: Immutable timestamping with cryptographic proof
+- **Polygon**: NFT minting for digital ownership
+- **Smart Contracts**: Automated royalty distribution
+- **Interoperability**: Cross-chain asset portability
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+#### 📡 Offline-First Architecture
+- **Local Storage**: IndexedDB for mobile, SQLite for native
+- **Sync Queue**: Automatic upload when connectivity returns
+- **Conflict Resolution**: Last-write-wins with version tracking
+- **Progressive Enhancement**: Core features work offline
+
+</td>
+<td width="50%">
+
+#### 🗣️ Voice-First UX
+- **Zero Literacy Barriers**: Voice commands for all actions
+- **Dialect Support**: Gondi, Bhili, Malwi, Hindi, English
+- **Audio Feedback**: Spoken confirmations and guidance
+- **Accessibility**: WCAG 2.1 AA compliant
+
+</td>
+</tr>
+</table>
+
+### 📊 Architecture Principles
+
+| Principle | Implementation | Benefit |
+|-----------|---------------|---------|
+| **Serverless-First** | Lambda, API Gateway, DynamoDB | Zero server management, auto-scaling, pay-per-use |
+| **AI-Native** | Bedrock, Rekognition, Textract | State-of-the-art accuracy, continuous improvement |
+| **Security-by-Design** | Encryption, MFA, RBAC, audit logs | GDPR compliant, zero-trust architecture |
+| **Mobile-First** | React Native, offline support | 80%+ users on mobile, poor connectivity areas |
+| **API-Driven** | REST APIs, GraphQL subscriptions | Extensibility, third-party integrations |
+
+---
+
+## 📖 System Glossary
+
+<table>
+<tr>
+<th width="25%">Term</th>
+<th width="75%">Definition</th>
+</tr>
+<tr>
+<td><b>Digital_Passport</b> 🎫</td>
+<td>Immutable certificate combining authenticity validation, GPS coordinates, creation documentation, and QR code for instant verification. Acts as a "birth certificate" for heritage assets.</td>
+</tr>
+<tr>
+<td><b>Prior_Art_Dossier</b> 📄</td>
+<td>Legal documentation of traditional knowledge formatted for patent office submission. Includes botanical taxonomy, usage methods, historical evidence, and community consent.</td>
+</tr>
+<tr>
+<td><b>Sovereignty_Vault</b> 🏛️</td>
+<td>Amazon QLDB-based immutable ledger providing cryptographic proof of "First Use" for legal disputes. Timestamped records cannot be altered or deleted.</td>
+</tr>
+<tr>
+<td><b>Dharohar_Bio</b> 🧬</td>
+<td>Voice-first AI agent recording oral remedies in native dialects and mapping local plant names to scientific taxonomy using AWS Bedrock Knowledge Bases.</td>
+</tr>
+<tr>
+<td><b>Dharohar_Craft</b> 🧵</td>
+<td>Computer vision system analyzing weave topology, thread patterns, and timing variations to distinguish handmade from machine-made products using Amazon Rekognition Custom Labels.</td>
+</tr>
+<tr>
+<td><b>License_Marketplace</b> 🏪</td>
+<td>B2B portal enabling ethical licensing of heritage assets with tiered access (research, commercial, exclusive) and automated smart contract royalty distribution (80% creator, 20% platform).</td>
+</tr>
+<tr>
+<td><b>GI_Tagged_Product</b> 🏷️</td>
+<td>Geographically Indicated product with verified origin, traditional methods, and authenticity score >85%. Eligible for premium pricing and legal protection.</td>
+</tr>
+<tr>
+<td><b>Authenticity_Score</b> 📊</td>
+<td>AI-generated percentage (0-100%) indicating likelihood of traditional production. Based on pattern analysis, timing variations, tool marks, and expert validation.</td>
+</tr>
+<tr>
+<td><b>Heritage_Creator</b> 👤</td>
+<td>Traditional knowledge holder including healers, weavers, storytellers, artisans, and community elders. Primary beneficiaries of the platform.</td>
+</tr>
+<tr>
+<td><b>Expert_Verifier</b> 👨‍🔬</td>
+<td>Domain specialist (botanist, textile expert, anthropologist) validating AI assessments when confidence score <85%. Provides feedback for model improvement.</td>
+</tr>
+<tr>
+<td><b>License_Buyer</b> 💼</td>
+<td>Researcher, pharmaceutical company, fashion brand, or institution purchasing ethical access to heritage assets for research, commercial use, or exclusive rights.</td>
+</tr>
+</table>
+
+---
+
+## 📋 Functional Requirements
+
+<div align="center">
+
+### *Detailed specifications for each platform module*
+
+</div>
 
 ## 🧬 Module 1: Dharohar-Bio (Oral Knowledge Protection)
 
