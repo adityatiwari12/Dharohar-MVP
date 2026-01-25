@@ -326,6 +326,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Built with ❤️ for India's cultural heritage preservation**
 
-*Last Updated: January 2026*#   D h a r o h a r - M V P 
- 
- 
+*Last Updated: January 2026*#
