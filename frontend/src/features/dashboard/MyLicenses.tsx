@@ -90,6 +90,28 @@ export const MyLicenses = () => {
                                     <p style={{ margin: '0.25rem 0 0', fontSize: '0.9rem' }}>{license.purpose}</p>
                                 </div>
 
+                                {/* Media access — locked until APPROVED */}
+                                <div style={{ marginTop: '1rem' }}>
+                                    {license.status === 'APPROVED' && (asset as any)?.mediaUrl ? (
+                                        <div style={{ padding: '0.75rem', background: 'rgba(34,197,94,0.05)', border: '1px solid #22c55e', borderRadius: '4px' }}>
+                                            <p style={{ fontSize: '0.8rem', fontWeight: 600, color: '#14532d', marginBottom: '0.5rem' }}>
+                                                🔓 Full Media Access Granted
+                                            </p>
+                                            {(asset as any).mediaUrl.match(/\.(mp4|webm|ogv)$/i) ? (
+                                                <video controls style={{ width: '100%', maxHeight: '200px', borderRadius: '2px' }} src={(asset as any).mediaUrl} />
+                                            ) : (
+                                                <audio controls style={{ width: '100%' }} src={(asset as any).mediaUrl} />
+                                            )}
+                                        </div>
+                                    ) : license.status !== 'APPROVED' ? (
+                                        <div style={{ padding: '0.75rem 1rem', background: 'rgba(0,0,0,0.03)', border: '1px dashed var(--color-muted-gold)', borderRadius: '4px', textAlign: 'center' }}>
+                                            <span style={{ fontSize: '0.85rem', color: 'var(--color-text-light)' }}>
+                                                🔒 Media access unlocks after license approval
+                                            </span>
+                                        </div>
+                                    ) : null}
+                                </div>
+
                                 {/* Approved: show agreement text */}
                                 {license.status === 'APPROVED' && license.agreementText && (
                                     <div style={{ marginTop: '1rem', padding: '0.75rem 1rem', background: 'rgba(34,197,94,0.06)', border: '1px solid #22c55e', borderRadius: '4px' }}>

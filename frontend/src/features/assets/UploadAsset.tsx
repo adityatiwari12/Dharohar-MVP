@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiMic, FiVideo, FiUpload, FiArrowLeft, FiMapPin, FiClock, FiCheckCircle, FiX } from 'react-icons/fi';
 import { submitAsset } from '../../services/assetService';
+import { Loader } from '../../components/Loader/Loader';
 import './UploadAsset.css';
 
 type SubmissionType = 'BIO' | 'SONIC' | null;
@@ -57,7 +58,7 @@ export const UploadAsset = () => {
                 const { latitude, longitude, accuracy } = position.coords;
                 setFormData((prev: any) => ({
                     ...prev,
-                    location: `${latitude.toFixed(6)}° N, ${longitude.toFixed(6)}° E (acc: ±${Math.round(accuracy)}m)`
+                    location: `${latitude.toFixed(6)}° N, ${longitude.toFixed(6)}° E(acc: ±${Math.round(accuracy)}m)`
                 }));
                 setIsLocating(false);
             },
@@ -187,6 +188,10 @@ export const UploadAsset = () => {
         }
     };
 
+    if (loading) {
+        return <Loader label="Archiving submission..." />;
+    }
+
     if (success) {
         return (
             <div className="alert-success">
@@ -234,7 +239,7 @@ export const UploadAsset = () => {
                     <FiMapPin /> <strong>Location:</strong> {formData.location}
                     <button
                         type="button"
-                        className={`refresh-location-btn ${isLocating ? 'spinning' : ''}`}
+                        className={`refresh - location - btn ${isLocating ? 'spinning' : ''} `}
                         onClick={detectLocation}
                         title="Re-detect precise location"
                         disabled={isLocating}
@@ -299,7 +304,7 @@ export const UploadAsset = () => {
                                 <div className="media-actions">
                                     <button
                                         type="button"
-                                        className={`media-btn ${isRecording ? 'recording' : ''}`}
+                                        className={`media - btn ${isRecording ? 'recording' : ''} `}
                                         onClick={isRecording ? stopRecording : () => startRecording('AUDIO')}
                                     >
                                         <FiMic />
@@ -352,7 +357,7 @@ export const UploadAsset = () => {
                                 <div className="media-actions">
                                     <button
                                         type="button"
-                                        className={`media-btn ${isRecording && recordingType === 'AUDIO' ? 'recording' : ''}`}
+                                        className={`media - btn ${isRecording && recordingType === 'AUDIO' ? 'recording' : ''} `}
                                         onClick={isRecording ? stopRecording : () => startRecording('AUDIO')}
                                         disabled={isRecording && recordingType === 'VIDEO'}
                                     >
@@ -361,7 +366,7 @@ export const UploadAsset = () => {
                                     </button>
                                     <button
                                         type="button"
-                                        className={`media-btn ${isRecording && recordingType === 'VIDEO' ? 'recording' : ''}`}
+                                        className={`media - btn ${isRecording && recordingType === 'VIDEO' ? 'recording' : ''} `}
                                         onClick={isRecording ? stopRecording : () => startRecording('VIDEO')}
                                         disabled={isRecording && recordingType === 'AUDIO'}
                                     >

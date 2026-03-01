@@ -32,21 +32,21 @@ const applyForLicense = async (licenseData, userId) => {
 
 const getMyLicenses = async (userId) => {
     return await License.find({ applicantId: userId })
-        .populate('assetId', 'title type communityName')
+        .populate('assetId', 'title type communityName mediaUrl recordeeName')
         .sort({ createdAt: -1 });
 };
 
 const getPendingLicenses = async () => {
     // Admin sees PENDING + MODIFICATION_REQUIRED that have been resubmitted (i.e., back to PENDING)
     return await License.find({ status: 'PENDING' })
-        .populate('assetId', 'title type communityName')
+        .populate('assetId', 'title type communityName mediaUrl recordeeName')
         .populate('applicantId', 'name email')
         .sort({ updatedAt: -1 });
 };
 
 const getAllLicenses = async () => {
     return await License.find()
-        .populate('assetId', 'title type communityName')
+        .populate('assetId', 'title type communityName mediaUrl recordeeName')
         .populate('applicantId', 'name email')
         .sort({ updatedAt: -1 });
 };

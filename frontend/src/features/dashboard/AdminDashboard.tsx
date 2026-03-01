@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { StatusBadge } from '../../components/StatusBadge';
 import { getPendingLicenses, approveLicense, rejectLicense, requestModification } from '../../services/licenseService';
 import type { License } from '../../services/licenseService';
+import { Loader } from '../../components/Loader/Loader';
 import notificationSound from '../../assets/Notification_Sound.wav';
 import './AdminDashboard.css';
 
 export const AdminDashboard = () => {
     const [licenses, setLicenses] = useState<License[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isActioning, setIsActioning] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [adminComments, setAdminComments] = useState<Record<string, string>>({});
     const [actionError, setActionError] = useState<Record<string, string>>({});
@@ -27,6 +29,7 @@ export const AdminDashboard = () => {
     useEffect(() => { load(); }, []);
 
     const handleApprove = async (id: string) => {
+        setIsActioning(true);
         try {
             await approveLicense(id);
             const audio = new Audio(notificationSound);
@@ -34,6 +37,8 @@ export const AdminDashboard = () => {
             setLicenses(prev => prev.filter(l => l._id !== id));
         } catch (e: any) {
             setActionError(prev => ({ ...prev, [id]: e.response?.data?.message || 'Approval failed' }));
+        } finally {
+            setIsActioning(false);
         }
     };
 
@@ -43,11 +48,14 @@ export const AdminDashboard = () => {
             setActionError(prev => ({ ...prev, [id]: 'A comment is required to reject an application.' }));
             return;
         }
+        setIsActioning(true);
         try {
             await rejectLicense(id, comment);
             setLicenses(prev => prev.filter(l => l._id !== id));
         } catch (e: any) {
             setActionError(prev => ({ ...prev, [id]: e.response?.data?.message || 'Rejection failed' }));
+        } finally {
+            setIsActioning(false);
         }
     };
 
@@ -67,6 +75,7 @@ export const AdminDashboard = () => {
 
     return (
         <div className="admin-dashboard">
+            {isActioning && <Loader label="Processing decision..." />}
             <header className="dashboard-header-inner">
                 <h3>License Requests</h3>
                 <p>Govern commercial and research access to cultural archives. All decisions are enforced server-side.</p>
@@ -111,6 +120,20 @@ export const AdminDashboard = () => {
                                     <strong>Requested Asset:</strong> {asset?.title || 'N/A'}
                                     <span className="community-ref">({asset?.communityName})</span>
                                 </div>
+
+                                {/* Media preview for admin — always visible */}
+                                {(asset as any)?.mediaUrl && (
+                                    <div style={{ margin: '0.75rem 0', padding: '0.75rem', background: 'rgba(0,0,0,0.03)', border: '1px solid var(--color-muted-gold)', borderRadius: '2px' }}>
+                                        <p style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.5rem' }}>
+                                            {(asset as any)?.type === 'SONIC' ? '🎵 Listen to Asset:' : '🎙 Voice Archive:'}
+                                        </p>
+                                        {(asset as any).mediaUrl.match(/\.(mp4|webm|ogv)$/i) ? (
+                                            <video controls style={{ width: '100%', maxHeight: '160px', borderRadius: '2px', background: '#000' }} src={(asset as any).mediaUrl} />
+                                        ) : (
+                                            <audio controls style={{ width: '100%' }} src={(asset as any).mediaUrl} />
+                                        )}
+                                    </div>
+                                )}
 
                                 <div className="intended-use-badge">
                                     <strong>License Type:</strong> {license.licenseType.replace('_', ' ')}

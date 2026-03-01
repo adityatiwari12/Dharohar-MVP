@@ -17,6 +17,7 @@ router.get('/mine', roleGuard(['community']), assetController.getMyAssets);
 
 // Review role only
 router.get('/pending', roleGuard(['review']), assetController.getPendingAssets);
+router.get('/reviewed', roleGuard(['review']), assetController.getReviewedAssets);
 router.patch('/:id/approve', roleGuard(['review']), assetController.approveAsset);
 router.patch('/:id/reject', roleGuard(['review']), assetController.rejectAsset);
 

@@ -1,10 +1,11 @@
-
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { TreeExplorer } from './TreeExplorer';
 import { CommunityDossier } from './CommunityDossier';
-import { mockCommunities, allMarketplaceAssets } from '../../data/mockData';
+import { mockCommunities } from '../../data/mockData';
+import { getPublicAssets } from '../../services/assetService';
+import type { Asset } from '../../services/assetService';
 import heroImage from '../../assets/beautiful.png';
 import ceremonialSymbol from '../../assets/image copy 2.png';
 import './CulturalExplorer.css';
@@ -23,17 +24,17 @@ const AttributionBlock = ({ text }: { text: string }) => {
 
 export const CulturalExplorer = () => {
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { user } = useAuth();
     const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
     const communityGridRef = useRef<HTMLDivElement>(null);
+    const [approvedAssets, setApprovedAssets] = useState<Asset[]>([]);
+    const [assetsLoading, setAssetsLoading] = useState(true);
 
     const handleNodeClick = (id: string) => {
-        // If it's a real community, scroll to the grid and open modal
         if (!id.startsWith('placeholder')) {
             const element = document.getElementById(`community-card-${id}`);
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                // Deliberately delay modal to let scroll happen
                 setTimeout(() => setSelectedCommunityId(id), 600);
             } else if (communityGridRef.current) {
                 communityGridRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -41,17 +42,25 @@ export const CulturalExplorer = () => {
         }
     };
 
+    // Load real approved assets from the API (public endpoint, no auth needed)
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const data = await getPublicAssets();
+                setApprovedAssets(data);
+            } catch {
+                // silently fail — page still works with mock communities
+            } finally {
+                setAssetsLoading(false);
+            }
+        };
+        load();
+    }, []);
+
     const selectedCommunity = mockCommunities.find(c => c.id === selectedCommunityId);
 
-    const handleDevLogin = (role: 'community' | 'review' | 'admin' | 'general') => {
-        // Mock login for development purposes
-        login('mock-token-123', { id: '1', email: `test@${role}.com`, roles: [role] });
-        navigate('/dashboard');
-    };
-
-    // Grab some samples for the showcase sections
-    const featuredKnowledge = allMarketplaceAssets.filter(a => a.type === 'BIO').slice(0, 3);
-    const folkMusic = allMarketplaceAssets.filter(a => a.type === 'SONIC').slice(0, 3);
+    const bioAssets = approvedAssets.filter(a => a.type === 'BIO');
+    const sonicAssets = approvedAssets.filter(a => a.type === 'SONIC');
 
     return (
         <div style={{ backgroundColor: 'var(--color-parchment)', minHeight: '100vh' }}>
@@ -62,7 +71,6 @@ export const CulturalExplorer = () => {
 
                 {/* LEFT PANE - Visualization */}
                 <div className="hero-left-pane">
-                    {/* 3D Explorer is positioned absolutely within the left pane to not disrupt flow */}
                     <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2 }}>
                         <TreeExplorer onNodeClick={handleNodeClick} />
                     </div>
@@ -76,37 +84,50 @@ export const CulturalExplorer = () => {
                     </div>
                 </div>
 
-                {/* RIGHT PANE - Login Area */}
+                {/* RIGHT PANE - Auth / Welcome */}
                 <div className="hero-right-pane">
                     <Link to="/" style={{ display: 'block', margin: '0 auto 1.5rem', textAlign: 'center' }}>
                         <img src="/logo.png" alt="Dharohar Logo" style={{ maxWidth: '100px' }} />
                     </Link>
-                    <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem', textAlign: 'center' }}>Institutional Access</h2>
-                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-light)', marginBottom: '2rem', textAlign: 'center' }}>
-                        Select your governance role to sign in.
-                    </p>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
-                        <button className="minimal-btn" onClick={() => handleDevLogin('general')} style={{ width: '100%', textAlign: 'center' }}>
-                            Login as General User
-                        </button>
-                        <button className="minimal-btn" onClick={() => handleDevLogin('community')} style={{ width: '100%', textAlign: 'center' }}>
-                            Login as Community
-                        </button>
-                        <button className="minimal-btn" onClick={() => handleDevLogin('review')} style={{ width: '100%', textAlign: 'center' }}>
-                            Login as Reviewer
-                        </button>
-                        <button className="minimal-btn" onClick={() => handleDevLogin('admin')} style={{ width: '100%', border: '1px solid var(--color-burnt-umber)', color: 'var(--color-burnt-umber)', textAlign: 'center' }}>
-                            Login as Administrator
-                        </button>
-                    </div>
-
-                    <div className="decorative-divider-small" style={{ margin: '2.5rem auto 1.5rem', width: '80%' }}></div>
-
-                    <p style={{ fontSize: '0.8rem', color: 'var(--color-text-main)', textAlign: 'center' }}>
-                        New to the governance platform? <br />
-                        <a href="/register" style={{ fontWeight: '600', marginTop: '0.5rem', display: 'inline-block' }}>Apply for Access</a>
-                    </p>
+                    {user ? (
+                        /* Logged-in welcome */
+                        <div style={{ textAlign: 'center' }}>
+                            <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Welcome back</h2>
+                            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-light)', marginBottom: '2rem' }}>
+                                Logged in as <strong>{user.roles[0]}</strong>
+                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <button className="primary-btn" onClick={() => navigate('/dashboard')} style={{ width: '100%' }}>
+                                    Go to Dashboard
+                                </button>
+                                <button className="minimal-btn" onClick={() => navigate('/marketplace')} style={{ width: '100%' }}>
+                                    Browse Marketplace
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        /* Guest login prompt */
+                        <div style={{ textAlign: 'center' }}>
+                            <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Institutional Access</h2>
+                            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-light)', marginBottom: '2rem' }}>
+                                Sign in to access your governance dashboard.
+                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <button className="primary-btn" onClick={() => navigate('/login')} style={{ width: '100%' }}>
+                                    Sign In
+                                </button>
+                                <button className="minimal-btn" onClick={() => navigate('/marketplace')} style={{ width: '100%' }}>
+                                    Browse Marketplace
+                                </button>
+                            </div>
+                            <div className="decorative-divider-small" style={{ margin: '2.5rem auto 1.5rem', width: '80%' }}></div>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--color-text-main)' }}>
+                                New to the governance platform? <br />
+                                <a href="/register" style={{ fontWeight: '600', marginTop: '0.5rem', display: 'inline-block' }}>Apply for Access</a>
+                            </p>
+                        </div>
+                    )}
                 </div>
             </section>
 
@@ -154,51 +175,67 @@ export const CulturalExplorer = () => {
                     </div>
                 </section>
 
-                {/* SECTION 4 - Knowledge Archive Highlights */}
+                {/* SECTION 4 - Live Approved BIO Knowledge */}
                 <section style={{ marginBottom: '6rem' }}>
-                    <h3 style={{ fontSize: '2rem', marginBottom: '2rem', textAlign: 'center' }}>Knowledge Archives</h3>
-                    <div className="grid-layout">
-                        {featuredKnowledge.map(asset => (
-                            <div key={asset.id} className="structured-card">
-                                <div className="card-header">
-                                    <h4 className="card-title">{asset.title}</h4>
-                                    <span className="card-badge">{asset.riskTier} RISK</span>
+                    <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem', textAlign: 'center' }}>Knowledge Archives</h3>
+                    <p style={{ textAlign: 'center', color: 'var(--color-text-light)', marginBottom: '2rem', fontSize: '0.9rem' }}>
+                        Showing community-approved biological knowledge assets
+                    </p>
+                    {assetsLoading ? (
+                        <p style={{ textAlign: 'center', color: 'var(--color-text-light)' }}>Loading approved archives...</p>
+                    ) : bioAssets.length === 0 ? (
+                        <p style={{ textAlign: 'center', color: 'var(--color-text-light)' }}>No approved biological assets yet. Submit assets through the community dashboard.</p>
+                    ) : (
+                        <div className="grid-layout">
+                            {bioAssets.map(asset => (
+                                <div key={asset._id} className="structured-card">
+                                    <div className="card-header">
+                                        <h4 className="card-title">{asset.title}</h4>
+                                        <span className="card-badge">{asset.riskTier || 'LOW'} RISK</span>
+                                    </div>
+                                    <h5 className="card-subtitle">{asset.communityName}</h5>
+                                    <p className="card-desc">{asset.description}</p>
+                                    <button className="minimal-btn" onClick={() => navigate('/marketplace')} style={{ width: '100%' }}>
+                                        Apply for License
+                                    </button>
+                                    <AttributionBlock text={asset.recordeeName || asset.communityName} />
                                 </div>
-                                <h5 className="card-subtitle">{asset.communityName} • {asset.licenseType.replace('_', ' ')}</h5>
-                                <p className="card-desc">{asset.summary}</p>
-
-                                <button className="minimal-btn" onClick={() => navigate('/marketplace')} style={{ width: '100%' }}>View Details</button>
-
-                                <AttributionBlock text={asset.attribution} />
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </section>
 
-                {/* SECTION 4 - Knowledge Archive Highlights ... (remains same) */}
-
-                {/* SECTION 5 - Folk Music Showcase */}
+                {/* SECTION 5 - Live Approved SONIC Assets */}
                 <section style={{ marginBottom: '4rem' }}>
-                    <h3 style={{ fontSize: '2rem', marginBottom: '2rem', textAlign: 'center' }}>Folk Music Showcase</h3>
-                    <div className="grid-layout">
-                        {folkMusic.map(track => (
-                            <div key={track.id} className="structured-card">
-                                <div className="card-header">
-                                    <h4 className="card-title">{track.title}</h4>
-                                    <span className="card-badge">{track.licenseType.replace('_', ' ')}</span>
+                    <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem', textAlign: 'center' }}>Sonic Archives</h3>
+                    <p style={{ textAlign: 'center', color: 'var(--color-text-light)', marginBottom: '2rem', fontSize: '0.9rem' }}>
+                        Showing community-approved musical and oral heritage assets
+                    </p>
+                    {assetsLoading ? (
+                        <p style={{ textAlign: 'center', color: 'var(--color-text-light)' }}>Loading approved archives...</p>
+                    ) : sonicAssets.length === 0 ? (
+                        <p style={{ textAlign: 'center', color: 'var(--color-text-light)' }}>No approved sonic assets yet.</p>
+                    ) : (
+                        <div className="grid-layout">
+                            {sonicAssets.map(asset => (
+                                <div key={asset._id} className="structured-card">
+                                    <div className="card-header">
+                                        <h4 className="card-title">{asset.title}</h4>
+                                        <span className="card-badge">SONIC</span>
+                                    </div>
+                                    <h5 className="card-subtitle">{asset.communityName}</h5>
+                                    <p className="card-desc">{asset.description}</p>
+                                    <div style={{ margin: '1.5rem 0', padding: '1rem', backgroundColor: 'var(--color-bg-light)', border: '1px solid var(--color-muted-gold)', textAlign: 'center' }}>
+                                        <span style={{ fontSize: '0.9rem', color: 'var(--color-burnt-umber)', fontWeight: '600' }}>▶ Preview available after licensing</span>
+                                    </div>
+                                    <button className="minimal-btn" onClick={() => navigate('/marketplace')} style={{ width: '100%' }}>
+                                        Apply for Media License
+                                    </button>
+                                    <AttributionBlock text={asset.recordeeName || asset.communityName} />
                                 </div>
-                                <h5 className="card-subtitle">{track.communityName} • Duration: {track.duration}</h5>
-
-                                <div style={{ margin: '1.5rem 0', padding: '1rem', backgroundColor: 'var(--color-bg-light)', border: '1px solid var(--color-muted-gold)', textAlign: 'center' }}>
-                                    <span style={{ fontSize: '0.9rem', color: 'var(--color-burnt-umber)', fontWeight: '600' }}>▶ Play Preview</span>
-                                </div>
-
-                                <button className="minimal-btn" onClick={() => navigate('/marketplace')} style={{ width: '100%' }}>Apply for License</button>
-
-                                <AttributionBlock text={track.attribution} />
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </section>
 
             </main>

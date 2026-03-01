@@ -25,6 +25,9 @@ const AssetSchema = new mongoose.Schema({
     transcript: {
         type: String
     },
+    mediaUrl: {
+        type: String   // URL or path to the recorded audio/video file
+    },
     metadata: {
         type: Object
     },

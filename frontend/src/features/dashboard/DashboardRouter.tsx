@@ -4,7 +4,9 @@ import { DashboardLayout } from '../../components/Layout/DashboardLayout';
 import { useAuth } from '../auth/AuthContext';
 import { UploadAsset } from '../assets/UploadAsset.tsx';
 import { ReviewDashboard } from './ReviewDashboard';
+import { ReviewHistory } from './ReviewHistory';
 import { AdminDashboard } from './AdminDashboard';
+import { LicenseHistory } from './LicenseHistory';
 import { MySubmissions } from './MySubmissions';
 import { MyLicenses } from './MyLicenses';
 
@@ -94,7 +96,9 @@ export const DashboardRouter = () => {
             <Route path="/assets/new" element={<DashboardLayout title="Upload Asset"><UploadAsset /></DashboardLayout>} />
             <Route path="/assets/mine" element={<MySubmissions />} />
             <Route path="/review-queue" element={<DashboardLayout title="Review Queue"><ReviewDashboard /></DashboardLayout>} />
+            <Route path="/review-history" element={<ReviewHistory />} />
             <Route path="/license-requests" element={<DashboardLayout title="License Requests"><AdminDashboard /></DashboardLayout>} />
+            <Route path="/license-history" element={<LicenseHistory />} />
             <Route path="/licenses/mine" element={<MyLicenses />} />
         </Routes>
     );

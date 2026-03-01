@@ -61,11 +61,21 @@ const rejectAsset = async (req, res, next) => {
     }
 };
 
+const getReviewedAssets = async (req, res, next) => {
+    try {
+        const assets = await assetService.getReviewedAssets();
+        res.status(200).json(assets);
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     createAsset,
     getMyAssets,
     getPendingAssets,
     getPublicAssets,
     approveAsset,
-    rejectAsset
+    rejectAsset,
+    getReviewedAssets
 };

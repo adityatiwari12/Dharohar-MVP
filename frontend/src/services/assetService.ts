@@ -8,6 +8,7 @@ export interface Asset {
     communityName: string;
     recordeeName: string;
     riskTier?: string;
+    mediaUrl?: string;
     approvalStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
     reviewComment?: string | null;
     createdBy?: { name: string; email: string };
@@ -47,6 +48,11 @@ export const getPendingAssets = async (): Promise<Asset[]> => {
 // Marketplace / General: get approved-only assets
 export const getPublicAssets = async (): Promise<Asset[]> => {
     const resp = await apiClient.get<Asset[]>('/assets/public');
+    return resp.data;
+};
+
+export const getReviewedAssets = async (): Promise<Asset[]> => {
+    const resp = await apiClient.get<Asset[]>('/assets/reviewed');
     return resp.data;
 };
 

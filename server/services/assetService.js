@@ -66,11 +66,18 @@ const rejectAsset = async (assetId, reviewComment) => {
     return await asset.save();
 };
 
+const getReviewedAssets = async () => {
+    return await Asset.find({ approvalStatus: { $in: ['APPROVED', 'REJECTED'] } })
+        .populate('createdBy', 'name email communityName')
+        .sort({ updatedAt: -1 });
+};
+
 module.exports = {
     createAsset,
     getMyAssets,
     getPendingAssets,
     getPublicAssets,
     approveAsset,
-    rejectAsset
+    rejectAsset,
+    getReviewedAssets
 };

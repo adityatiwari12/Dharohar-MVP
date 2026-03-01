@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { FiMic, FiVideo } from 'react-icons/fi';
+import { FiMic } from 'react-icons/fi';
 import { StatusBadge } from '../../components/StatusBadge';
 import { getPendingAssets, approveAsset, rejectAsset } from '../../services/assetService';
 import type { Asset } from '../../services/assetService';
+import { Loader } from '../../components/Loader/Loader';
 import notificationSound from '../../assets/Notification_Sound.wav';
 import './ReviewDashboard.css';
 
@@ -10,6 +11,7 @@ export const ReviewDashboard = () => {
     const [pendingAssets, setPendingAssets] = useState<Asset[]>([]);
     const [reviewComments, setReviewComments] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(true);
+    const [isActioning, setIsActioning] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [actionError, setActionError] = useState<Record<string, string>>({});
 
@@ -28,6 +30,7 @@ export const ReviewDashboard = () => {
     }, []);
 
     const handleApprove = async (id: string) => {
+        setIsActioning(true);
         try {
             await approveAsset(id);
             // Play sound on approval only
@@ -38,6 +41,8 @@ export const ReviewDashboard = () => {
             setActionError(prev => ({ ...prev, [id]: '' }));
         } catch (e: any) {
             setActionError(prev => ({ ...prev, [id]: e.response?.data?.message || 'Approve failed' }));
+        } finally {
+            setIsActioning(false);
         }
     };
 
@@ -47,17 +52,21 @@ export const ReviewDashboard = () => {
             setActionError(prev => ({ ...prev, [id]: 'A review comment is required to reject a submission.' }));
             return;
         }
+        setIsActioning(true);
         try {
             await rejectAsset(id, comment);
             setPendingAssets(prev => prev.filter(a => a._id !== id));
             setActionError(prev => ({ ...prev, [id]: '' }));
         } catch (e: any) {
             setActionError(prev => ({ ...prev, [id]: e.response?.data?.message || 'Reject failed' }));
+        } finally {
+            setIsActioning(false);
         }
     };
 
     return (
         <div className="review-dashboard">
+            {isActioning && <Loader label="Processing decision..." />}
             <header className="dashboard-header-inner">
                 <h3>Asset Review Queue</h3>
                 <p>Institutional verification of tribal metadata and cultural integrity. All decisions are final and server-enforced.</p>
@@ -116,16 +125,26 @@ export const ReviewDashboard = () => {
 
                             <div className="archive-dossier" style={{ marginTop: '1.5rem', background: 'rgba(0,0,0,0.02)', padding: '1rem', border: '1px solid var(--color-muted-gold)' }}>
                                 <p className="asset-description" style={{ fontStyle: 'italic', marginBottom: '1rem' }}>"{asset.description}"</p>
-                                <div className="media-verification" style={{ display: 'flex', gap: '1rem' }}>
-                                    {asset.type === 'BIO' ? (
-                                        <div className="media-status-pill"><FiMic /> Voice Archive Recorded</div>
-                                    ) : (
-                                        <>
-                                            <div className="media-status-pill"><FiMic /> Audio Track High-Fi</div>
-                                            <div className="media-status-pill"><FiVideo /> Ritual Video Proof</div>
-                                        </>
-                                    )}
-                                </div>
+
+                                {/* Real media player for reviewer */}
+                                {asset.mediaUrl ? (
+                                    <div style={{ marginTop: '0.75rem' }}>
+                                        <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.5rem' }}>
+                                            {asset.type === 'SONIC' ? '🎵 Sonic Archive — Listen before reviewing:' : '🎙 Voice Archive — Listen before reviewing:'}
+                                        </p>
+                                        {asset.mediaUrl.match(/\.(mp4|webm|ogv)$/i) ? (
+                                            <video controls style={{ width: '100%', borderRadius: '2px', maxHeight: '200px', background: '#000' }} src={asset.mediaUrl} />
+                                        ) : (
+                                            <audio controls style={{ width: '100%' }} src={asset.mediaUrl} />
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="media-verification" style={{ display: 'flex', gap: '1rem' }}>
+                                        <div className="media-status-pill" style={{ opacity: 0.5 }}>
+                                            <FiMic /> No media file uploaded
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="reviewer-input" style={{ marginTop: '1.5rem' }}>

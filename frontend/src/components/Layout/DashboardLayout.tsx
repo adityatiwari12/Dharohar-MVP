@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../features/auth/AuthContext';
-import { FiLogOut, FiHome, FiUploadCloud, FiList, FiCheckSquare, FiGlobe, FiFileText } from 'react-icons/fi';
+import { FiLogOut, FiHome, FiUploadCloud, FiList, FiCheckSquare, FiGlobe, FiFileText, FiClock } from 'react-icons/fi';
 import { BackButton } from '../Navigation/BackButton';
 import './DashboardLayout.css';
 
@@ -43,10 +43,12 @@ export const DashboardLayout: React.FC<LayoutProps> = ({ title, children }) => {
 
         if (roles.includes('review')) {
             links.push({ to: '/dashboard/review-queue', label: 'Pending Reviews', icon: <FiCheckSquare /> });
+            links.push({ to: '/dashboard/review-history', label: 'Review History', icon: <FiClock /> });
         }
 
         if (roles.includes('admin')) {
             links.push({ to: '/dashboard/license-requests', label: 'License Requests', icon: <FiCheckSquare /> });
+            links.push({ to: '/dashboard/license-history', label: 'License History', icon: <FiClock /> });
         }
 
         return links;

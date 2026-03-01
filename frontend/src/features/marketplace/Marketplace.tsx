@@ -4,6 +4,7 @@ import { getPublicAssets } from '../../services/assetService';
 import type { Asset } from '../../services/assetService';
 import { SkeletonCard } from '../../components/SkeletonLoader';
 import { BackButton } from '../../components/Navigation/BackButton';
+import { useAuth } from '../../features/auth/AuthContext';
 import './Marketplace.css';
 
 const AttributionBlock = ({ text }: { text: string }) => {
@@ -20,12 +21,21 @@ const AttributionBlock = ({ text }: { text: string }) => {
 
 export const Marketplace = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [assets, setAssets] = useState<Asset[]>([]);
     const [filterType, setFilterType] = useState('ALL');
     const [filterRisk, setFilterRisk] = useState('ALL');
     const [sortBy, setSortBy] = useState('COMMUNITY');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const handleApply = (asset: Asset, licenseType?: string) => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        navigate(`/apply/${asset._id}?assetType=${asset.type}&title=${encodeURIComponent(asset.title)}&lt=${licenseType || ''}`);
+    };
 
     useEffect(() => {
         const load = async () => {
@@ -127,13 +137,27 @@ export const Marketplace = () => {
                                             )}
                                         </div>
 
-                                        <p className="card-desc truncate">{asset.description}</p>
+                                        <p className="card-desc">{asset.description}</p>
+
+                                        {/* ── Media Preview ── */}
+                                        {asset.mediaUrl && (
+                                            <div style={{ margin: '1rem 0', padding: '0.75rem', background: 'rgba(0,0,0,0.03)', border: '1px solid var(--color-muted-gold)', borderRadius: '2px' }}>
+                                                <p style={{ fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--color-text-light)' }}>
+                                                    {asset.type === 'SONIC' ? '🎵 Listen to Preview' : '🎙 Voice Archive'}
+                                                </p>
+                                                {asset.mediaUrl.match(/\.(mp4|webm|ogg)$/i) ? (
+                                                    <video controls style={{ width: '100%', borderRadius: '2px', maxHeight: '180px' }} src={asset.mediaUrl} />
+                                                ) : (
+                                                    <audio controls style={{ width: '100%' }} src={asset.mediaUrl} />
+                                                )}
+                                            </div>
+                                        )}
 
                                         <div className="marketplace-action">
                                             {asset.type === 'BIO' ? (
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
-                                                    <button className="minimal-btn" style={{ width: '100%' }} onClick={() => navigate('/login')}>Apply for Research License</button>
-                                                    <button className="primary-btn" style={{ width: '100%' }} onClick={() => navigate('/login')}>Apply for Commercial License</button>
+                                                    <button className="minimal-btn" style={{ width: '100%' }} onClick={() => handleApply(asset, 'RESEARCH')}>Apply for Research License</button>
+                                                    <button className="primary-btn" style={{ width: '100%' }} onClick={() => handleApply(asset, 'COMMERCIAL')}>Apply for Commercial License</button>
                                                 </div>
                                             ) : (
                                                 <div style={{ width: '100%' }}>
@@ -141,7 +165,7 @@ export const Marketplace = () => {
                                                         <span>Licensing Fee</span>
                                                         <strong>Tiered Governance</strong>
                                                     </div>
-                                                    <button className="primary-btn" style={{ width: '100%' }} onClick={() => navigate('/login')}>Apply for Media License</button>
+                                                    <button className="primary-btn" style={{ width: '100%' }} onClick={() => handleApply(asset, 'MEDIA')}>Apply for Media License</button>
                                                 </div>
                                             )}
                                         </div>
