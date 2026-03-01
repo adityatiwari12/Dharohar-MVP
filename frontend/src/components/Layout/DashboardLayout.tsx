@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../features/auth/AuthContext';
 import { FiLogOut, FiHome, FiUploadCloud, FiList, FiCheckSquare, FiGlobe } from 'react-icons/fi';
+import { BackButton } from '../Navigation/BackButton';
 import './DashboardLayout.css';
 
 interface LayoutProps {
@@ -28,7 +29,11 @@ export const DashboardLayout: React.FC<LayoutProps> = ({ title, children }) => {
 
         // General user links
         links.push({ to: '/dashboard', label: 'Dashboard', icon: <FiHome /> });
-        links.push({ to: '/explorer', label: 'Public Explorer', icon: <FiGlobe /> });
+
+        const isGovernanceUser = roles.includes('community') || roles.includes('review') || roles.includes('admin');
+        if (!isGovernanceUser) {
+            links.push({ to: '/cultural-explorer', label: 'Public Explorer', icon: <FiGlobe /> });
+        }
 
         if (roles.includes('community')) {
             links.push({ to: '/dashboard/assets/new', label: 'Upload Asset', icon: <FiUploadCloud /> });
@@ -36,11 +41,11 @@ export const DashboardLayout: React.FC<LayoutProps> = ({ title, children }) => {
         }
 
         if (roles.includes('review')) {
-            links.push({ to: '/dashboard/review', label: 'Review Assets', icon: <FiCheckSquare /> });
+            links.push({ to: '/dashboard/review-queue', label: 'Pending Reviews', icon: <FiCheckSquare /> });
         }
 
         if (roles.includes('admin')) {
-            links.push({ to: '/dashboard/admin', label: 'Admin Panel', icon: <FiCheckSquare /> });
+            links.push({ to: '/dashboard/license-requests', label: 'License Requests', icon: <FiCheckSquare /> });
         }
 
         return links;
@@ -86,6 +91,7 @@ export const DashboardLayout: React.FC<LayoutProps> = ({ title, children }) => {
             </nav>
 
             <main className="content-area">
+                <BackButton />
                 <header className="page-header">
                     <h2>{title}</h2>
                     <div className="decorative-divider">

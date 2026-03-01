@@ -6,7 +6,7 @@ import { DashboardRouter } from './features/dashboard/DashboardRouter';
 import { CulturalExplorer } from './features/public-explorer/CulturalExplorer';
 import { CommunityDetail } from './features/public-explorer/CommunityDetail';
 import { Marketplace } from './features/marketplace/Marketplace';
-
+import { PageTransition } from './components/Layout/PageTransition';
 
 function App() {
   return (
@@ -14,17 +14,17 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<CulturalExplorer />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/cultural-explorer" element={<CulturalExplorer />} />
-          <Route path="/community/:id" element={<CommunityDetail />} />
-          <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/" element={<PageTransition><CulturalExplorer /></PageTransition>} />
+          <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+          <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
+          <Route path="/cultural-explorer" element={<PageTransition><CulturalExplorer /></PageTransition>} />
+          <Route path="/community/:id" element={<PageTransition><CommunityDetail /></PageTransition>} />
+          <Route path="/marketplace" element={<PageTransition><Marketplace /></PageTransition>} />
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
             {/* General catch-all for dashboards */}
-            <Route path="/dashboard/*" element={<DashboardRouter />} />
+            <Route path="/dashboard/*" element={<PageTransition><DashboardRouter /></PageTransition>} />
           </Route>
         </Routes>
       </BrowserRouter>

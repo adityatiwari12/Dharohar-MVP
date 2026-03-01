@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const errorHandler = require('./middleware/errorHandler');
 
 const authRoutes = require('./routes/authRoutes');
@@ -7,6 +8,7 @@ const licenseRoutes = require('./routes/licenseRoutes');
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 // Routes

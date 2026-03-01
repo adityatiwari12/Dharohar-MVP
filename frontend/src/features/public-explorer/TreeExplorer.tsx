@@ -1,4 +1,4 @@
-import React, { Component, useRef, useState } from 'react';
+import { useRef, useState, Component } from 'react';
 import type { ErrorInfo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';
@@ -66,7 +66,7 @@ const TreeNode = ({ node, onClick }: { node: NodeData, onClick: (id: string) => 
     );
 };
 
-const TreeScene = () => {
+const TreeScene = ({ onNodeClick }: { onNodeClick?: (id: string) => void }) => {
     const navigate = useNavigate();
 
     // Generate 8 organic nodes around the trunk
@@ -86,7 +86,9 @@ const TreeScene = () => {
     });
 
     const handleNodeClick = (id: string) => {
-        if (!id.startsWith('placeholder')) {
+        if (onNodeClick) {
+            onNodeClick(id);
+        } else if (!id.startsWith('placeholder')) {
             navigate(`/community/${id}`);
         }
     };
@@ -97,13 +99,11 @@ const TreeScene = () => {
                 <ambientLight intensity={0.5} />
                 <directionalLight position={[10, 10, 5]} intensity={1} color="#F4EDE4" />
 
-                {/* Central Trunk */}
                 <mesh position={[0, 2, 0]}>
                     <cylinderGeometry args={[0.4, 0.7, 7, 16]} />
                     <meshStandardMaterial color="#6E3B2E" roughness={0.9} />
                 </mesh>
 
-                {/* Simple stylized branches */}
                 <mesh position={[1, 3, 0]} rotation={[0, 0, -Math.PI / 4]}>
                     <cylinderGeometry args={[0.1, 0.2, 3, 8]} />
                     <meshStandardMaterial color="#6E3B2E" roughness={0.9} />
@@ -118,7 +118,6 @@ const TreeScene = () => {
                     <TreeNode key={node.id} node={node} onClick={handleNodeClick} />
                 ))}
 
-                {/* Very slow full scene rotation for ambient feel */}
                 <OrbitControls
                     enablePan={false}
                     maxPolarAngle={Math.PI / 2}
@@ -129,9 +128,8 @@ const TreeScene = () => {
             </Canvas>
         </div>
     );
-}
+};
 
-// Error Boundary for Graceful Degradation
 class ExplorerErrorBoundary extends Component<{ children: React.ReactNode }, { hasError: boolean }> {
     constructor(props: { children: React.ReactNode }) {
         super(props);
@@ -159,8 +157,8 @@ class ExplorerErrorBoundary extends Component<{ children: React.ReactNode }, { h
     }
 }
 
-export const TreeExplorer = () => (
+export const TreeExplorer = ({ onNodeClick }: { onNodeClick?: (id: string) => void }) => (
     <ExplorerErrorBoundary>
-        <TreeScene />
+        <TreeScene onNodeClick={onNodeClick} />
     </ExplorerErrorBoundary>
 );

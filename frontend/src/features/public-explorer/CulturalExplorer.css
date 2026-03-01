@@ -3,12 +3,38 @@
     min-height: 100vh;
     width: 100%;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    /* Now flex will split the children */
     background-size: cover;
     background-position: center;
     background-blend-mode: multiply;
     overflow: hidden;
+}
+
+.hero-left-pane {
+    flex: 1;
+    /* Takes up remaining space */
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid rgba(176, 141, 87, 0.3);
+    /* Subtle gold divider */
+}
+
+.hero-right-pane {
+    width: 450px;
+    /* Fixed width for login side */
+    background-color: rgba(244, 237, 228, 0.95);
+    /* Parchment with high opacity */
+    backdrop-filter: blur(10px);
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
 }
 
 /* 20-30% dark overlay for readability */
@@ -95,12 +121,13 @@
     border-radius: var(--border-radius);
     padding: 1.5rem;
     box-shadow: var(--shadow-soft);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
     position: relative;
+    cursor: pointer;
 }
 
 .structured-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4px);
     box-shadow: var(--shadow-medium);
 }
 

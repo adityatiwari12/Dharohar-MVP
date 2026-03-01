@@ -6,6 +6,15 @@ export interface BioKnowledge {
     riskTier: 'LOW' | 'MEDIUM' | 'HIGH';
     licenseType: 'COMMUNITY_CONSENT' | 'RESEARCH_ONLY' | 'COMMERCIAL';
     attribution: string;
+    // Enhanced Phase 3 Fields
+    region?: string;
+    location?: string; // GPS Coordinates
+    category?: 'MEDICINAL' | 'AGRICULTURAL' | 'ECOLOGICAL' | 'RITUAL';
+    preparationProcess?: string; // Hidden behind license
+    usageContext?: string; // Hidden behind license
+    tribalMember?: string; // Submitting individual
+    timestamp?: string;
+    voiceNote?: string; // URL to recording
 }
 
 export interface MusicTrack {
@@ -15,6 +24,16 @@ export interface MusicTrack {
     audioFile: string;
     licenseType: string;
     attribution: string;
+    // Enhanced Phase 3 Fields
+    performanceContext?: 'FESTIVAL' | 'RITUAL' | 'AGRICULTURAL' | 'CELEBRATION';
+    lyrics?: string;
+    instrumentation?: string;
+    culturalMeaning?: string;
+    videoFile?: string; // Optional video
+    location?: string;
+    tribalMember?: string;
+    timestamp?: string;
+    fingerprint?: string; // Audio hash
 }
 
 export interface MediaItem {
@@ -108,8 +127,52 @@ export const mockCommunities: Community[] = [
 
 // Flat arrays for marketplace
 export const allMarketplaceAssets = mockCommunities.flatMap(c => {
-    const assets = [];
+    const assets: any[] = [];
     c.bioKnowledge.forEach(bk => assets.push({ ...bk, type: 'BIO', communityName: c.name, communityId: c.id }));
     c.music.forEach(m => assets.push({ ...m, type: 'SONIC', communityName: c.name, communityId: c.id }));
     return assets;
 });
+
+export const mockPendingAssets = [
+    {
+        id: 'pa-1',
+        title: 'Traditional Bamboo Weaving technique',
+        communityName: 'Warli Tribe',
+        type: 'BIO',
+        riskTier: 'LOW',
+        description: 'A sustainable method of creating durable baskets using specifically aged local bamboo.',
+        submittedDate: '2023-10-25'
+    },
+    {
+        id: 'pa-2',
+        title: 'Monsoon Chants of the Forest',
+        communityName: 'Gond Community',
+        type: 'SONIC',
+        riskTier: 'MEDIUM',
+        description: 'Audio documentation of the three-day monsoon welcoming chant.',
+        submittedDate: '2023-11-02'
+    }
+];
+
+export const mockLicenseRequests = [
+    {
+        id: 'lr-1',
+        assetTitle: 'Digestive Herbal Infusion',
+        communityName: 'Warli Tribe',
+        applicant: 'Global Pharma Research Ltd.',
+        intendedUse: 'COMMERCIAL',
+        status: 'PENDING',
+        requestDate: '2023-11-10',
+        justification: 'We intend to research the active compounds for a new line of organic digestive aids, with profit-sharing governed by the DHAROHAR framework.'
+    },
+    {
+        id: 'lr-2',
+        assetTitle: 'Forest Water Conservation Technique',
+        communityName: 'Gond Community',
+        applicant: 'National Ecological Institute',
+        intendedUse: 'RESEARCH_ONLY',
+        status: 'PENDING',
+        requestDate: '2023-11-12',
+        justification: 'Academic study to document the efficacy of traditional water retention against modern climate stress.'
+    }
+];

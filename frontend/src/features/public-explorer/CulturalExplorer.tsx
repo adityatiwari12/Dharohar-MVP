@@ -1,6 +1,9 @@
-import React from 'react';
+
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
 import { TreeExplorer } from './TreeExplorer';
+import { CommunityDossier } from './CommunityDossier';
 import { mockCommunities, allMarketplaceAssets } from '../../data/mockData';
 import heroImage from '../../assets/beautiful.png';
 import ceremonialSymbol from '../../assets/image copy 2.png';
@@ -20,6 +23,31 @@ const AttributionBlock = ({ text }: { text: string }) => {
 
 export const CulturalExplorer = () => {
     const navigate = useNavigate();
+    const { login } = useAuth();
+    const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
+    const communityGridRef = useRef<HTMLDivElement>(null);
+
+    const handleNodeClick = (id: string) => {
+        // If it's a real community, scroll to the grid and open modal
+        if (!id.startsWith('placeholder')) {
+            const element = document.getElementById(`community-card-${id}`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Deliberately delay modal to let scroll happen
+                setTimeout(() => setSelectedCommunityId(id), 600);
+            } else if (communityGridRef.current) {
+                communityGridRef.current.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    };
+
+    const selectedCommunity = mockCommunities.find(c => c.id === selectedCommunityId);
+
+    const handleDevLogin = (role: 'community' | 'review' | 'admin' | 'general') => {
+        // Mock login for development purposes
+        login('mock-token-123', { id: '1', email: `test@${role}.com`, roles: [role] });
+        navigate('/dashboard');
+    };
 
     // Grab some samples for the showcase sections
     const featuredKnowledge = allMarketplaceAssets.filter(a => a.type === 'BIO').slice(0, 3);
@@ -32,16 +60,51 @@ export const CulturalExplorer = () => {
             <section className="hero-section" style={{ backgroundImage: `url(${heroImage})` }}>
                 <div className="hero-overlay"></div>
 
-                {/* 3D Explorer is positioned absolutely or fixed within hero if full screen, 
-                    or just rendered inside the hero content */}
-                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2 }}>
-                    <TreeExplorer />
+                {/* LEFT PANE - Visualization */}
+                <div className="hero-left-pane">
+                    {/* 3D Explorer is positioned absolutely within the left pane to not disrupt flow */}
+                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2 }}>
+                        <TreeExplorer onNodeClick={handleNodeClick} />
+                    </div>
+
+                    <div className="hero-content" style={{ zIndex: 3 }}>
+                        <img src={ceremonialSymbol} alt="Ceremonial Rotation" className="ceremonial-symbol" />
+                        <h1 className="hero-title">DHAROHAR</h1>
+                        <p style={{ color: 'var(--color-parchment)', fontSize: '1.2rem', marginTop: '1rem', textShadow: '0 2px 4px rgba(0,0,0,0.5)', letterSpacing: '1px' }}>
+                            Cultural Knowledge & Licensing
+                        </p>
+                    </div>
                 </div>
 
-                <div className="hero-content">
-                    <img src="/logo.png" alt="Dharohar Logo" className="hero-logo-img" style={{ maxWidth: '150px', marginBottom: '1rem', zIndex: 10, position: 'relative' }} />
-                    <img src={ceremonialSymbol} alt="Ceremonial Rotation" className="ceremonial-symbol" />
-                    <h1 className="hero-title">DHAROHAR</h1>
+                {/* RIGHT PANE - Login Area */}
+                <div className="hero-right-pane">
+                    <img src="/logo.png" alt="Dharohar Logo" style={{ maxWidth: '100px', marginBottom: '1.5rem' }} />
+                    <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem', textAlign: 'center' }}>Institutional Access</h2>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-light)', marginBottom: '2rem', textAlign: 'center' }}>
+                        Select your governance role to sign in.
+                    </p>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
+                        <button className="minimal-btn" onClick={() => handleDevLogin('general')} style={{ width: '100%', textAlign: 'center' }}>
+                            Login as General User
+                        </button>
+                        <button className="minimal-btn" onClick={() => handleDevLogin('community')} style={{ width: '100%', textAlign: 'center' }}>
+                            Login as Community
+                        </button>
+                        <button className="minimal-btn" onClick={() => handleDevLogin('review')} style={{ width: '100%', textAlign: 'center' }}>
+                            Login as Reviewer
+                        </button>
+                        <button className="minimal-btn" onClick={() => handleDevLogin('admin')} style={{ width: '100%', border: '1px solid var(--color-burnt-umber)', color: 'var(--color-burnt-umber)', textAlign: 'center' }}>
+                            Login as Administrator
+                        </button>
+                    </div>
+
+                    <div className="decorative-divider-small" style={{ margin: '2.5rem auto 1.5rem', width: '80%' }}></div>
+
+                    <p style={{ fontSize: '0.8rem', color: 'var(--color-text-main)', textAlign: 'center' }}>
+                        New to the governance platform? <br />
+                        <a href="/register" style={{ fontWeight: '600', marginTop: '0.5rem', display: 'inline-block' }}>Apply for Access</a>
+                    </p>
                 </div>
             </section>
 
@@ -56,9 +119,14 @@ export const CulturalExplorer = () => {
                 {/* SECTION 3 - Featured Communities Grid */}
                 <section style={{ marginBottom: '6rem' }}>
                     <h3 style={{ fontSize: '2rem', marginBottom: '2rem', textAlign: 'center' }}>Featured Communities</h3>
-                    <div className="grid-layout">
+                    <div className="grid-layout" ref={communityGridRef}>
                         {mockCommunities.map(community => (
-                            <div key={community.id} className="structured-card">
+                            <div
+                                key={community.id}
+                                id={`community-card-${community.id}`}
+                                className="structured-card interactive-card"
+                                onClick={() => setSelectedCommunityId(community.id)}
+                            >
                                 <div className="card-header">
                                     <h4 className="card-title">{community.name}</h4>
                                 </div>
@@ -72,8 +140,12 @@ export const CulturalExplorer = () => {
 
                                 <p className="card-desc">{community.culturalIdentity}</p>
 
-                                <button className="minimal-btn" style={{ width: '100%' }} onClick={() => navigate(`/community/${community.id}`)}>
-                                    Explore Community
+                                <button
+                                    className="minimal-btn"
+                                    style={{ width: '100%' }}
+                                    onClick={(e) => { e.stopPropagation(); navigate(`/community/${community.id}`); }}
+                                >
+                                    View Full Dossier
                                 </button>
                             </div>
                         ))}
@@ -101,6 +173,8 @@ export const CulturalExplorer = () => {
                     </div>
                 </section>
 
+                {/* SECTION 4 - Knowledge Archive Highlights ... (remains same) */}
+
                 {/* SECTION 5 - Folk Music Showcase */}
                 <section style={{ marginBottom: '4rem' }}>
                     <h3 style={{ fontSize: '2rem', marginBottom: '2rem', textAlign: 'center' }}>Folk Music Showcase</h3>
@@ -114,7 +188,6 @@ export const CulturalExplorer = () => {
                                 <h5 className="card-subtitle">{track.communityName} • Duration: {track.duration}</h5>
 
                                 <div style={{ margin: '1.5rem 0', padding: '1rem', backgroundColor: 'var(--color-bg-light)', border: '1px solid var(--color-muted-gold)', textAlign: 'center' }}>
-                                    {/* Placeholder HTML5 Audio */}
                                     <span style={{ fontSize: '0.9rem', color: 'var(--color-burnt-umber)', fontWeight: '600' }}>▶ Play Preview</span>
                                 </div>
 
@@ -127,6 +200,15 @@ export const CulturalExplorer = () => {
                 </section>
 
             </main>
+
+            {/* Community Modal */}
+            {selectedCommunity && (
+                <CommunityDossier
+                    community={selectedCommunity}
+                    isModal={true}
+                    onClose={() => setSelectedCommunityId(null)}
+                />
+            )}
         </div>
     );
 };

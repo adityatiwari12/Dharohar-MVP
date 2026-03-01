@@ -88,6 +88,7 @@
     border-radius: 2px;
     text-transform: uppercase;
     font-weight: 600;
+    animation: badgePop var(--transition-fast) forwards;
 }
 
 .tag.low {
