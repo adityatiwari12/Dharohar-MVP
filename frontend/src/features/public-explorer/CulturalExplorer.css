@@ -1,0 +1,165 @@
+.hero-section {
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-size: cover;
+    background-position: center;
+    background-blend-mode: multiply;
+    overflow: hidden;
+}
+
+/* 20-30% dark overlay for readability */
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(44, 42, 41, 0.25);
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    pointer-events: none;
+    /* Let Three.js catch clicks behind if needed */
+}
+
+.hero-title {
+    font-size: 4rem;
+    letter-spacing: 6px;
+    color: var(--color-parchment);
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    position: relative;
+    display: inline-block;
+}
+
+/* Ceremonial Rotating Symbol Behind Title */
+.ceremonial-symbol {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    z-index: -1;
+    opacity: 0.07;
+    /* 5-8% opacity */
+    animation: ceremonialRotate 55s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes ceremonialRotate {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+.explorer-container {
+    padding: 4rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-banner {
+    text-align: center;
+    padding: 4rem 0;
+    border-bottom: 1px solid var(--color-muted-gold);
+    margin-bottom: 4rem;
+}
+
+.section-banner h2 {
+    font-size: 2rem;
+    color: var(--color-burnt-umber);
+}
+
+.grid-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+.structured-card {
+    background-color: var(--color-bg-light);
+    border: 1px solid var(--color-muted-gold);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+}
+
+.structured-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.card-title {
+    font-family: var(--font-serif);
+    color: var(--color-burnt-umber);
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+.card-badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--color-terracotta);
+    color: var(--color-terracotta);
+    border-radius: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    background: transparent;
+}
+
+.card-subtitle {
+    color: var(--color-muted-gold);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+
+.card-desc {
+    font-size: 0.95rem;
+    color: var(--color-text-main);
+    margin-bottom: 1.5rem;
+}
+
+/* Reusable Attribution Block */
+.attribution-block {
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: rgba(176, 141, 87, 0.05);
+    border-left: 3px solid var(--color-burnt-umber);
+    font-size: 0.85rem;
+    color: var(--color-text-light);
+    font-family: var(--font-sans);
+}
+
+.attribution-block strong {
+    color: var(--color-burnt-umber);
+    display: block;
+}
+
+.attribution-block span {
+    display: block;
+    margin-top: 0.25rem;
+}

@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@400;600;700&display=swap');
+@import './config/theme.css';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--color-parchment);
+  color: var(--color-text-main);
+  font-family: var(--font-sans);
+
+  /* Subtle CSS Texture from user Assets */
+  background-image: url('./assets/image.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-blend-mode: multiply;
+
+  line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-serif);
+  color: var(--color-burnt-umber);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+a {
+  color: var(--color-terracotta);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--color-burnt-umber);
+}
+
+button {
+  font-family: var(--font-sans);
+  cursor: pointer;
+}
+
+/* Institutional standard Framed Section */
+.framed-section {
+  border: 1px solid var(--color-muted-gold);
+  padding: 2.5rem;
+  background-color: var(--color-bg-light);
+  box-shadow: var(--shadow-soft);
+  border-radius: var(--border-radius);
+  position: relative;
+}
+
+/* Decorative corner accents for framed sections */
+.framed-section::before,
+.framed-section::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-terracotta);
+}
+
+.framed-section::before {
+  top: 10px;
+  left: 10px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.framed-section::after {
+  bottom: 10px;
+  right: 10px;
+  border-left: none;
+  border-top: none;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: var(--font-serif);
+  color: var(--color-terracotta);
+  font-size: 1.5rem;
+}
