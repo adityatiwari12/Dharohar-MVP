@@ -1,6 +1,6 @@
 
 import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { TreeExplorer } from './TreeExplorer';
 import { CommunityDossier } from './CommunityDossier';
@@ -78,7 +78,9 @@ export const CulturalExplorer = () => {
 
                 {/* RIGHT PANE - Login Area */}
                 <div className="hero-right-pane">
-                    <img src="/logo.png" alt="Dharohar Logo" style={{ maxWidth: '100px', marginBottom: '1.5rem' }} />
+                    <Link to="/" style={{ display: 'block', margin: '0 auto 1.5rem', textAlign: 'center' }}>
+                        <img src="/logo.png" alt="Dharohar Logo" style={{ maxWidth: '100px' }} />
+                    </Link>
                     <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem', textAlign: 'center' }}>Institutional Access</h2>
                     <p style={{ fontSize: '0.9rem', color: 'var(--color-text-light)', marginBottom: '2rem', textAlign: 'center' }}>
                         Select your governance role to sign in.

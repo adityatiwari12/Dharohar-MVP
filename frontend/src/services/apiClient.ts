@@ -1,12 +1,13 @@
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || '/api',
-    headers: {
-        'Content-Type': 'application/json',
-    },
+    baseURL: API_BASE_URL,
+    headers: { 'Content-Type': 'application/json' },
 });
 
+// Automatically attach auth token to every request
 apiClient.interceptors.request.use((config) => {
     const token = localStorage.getItem('dharohar_token');
     if (token) {
@@ -15,12 +16,12 @@ apiClient.interceptors.request.use((config) => {
     return config;
 }, (error) => Promise.reject(error));
 
+// Handle session expiry globally
 apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
             localStorage.removeItem('dharohar_token');
-            localStorage.removeItem('dharohar_user');
             window.location.href = '/login';
         }
         return Promise.reject(error);

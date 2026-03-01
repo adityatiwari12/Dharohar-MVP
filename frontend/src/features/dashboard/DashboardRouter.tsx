@@ -6,6 +6,7 @@ import { UploadAsset } from '../assets/UploadAsset.tsx';
 import { ReviewDashboard } from './ReviewDashboard';
 import { AdminDashboard } from './AdminDashboard';
 import { MySubmissions } from './MySubmissions';
+import { MyLicenses } from './MyLicenses';
 
 const AnimatedCounter = ({ value, label }: { value: number, label: string }) => {
     const [count, setCount] = useState(0);
@@ -51,9 +52,12 @@ const AnimatedCounter = ({ value, label }: { value: number, label: string }) => 
 const Overview = () => {
     const { user } = useAuth();
 
-    // Redirect users to their specific active dash or public site
+    // Redirect governance users to their primary view
+    if (user?.roles.includes('community')) {
+        return <Navigate to="/dashboard/assets/mine" replace />;
+    }
     if (user?.roles.includes('general')) {
-        return <Navigate to="/cultural-explorer" replace />;
+        return <Navigate to="/dashboard/licenses/mine" replace />;
     }
     if (user?.roles.includes('review')) {
         return <Navigate to="/dashboard/review-queue" replace />;
@@ -88,9 +92,10 @@ export const DashboardRouter = () => {
         <Routes>
             <Route path="/" element={<DashboardLayout title="Overview"><Overview /></DashboardLayout>} />
             <Route path="/assets/new" element={<DashboardLayout title="Upload Asset"><UploadAsset /></DashboardLayout>} />
+            <Route path="/assets/mine" element={<MySubmissions />} />
             <Route path="/review-queue" element={<DashboardLayout title="Review Queue"><ReviewDashboard /></DashboardLayout>} />
             <Route path="/license-requests" element={<DashboardLayout title="License Requests"><AdminDashboard /></DashboardLayout>} />
-            <Route path="/assets/mine" element={<MySubmissions />} />
+            <Route path="/licenses/mine" element={<MyLicenses />} />
         </Routes>
     );
 };

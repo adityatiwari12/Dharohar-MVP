@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiMic, FiVideo, FiUpload, FiArrowLeft, FiMapPin, FiClock, FiCheckCircle, FiX } from 'react-icons/fi';
+import { submitAsset } from '../../services/assetService';
 import './UploadAsset.css';
 
 type SubmissionType = 'BIO' | 'SONIC' | null;
@@ -157,14 +158,33 @@ export const UploadAsset = () => {
         setMediaUploaded(false);
     };
 
+    const [submitError, setSubmitError] = useState('');
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        // Simulation of upload
-        setTimeout(() => {
+        setSubmitError('');
+        try {
+            await submitAsset({
+                type: type!,
+                title: formData.title,
+                description: formData.description,
+                recordeeName: formData.tribalMember,   // form field → model field
+                communityName: formData.community,      // form field → model field
+                riskTier: formData.riskTier,
+                metadata: {
+                    category: formData.category,
+                    performanceContext: formData.performanceContext,
+                    location: formData.location,
+                    timestamp: formData.timestamp,
+                }
+            });
             setSuccess(true);
+        } catch (err: any) {
+            setSubmitError(err.response?.data?.message || 'Submission failed. Please check your connection and try again.');
+        } finally {
             setLoading(false);
-        }, 1500);
+        }
     };
 
     if (success) {

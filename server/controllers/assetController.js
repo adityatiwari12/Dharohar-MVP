@@ -45,6 +45,7 @@ const approveAsset = async (req, res, next) => {
         const asset = await assetService.approveAsset(req.params.id);
         res.status(200).json(asset);
     } catch (error) {
+        if (error.statusCode) res.status(error.statusCode);
         next(error);
     }
 };
@@ -55,9 +56,7 @@ const rejectAsset = async (req, res, next) => {
         const asset = await assetService.rejectAsset(req.params.id, reviewComment);
         res.status(200).json(asset);
     } catch (error) {
-        if (error.message === 'Rejection requires a review comment') {
-            res.status(400);
-        }
+        if (error.statusCode) res.status(error.statusCode);
         next(error);
     }
 };

@@ -1,7 +1,7 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../features/auth/AuthContext';
-import { FiLogOut, FiHome, FiUploadCloud, FiList, FiCheckSquare, FiGlobe } from 'react-icons/fi';
+import { FiLogOut, FiHome, FiUploadCloud, FiList, FiCheckSquare, FiGlobe, FiFileText } from 'react-icons/fi';
 import { BackButton } from '../Navigation/BackButton';
 import './DashboardLayout.css';
 
@@ -33,6 +33,7 @@ export const DashboardLayout: React.FC<LayoutProps> = ({ title, children }) => {
         const isGovernanceUser = roles.includes('community') || roles.includes('review') || roles.includes('admin');
         if (!isGovernanceUser) {
             links.push({ to: '/cultural-explorer', label: 'Public Explorer', icon: <FiGlobe /> });
+            links.push({ to: '/dashboard/licenses/mine', label: 'My Applications', icon: <FiFileText /> });
         }
 
         if (roles.includes('community')) {
@@ -57,9 +58,11 @@ export const DashboardLayout: React.FC<LayoutProps> = ({ title, children }) => {
         <div className="layout-container">
             <nav className="sidebar">
                 <div className="brand-section">
-                    <img src="/logo.png" alt="Dharohar Logo" className="brand-logo-img" style={{ maxWidth: '100px', marginBottom: '10px' }} />
-                    <h1 className="brand-logo">DHAROHAR</h1>
-                    <p className="brand-subtitle">Cultural Preservation</p>
+                    <Link to="/" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <img src="/logo.png" alt="Dharohar Logo" className="brand-logo-img" style={{ maxWidth: '100px', marginBottom: '10px' }} />
+                        <h1 className="brand-logo">DHAROHAR</h1>
+                        <p className="brand-subtitle">Cultural Preservation</p>
+                    </Link>
                     <div className="decorative-divider-small"></div>
                 </div>
 

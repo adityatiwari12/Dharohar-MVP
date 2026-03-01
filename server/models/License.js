@@ -20,13 +20,20 @@ const LicenseSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    documentation: {
+        type: String  // URL or description of supporting documents
+    },
     fee: {
         type: Number
     },
     status: {
         type: String,
-        enum: ['PENDING', 'APPROVED', 'REJECTED'],
+        enum: ['PENDING', 'APPROVED', 'REJECTED', 'MODIFICATION_REQUIRED'],
         default: 'PENDING'
+    },
+    adminComment: {
+        type: String,
+        default: null
     },
     agreementText: {
         type: String
