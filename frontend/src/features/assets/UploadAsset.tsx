@@ -417,6 +417,11 @@ export const UploadAsset = () => {
                 </div>
 
                 <div className="form-actions">
+                    {submitError && (
+                        <div style={{ padding: '0.75rem 1rem', background: 'rgba(239,68,68,0.08)', border: '1px solid #ef4444', borderRadius: '4px', color: '#7f1d1d', fontSize: '0.85rem', marginBottom: '0.75rem' }}>
+                            ⚠ {submitError}
+                        </div>
+                    )}
                     <button type="submit" className="primary-btn" disabled={loading || isRecording}>
                         {loading ? 'Archiving...' : 'Finalize Governance Submission'}
                     </button>

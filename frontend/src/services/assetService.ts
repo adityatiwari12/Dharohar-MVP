@@ -20,6 +20,7 @@ export interface CreateAssetPayload {
     title: string;
     description: string;
     recordeeName: string;
+    communityName: string;
     riskTier?: string;
     transcript?: string;
     metadata?: Record<string, unknown>;
