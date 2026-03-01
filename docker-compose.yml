@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  localstack:
+    container_name: dharohar-localstack
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"            # LocalStack Gateway
+      - "4510-4559:4510-4559"  # External services port range
+    environment:
+      - DEBUG=${DEBUG-}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR-}
+      - LOCALSTACK_API_KEY=${LOCALSTACK_API_KEY-}  # Pro features
+      - SERVICES=s3,dynamodb,lambda,apigateway,cognito-idp,cognito-identity,qldb,rekognition,bedrock
+      - DATA_DIR=/tmp/localstack/data
+      - PERSISTENCE=${PERSISTENCE-}
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+    volumes:
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - dharohar-network
+
+  # Optional: DynamoDB Admin UI
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin
+    ports:
+      - "8001:8001"
+    environment:
+      - DYNAMO_ENDPOINT=http://localstack:4566
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+    depends_on:
+      - localstack
+    networks:
+      - dharohar-network
+
+networks:
+  dharohar-network:
+    driver: bridge
+
+volumes:
+  localstack-data:
