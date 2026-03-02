@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../components/Layout/DashboardLayout';
 import { useAuth } from '../auth/AuthContext';
 import { UploadAsset } from '../assets/UploadAsset.tsx';
@@ -9,6 +9,7 @@ import { AdminDashboard } from './AdminDashboard';
 import { LicenseHistory } from './LicenseHistory';
 import { MySubmissions } from './MySubmissions';
 import { MyLicenses } from './MyLicenses';
+import { GeneralDashboard } from './GeneralDashboard';
 
 const AnimatedCounter = ({ value, label }: { value: number, label: string }) => {
     const [count, setCount] = useState(0);
@@ -53,13 +54,14 @@ const AnimatedCounter = ({ value, label }: { value: number, label: string }) => 
 
 const Overview = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
 
     // Redirect governance users to their primary view
     if (user?.roles.includes('community')) {
         return <Navigate to="/dashboard/assets/mine" replace />;
     }
     if (user?.roles.includes('general')) {
-        return <Navigate to="/dashboard/licenses/mine" replace />;
+        return <Navigate to="/dashboard/home" replace />;
     }
     if (user?.roles.includes('review')) {
         return <Navigate to="/dashboard/review-queue" replace />;
@@ -85,6 +87,44 @@ const Overview = () => {
                 <h4>Governance Notice</h4>
                 <p>Welcome back, <strong>{user?.roles[0]}</strong>. Your account is verified for the DHAROHAR governance framework. Please use the sidebar to access role-specific actions.</p>
             </div>
+
+            {/* Licensing Guide Widget */}
+            <div style={{
+                marginTop: '2rem',
+                padding: '1.5rem',
+                background: 'linear-gradient(135deg, rgba(161,75,59,0.06) 0%, rgba(176,141,87,0.1) 100%)',
+                border: '1px solid var(--color-muted-gold)',
+                borderRadius: '6px',
+                borderLeft: '4px solid var(--color-terracotta)',
+            }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div style={{ flex: 1 }}>
+                        <h4 style={{ margin: '0 0 0.75rem', fontSize: '1.1rem', color: 'var(--color-burnt-umber)' }}>
+                            📜 Understanding Licensing
+                        </h4>
+                        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                            {[
+                                '4 license types: Research, Commercial, Media & Music',
+                                'Fees range from ₹10,000 to ₹50,00,000',
+                                'Communities receive 10%–50% of all fees',
+                                'Approval takes 2–5 business days',
+                            ].map(item => (
+                                <li key={item} style={{ fontSize: '0.85rem', color: 'var(--color-text-main)', display: 'flex', gap: '0.5rem' }}>
+                                    <span style={{ color: 'var(--color-terracotta)', fontWeight: 700 }}>•</span>
+                                    {item}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <button
+                        className="minimal-btn"
+                        onClick={() => navigate('/licensing-guide')}
+                        style={{ whiteSpace: 'nowrap', alignSelf: 'flex-end' }}
+                    >
+                        View Full Guide →
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };
@@ -100,6 +140,7 @@ export const DashboardRouter = () => {
             <Route path="/license-requests" element={<DashboardLayout title="License Requests"><AdminDashboard /></DashboardLayout>} />
             <Route path="/license-history" element={<LicenseHistory />} />
             <Route path="/licenses/mine" element={<MyLicenses />} />
+            <Route path="/home" element={<GeneralDashboard />} />
         </Routes>
     );
 };

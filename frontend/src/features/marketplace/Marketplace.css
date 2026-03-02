@@ -156,3 +156,23 @@
 .fee-structure strong {
     color: var(--color-burnt-umber);
 }
+
+/* ── Licensing Section Toggle ── */
+.lis-toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-terracotta);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.4rem 0.75rem;
+    border-radius: 20px;
+    transition: background 0.2s ease, color 0.2s ease;
+    font-family: var(--font-sans);
+    letter-spacing: 0.02em;
+}
+
+.lis-toggle-btn:hover {
+    background: rgba(161, 75, 59, 0.08);
+    color: var(--color-burnt-umber);
+}

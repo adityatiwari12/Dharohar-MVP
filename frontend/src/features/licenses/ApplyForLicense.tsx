@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { applyForLicense } from '../../services/licenseService';
+import { LicenseApplicationDoc } from '../dashboard/LicenseApplicationDoc';
+import type { ApplicationData } from '../dashboard/LicenseApplicationDoc';
+import { useAuth } from '../auth/AuthContext';
 
 type LicenseType = 'RESEARCH' | 'COMMERCIAL' | 'MEDIA';
 
@@ -137,8 +140,10 @@ const MediaForm = ({ data, onChange }: { data: any; onChange: (k: string, v: str
 export const ApplyForLicense = () => {
     const { assetId } = useParams<{ assetId: string }>();
     const [searchParams] = useSearchParams();
+    const { user } = useAuth();
     const assetTitle = searchParams.get('title') || 'Cultural Asset';
     const assetType = searchParams.get('assetType') || 'BIO';
+    const communityName = searchParams.get('community') || '';
     const navigate = useNavigate();
 
     const defaultType: LicenseType = assetType === 'SONIC' ? 'MEDIA' : 'RESEARCH';
@@ -147,10 +152,34 @@ export const ApplyForLicense = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
+    const [previewDoc, setPreviewDoc] = useState<ApplicationData | null>(null);
+
+    const userName = user?.email?.split('@')[0] || 'Applicant';
+    const userEmail = user?.email || '';
 
     const handleFieldChange = (key: string, value: string) => {
         setFormData(prev => ({ ...prev, [key]: value }));
     };
+
+    // Build ApplicationData from the current form state
+    const buildDocData = (): ApplicationData => ({
+        applicantName: formData.leadResearcher || formData.companyName || userName,
+        organizationName: formData.institutionName || formData.companyName || '',
+        email: userEmail,
+        phone: formData.phone || '',
+        address: formData.address || '',
+        assetTitle,
+        communityName: communityName || 'Originating Community',
+        licenseType,
+        purpose: formData.purpose || formData.commercialUseDescription || '',
+        duration: formData.expectedDuration || '1 year',
+        documentation: formData.documentation || '',
+        signedDate: new Date().toLocaleDateString('en-IN', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+        }),
+    });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -166,7 +195,6 @@ export const ApplyForLicense = () => {
                 licenseType,
                 purpose: formData.purpose,
                 documentation: formData.documentation,
-                // Send all extra fields merged into the payload — backend stores what it knows
                 ...Object.fromEntries(
                     Object.entries(formData).filter(([k]) => k !== 'purpose' && k !== 'documentation')
                 )
@@ -179,10 +207,11 @@ export const ApplyForLicense = () => {
         }
     };
 
+    // ── Success screen ──
     if (success) {
         return (
             <div style={{ minHeight: '100vh', background: 'var(--color-parchment)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-                <div className="framed-section" style={{ maxWidth: 500, textAlign: 'center', padding: '2.5rem' }}>
+                <div className="framed-section" style={{ maxWidth: 520, textAlign: 'center', padding: '2.5rem' }}>
                     <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✅</div>
                     <h3>License Application Submitted</h3>
                     <p style={{ color: 'var(--color-text-light)' }}>
@@ -191,7 +220,33 @@ export const ApplyForLicense = () => {
                     <p style={{ fontSize: '0.85rem', color: 'var(--color-text-light)', marginTop: '0.5rem' }}>
                         You'll be notified of the decision. Track your applications in your dashboard.
                     </p>
-                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1.5rem', flexWrap: 'wrap' }}>
+
+                    {/* Download document on success too */}
+                    <div style={{
+                        margin: '1.5rem 0',
+                        padding: '1rem 1.25rem',
+                        background: 'rgba(176,141,87,0.08)',
+                        border: '1px solid var(--color-muted-gold)',
+                        borderRadius: '6px',
+                        textAlign: 'left',
+                    }}>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--color-text-main)', margin: '0 0 0.75rem', fontWeight: 600 }}>
+                            📄 Want a copy of your application?
+                        </p>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--color-text-light)', margin: '0 0 0.75rem' }}>
+                            Download a branded PDF copy of your license application for your records.
+                        </p>
+                        <button
+                            type="button"
+                            className="minimal-btn"
+                            style={{ fontSize: '0.85rem' }}
+                            onClick={() => setPreviewDoc(buildDocData())}
+                        >
+                            ⬇ Preview & Download Application Document
+                        </button>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                         <button className="primary-btn" onClick={() => navigate('/dashboard/licenses/mine')}>
                             View My Applications
                         </button>
@@ -200,10 +255,15 @@ export const ApplyForLicense = () => {
                         </button>
                     </div>
                 </div>
+
+                {previewDoc && (
+                    <LicenseApplicationDoc data={previewDoc} onClose={() => setPreviewDoc(null)} />
+                )}
             </div>
         );
     }
 
+    // ── Main form ──
     return (
         <div style={{ minHeight: '100vh', background: 'var(--color-parchment)', padding: '3rem 2rem' }}>
             <div style={{ maxWidth: 700, margin: '0 auto' }}>
@@ -215,9 +275,10 @@ export const ApplyForLicense = () => {
                     <h2 style={{ marginTop: 0 }}>License Application</h2>
                     <p style={{ color: 'var(--color-text-light)' }}>
                         Applying for: <strong>{assetTitle}</strong>
+                        {communityName && <span> — <em>{communityName}</em></span>}
                     </p>
 
-                    {/* License type selector — BIO shows 2 options, SONIC shows 1 */}
+                    {/* License type selector */}
                     <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem', marginTop: '0.5rem' }}>
                         {assetType === 'BIO' && (
                             <>
@@ -255,17 +316,62 @@ export const ApplyForLicense = () => {
                             </div>
                         )}
 
-                        <button
-                            type="submit"
-                            className="primary-btn"
-                            disabled={isSubmitting}
-                            style={{ marginTop: '2rem', padding: '0.9rem' }}
-                        >
-                            {isSubmitting ? 'Submitting Application...' : 'Submit License Application'}
-                        </button>
+                        {/* ── Document Preview + Submit row ── */}
+                        <div style={{
+                            marginTop: '2rem',
+                            paddingTop: '1.5rem',
+                            borderTop: '1px solid var(--color-muted-gold)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.75rem',
+                        }}>
+                            {/* Document generation tip */}
+                            <div style={{
+                                padding: '0.9rem 1.1rem',
+                                background: 'rgba(176,141,87,0.06)',
+                                border: '1px solid var(--color-muted-gold)',
+                                borderRadius: '6px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: '1rem',
+                                flexWrap: 'wrap',
+                            }}>
+                                <div>
+                                    <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-burnt-umber)' }}>
+                                        📄 Generate Application Document
+                                    </p>
+                                    <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: 'var(--color-text-light)' }}>
+                                        Preview and download a DHAROHAR-branded PDF of your application before or after submitting.
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="minimal-btn"
+                                    style={{ fontSize: '0.82rem', flexShrink: 0 }}
+                                    onClick={() => setPreviewDoc(buildDocData())}
+                                >
+                                    Preview Document →
+                                </button>
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="primary-btn"
+                                disabled={isSubmitting}
+                                style={{ padding: '0.9rem', fontSize: '1rem' }}
+                            >
+                                {isSubmitting ? 'Submitting Application...' : 'Submit License Application'}
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
+
+            {/* PDF Preview Modal */}
+            {previewDoc && (
+                <LicenseApplicationDoc data={previewDoc} onClose={() => setPreviewDoc(null)} />
+            )}
         </div>
     );
 };

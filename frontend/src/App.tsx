@@ -7,6 +7,7 @@ import { CulturalExplorer } from './features/public-explorer/CulturalExplorer';
 import { CommunityDetail } from './features/public-explorer/CommunityDetail';
 import { Marketplace } from './features/marketplace/Marketplace';
 import { ApplyForLicense } from './features/licenses/ApplyForLicense';
+import { LicensingGuide } from './features/licensing/LicensingGuide';
 import { Loader } from './components/Loader/Loader';
 import { PageTransition } from './components/Layout/PageTransition';
 import { useAuth } from './features/auth/AuthContext';
@@ -29,6 +30,7 @@ const AppShell = () => {
       <Route path="/cultural-explorer" element={<PageTransition><CulturalExplorer /></PageTransition>} />
       <Route path="/community/:id" element={<PageTransition><CommunityDetail /></PageTransition>} />
       <Route path="/marketplace" element={<PageTransition><Marketplace /></PageTransition>} />
+      <Route path="/licensing-guide" element={<PageTransition><LicensingGuide /></PageTransition>} />
 
       {/* Protected Routes */}
       <Route element={<ProtectedRoute />}>

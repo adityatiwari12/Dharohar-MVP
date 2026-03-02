@@ -5,6 +5,7 @@ import type { Asset } from '../../services/assetService';
 import { SkeletonCard } from '../../components/SkeletonLoader';
 import { BackButton } from '../../components/Navigation/BackButton';
 import { useAuth } from '../../features/auth/AuthContext';
+import { LicensingInfoSection } from './LicensingInfoSection';
 import './Marketplace.css';
 
 const AttributionBlock = ({ text }: { text: string }) => {
@@ -28,6 +29,7 @@ export const Marketplace = () => {
     const [sortBy, setSortBy] = useState('COMMUNITY');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [expandedAssetId, setExpandedAssetId] = useState<string | null>(null);
 
     const handleApply = (asset: Asset, licenseType?: string) => {
         if (!user) {
@@ -35,6 +37,10 @@ export const Marketplace = () => {
             return;
         }
         navigate(`/apply/${asset._id}?assetType=${asset.type}&title=${encodeURIComponent(asset.title)}&lt=${licenseType || ''}`);
+    };
+
+    const toggleLicensingSection = (assetId: string) => {
+        setExpandedAssetId(prev => (prev === assetId ? null : assetId));
     };
 
     useEffect(() => {
@@ -123,60 +129,107 @@ export const Marketplace = () => {
                                         : 'No assets match the current filters.'}
                                 </div>
                             ) : (
-                                displayedAssets.map(asset => (
-                                    <div key={asset._id} className="structured-card" style={{ animation: 'fadeIn var(--transition-base)' }}>
-                                        <div className="card-header">
-                                            <h4 className="card-title">{asset.title}</h4>
-                                            <span className="card-badge">{asset.type}</span>
-                                        </div>
-                                        <h5 className="card-subtitle">{asset.communityName}</h5>
+                                displayedAssets.map(asset => {
+                                    const isLicensingOpen = expandedAssetId === asset._id;
+                                    return (
+                                        <div key={asset._id} className="structured-card" style={{ animation: 'fadeIn var(--transition-base)' }}>
+                                            <div className="card-header">
+                                                <h4 className="card-title">{asset.title}</h4>
+                                                <span className="card-badge">{asset.type}</span>
+                                            </div>
+                                            <h5 className="card-subtitle">{asset.communityName}</h5>
 
-                                        <div className="badges-row">
-                                            {asset.riskTier && (
-                                                <span className={`status tag ${asset.riskTier.toLowerCase()}`}>{asset.riskTier} RISK</span>
-                                            )}
-                                        </div>
-
-                                        <p className="card-desc">{asset.description}</p>
-
-                                        {/* ── Media Preview ── */}
-                                        {asset.mediaUrl && (
-                                            <div style={{ margin: '1rem 0', padding: '0.75rem', background: 'rgba(0,0,0,0.03)', border: '1px solid var(--color-muted-gold)', borderRadius: '2px' }}>
-                                                <p style={{ fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--color-text-light)' }}>
-                                                    {asset.type === 'SONIC' ? '🎵 Listen to Preview' : '🎙 Voice Archive'}
-                                                </p>
-                                                {asset.mediaUrl.match(/\.(mp4|webm|ogg)$/i) ? (
-                                                    <video controls style={{ width: '100%', borderRadius: '2px', maxHeight: '180px' }} src={asset.mediaUrl} />
-                                                ) : (
-                                                    <audio controls style={{ width: '100%' }} src={asset.mediaUrl} />
+                                            <div className="badges-row">
+                                                {asset.riskTier && (
+                                                    <span className={`status tag ${asset.riskTier.toLowerCase()}`}>{asset.riskTier} RISK</span>
                                                 )}
                                             </div>
-                                        )}
 
-                                        <div className="marketplace-action">
-                                            {asset.type === 'BIO' ? (
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
-                                                    <button className="minimal-btn" style={{ width: '100%' }} onClick={() => handleApply(asset, 'RESEARCH')}>Apply for Research License</button>
-                                                    <button className="primary-btn" style={{ width: '100%' }} onClick={() => handleApply(asset, 'COMMERCIAL')}>Apply for Commercial License</button>
-                                                </div>
-                                            ) : (
-                                                <div style={{ width: '100%' }}>
-                                                    <div className="fee-structure" style={{ marginBottom: '0.5rem' }}>
-                                                        <span>Licensing Fee</span>
-                                                        <strong>Tiered Governance</strong>
-                                                    </div>
-                                                    <button className="primary-btn" style={{ width: '100%' }} onClick={() => handleApply(asset, 'MEDIA')}>Apply for Media License</button>
+                                            <p className="card-desc">{asset.description}</p>
+
+                                            {/* ── Media Preview ── */}
+                                            {asset.mediaUrl && (
+                                                <div style={{ margin: '1rem 0', padding: '0.75rem', background: 'rgba(0,0,0,0.03)', border: '1px solid var(--color-muted-gold)', borderRadius: '2px' }}>
+                                                    <p style={{ fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--color-text-light)' }}>
+                                                        {asset.type === 'SONIC' ? '🎵 Listen to Preview' : '🎙 Voice Archive'}
+                                                    </p>
+                                                    {asset.mediaUrl.match(/\.(mp4|webm|ogg)$/i) ? (
+                                                        <video controls style={{ width: '100%', borderRadius: '2px', maxHeight: '180px' }} src={asset.mediaUrl} />
+                                                    ) : (
+                                                        <audio controls style={{ width: '100%' }} src={asset.mediaUrl} />
+                                                    )}
                                                 </div>
                                             )}
-                                        </div>
 
-                                        <AttributionBlock text={asset.recordeeName || asset.communityName} />
-                                    </div>
-                                ))
+                                            {/* ── Quick Apply Buttons ── */}
+                                            <div className="marketplace-action">
+                                                {asset.type === 'BIO' ? (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
+                                                        <button className="minimal-btn" style={{ width: '100%' }} onClick={() => handleApply(asset, 'RESEARCH')}>Apply for Research License</button>
+                                                        <button className="primary-btn" style={{ width: '100%' }} onClick={() => handleApply(asset, 'COMMERCIAL')}>Apply for Commercial License</button>
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ width: '100%' }}>
+                                                        <div className="fee-structure" style={{ marginBottom: '0.5rem' }}>
+                                                            <span>Licensing Fee</span>
+                                                            <strong>Tiered Governance</strong>
+                                                        </div>
+                                                        <button className="primary-btn" style={{ width: '100%' }} onClick={() => handleApply(asset, 'MEDIA')}>Apply for Media License</button>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* ── View Licensing Info Toggle ── */}
+                                            <div style={{ marginTop: '0.75rem', textAlign: 'center' }}>
+                                                <button
+                                                    type="button"
+                                                    className="lis-toggle-btn"
+                                                    onClick={() => toggleLicensingSection(asset._id)}
+                                                    aria-expanded={isLicensingOpen}
+                                                >
+                                                    {isLicensingOpen ? '▲ Hide Licensing Details' : '▼ View Licensing Options & Fees'}
+                                                </button>
+                                            </div>
+
+                                            {/* ── Inline Licensing Info Section ── */}
+                                            {isLicensingOpen && (
+                                                <LicensingInfoSection
+                                                    assetType={asset.type as 'BIO' | 'SONIC'}
+                                                    onApply={(lt) => handleApply(asset, lt)}
+                                                />
+                                            )}
+
+                                            <AttributionBlock text={asset.recordeeName || asset.communityName} />
+                                        </div>
+                                    );
+                                })
                             )}
                         </div>
                     </main>
                 </div>
+
+                {/* ── General Licensing Guide (shown when no specific asset selected) ── */}
+                {!isLoading && assets.length === 0 && (
+                    <div style={{ marginTop: '4rem' }}>
+                        <hr style={{ borderColor: 'var(--color-muted-gold)', marginBottom: '3rem' }} />
+                        <h3 style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-burnt-umber)', fontSize: '1.75rem', marginBottom: '0.5rem', textAlign: 'center' }}>
+                            Understanding Our Licensing Framework
+                        </h3>
+                        <p style={{ textAlign: 'center', color: 'var(--color-text-light)', marginBottom: '2.5rem' }}>
+                            Browse the license types available on this platform before assets are approved.
+                        </p>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                            <div>
+                                <h4 style={{ color: 'var(--color-burnt-umber)', marginBottom: '1rem' }}>🌿 Biological Knowledge (BIO)</h4>
+                                <LicensingInfoSection assetType="BIO" onApply={() => navigate('/login')} />
+                            </div>
+                            <div>
+                                <h4 style={{ color: 'var(--color-burnt-umber)', marginBottom: '1rem' }}>🎶 Sonic Heritage (SONIC)</h4>
+                                <LicensingInfoSection assetType="SONIC" onApply={() => navigate('/login')} />
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

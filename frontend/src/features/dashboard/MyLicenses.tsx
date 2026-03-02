@@ -45,12 +45,14 @@ export const MyLicenses = () => {
     return (
         <DashboardLayout title="My License Applications">
             <div style={{ animation: 'fadeIn var(--transition-base)' }}>
-                <p style={{ color: 'var(--color-text-light)', marginBottom: '2rem' }}>
+                <p style={{ color: 'var(--color-text-light)', marginBottom: '2rem', fontSize: '0.95rem' }}>
                     Track the status of your license applications. If a modification is requested, you can edit and resubmit below.
                 </p>
 
                 {isLoading && (
-                    <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-light)' }}>Loading applications...</div>
+                    <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-light)' }}>
+                        Loading applications...
+                    </div>
                 )}
 
                 {error && (
@@ -60,7 +62,16 @@ export const MyLicenses = () => {
                 )}
 
                 {!isLoading && !error && licenses.length === 0 && (
-                    <div className="no-data">No license applications found. Browse the Marketplace to apply for a license.</div>
+                    <div className="framed-section" style={{ padding: '2rem', textAlign: 'center' }}>
+                        <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>📋</div>
+                        <h4 style={{ color: 'var(--color-burnt-umber)', marginBottom: '0.5rem' }}>No Applications Yet</h4>
+                        <p style={{ color: 'var(--color-text-light)', fontSize: '0.9rem', marginBottom: '1.25rem' }}>
+                            Go to the Marketplace to find cultural assets and apply for a license.
+                        </p>
+                        <a href="/marketplace" className="primary-btn" style={{ textDecoration: 'none', display: 'inline-block' }}>
+                            Browse Marketplace →
+                        </a>
+                    </div>
                 )}
 
                 <div className="audio-list">
@@ -90,7 +101,7 @@ export const MyLicenses = () => {
                                     <p style={{ margin: '0.25rem 0 0', fontSize: '0.9rem' }}>{license.purpose}</p>
                                 </div>
 
-                                {/* Media access — locked until APPROVED */}
+                                {/* Media access */}
                                 <div style={{ marginTop: '1rem' }}>
                                     {license.status === 'APPROVED' && (asset as any)?.mediaUrl ? (
                                         <div style={{ padding: '0.75rem', background: 'rgba(34,197,94,0.05)', border: '1px solid #22c55e', borderRadius: '4px' }}>
@@ -112,7 +123,7 @@ export const MyLicenses = () => {
                                     ) : null}
                                 </div>
 
-                                {/* Approved: show agreement text */}
+                                {/* Approved: agreement */}
                                 {license.status === 'APPROVED' && license.agreementText && (
                                     <div style={{ marginTop: '1rem', padding: '0.75rem 1rem', background: 'rgba(34,197,94,0.06)', border: '1px solid #22c55e', borderRadius: '4px' }}>
                                         <strong style={{ fontSize: '0.85rem', color: '#14532d' }}>📜 License Agreement Issued:</strong>
@@ -120,7 +131,7 @@ export const MyLicenses = () => {
                                     </div>
                                 )}
 
-                                {/* Rejected: show comment */}
+                                {/* Rejected */}
                                 {license.status === 'REJECTED' && license.adminComment && (
                                     <div style={{ marginTop: '1rem', padding: '0.75rem 1rem', background: 'rgba(239,68,68,0.06)', border: '1px solid #ef4444', borderRadius: '4px' }}>
                                         <strong style={{ fontSize: '0.85rem', color: '#7f1d1d' }}>Rejection Reason:</strong>
@@ -128,7 +139,7 @@ export const MyLicenses = () => {
                                     </div>
                                 )}
 
-                                {/* Modification required: show comment + edit form */}
+                                {/* Modification required */}
                                 {isModRequired && (
                                     <>
                                         {license.adminComment && (
@@ -137,11 +148,8 @@ export const MyLicenses = () => {
                                                 <p style={{ margin: '0.25rem 0 0', fontSize: '0.9rem' }}>{license.adminComment}</p>
                                             </div>
                                         )}
-
-                                        {/* Edit form */}
                                         <div style={{ marginTop: '1.25rem', padding: '1.25rem', background: 'rgba(59,130,246,0.04)', border: '1px dashed #3b82f6', borderRadius: '4px' }}>
                                             <h5 style={{ margin: '0 0 1rem', color: '#1e3a5f' }}>✏️ Edit &amp; Resubmit Application</h5>
-
                                             <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.4rem' }}>
                                                 Updated Purpose <span style={{ color: '#ef4444' }}>*</span>
                                             </label>
@@ -151,7 +159,6 @@ export const MyLicenses = () => {
                                                 defaultValue={license.purpose}
                                                 onChange={e => setResubmitData(prev => ({ ...prev, [license._id]: { ...prev[license._id], purpose: e.target.value } }))}
                                             />
-
                                             <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.4rem' }}>
                                                 Updated Documentation
                                             </label>
@@ -161,22 +168,13 @@ export const MyLicenses = () => {
                                                 defaultValue={license.documentation || ''}
                                                 onChange={e => setResubmitData(prev => ({ ...prev, [license._id]: { ...prev[license._id], documentation: e.target.value } }))}
                                             />
-
                                             {submitError[license._id] && (
-                                                <p style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                                                    ⚠ {submitError[license._id]}
-                                                </p>
+                                                <p style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: '0.5rem' }}>⚠ {submitError[license._id]}</p>
                                             )}
                                             {submitSuccess[license._id] && (
-                                                <p style={{ color: '#14532d', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                                                    ✅ {submitSuccess[license._id]}
-                                                </p>
+                                                <p style={{ color: '#14532d', fontSize: '0.85rem', marginBottom: '0.5rem' }}>✅ {submitSuccess[license._id]}</p>
                                             )}
-
-                                            <button
-                                                className="primary-btn"
-                                                onClick={() => handleResubmit(license._id)}
-                                            >
+                                            <button className="primary-btn" onClick={() => handleResubmit(license._id)}>
                                                 Resubmit Application
                                             </button>
                                         </div>
