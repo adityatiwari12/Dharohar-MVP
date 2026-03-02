@@ -12,6 +12,8 @@ export interface Asset {
     approvalStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
     reviewComment?: string | null;
     createdBy?: { name: string; email: string };
+    metadata?: Record<string, any>;
+    transcript?: string;
     createdAt: string;
     updatedAt: string;
 }

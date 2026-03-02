@@ -1,11 +1,11 @@
 const licenseService = require('../services/licenseService');
+const logger = require('../utils/logger');
 
 const applyForLicense = async (req, res, next) => {
     try {
         const license = await licenseService.applyForLicense(req.body, req.user.id);
         res.status(201).json(license);
     } catch (error) {
-        if (!error.statusCode) error.statusCode = 400;
         next(error);
     }
 };
@@ -48,11 +48,9 @@ const getLicensesForAsset = async (req, res, next) => {
 
 const approveLicense = async (req, res, next) => {
     try {
-        const license = await licenseService.approveLicense(req.params.id);
+        const license = await licenseService.approveLicense(req.params.id, req.user.id);
         res.status(200).json(license);
     } catch (error) {
-        if (!error.statusCode) error.statusCode = 500;
-        res.status(error.statusCode);
         next(error);
     }
 };
@@ -60,11 +58,9 @@ const approveLicense = async (req, res, next) => {
 const rejectLicense = async (req, res, next) => {
     try {
         const { adminComment } = req.body;
-        const license = await licenseService.rejectLicense(req.params.id, adminComment);
+        const license = await licenseService.rejectLicense(req.params.id, adminComment, req.user.id);
         res.status(200).json(license);
     } catch (error) {
-        if (!error.statusCode) error.statusCode = 400;
-        res.status(error.statusCode);
         next(error);
     }
 };
@@ -72,11 +68,9 @@ const rejectLicense = async (req, res, next) => {
 const requestModification = async (req, res, next) => {
     try {
         const { adminComment } = req.body;
-        const license = await licenseService.requestModification(req.params.id, adminComment);
+        const license = await licenseService.requestModification(req.params.id, adminComment, req.user.id);
         res.status(200).json(license);
     } catch (error) {
-        if (!error.statusCode) error.statusCode = 400;
-        res.status(error.statusCode);
         next(error);
     }
 };
@@ -90,8 +84,6 @@ const resubmitLicense = async (req, res, next) => {
         );
         res.status(200).json(license);
     } catch (error) {
-        if (!error.statusCode) error.statusCode = 400;
-        res.status(error.statusCode);
         next(error);
     }
 };

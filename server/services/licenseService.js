@@ -1,140 +1,239 @@
 const License = require('../models/License');
 const Asset = require('../models/Asset');
-const { generateAgreementText } = require('./agreementService');
-
-// Helper: enforce state transitions
-const enforceTransition = (currentStatus, allowedFrom, targetStatus) => {
-    if (!allowedFrom.includes(currentStatus)) {
-        const err = new Error(
-            `Invalid state transition: Cannot move from "${currentStatus}" to "${targetStatus}". ` +
-            `Only allowed from: [${allowedFrom.join(', ')}].`
-        );
-        err.statusCode = 409;
-        throw err;
-    }
-};
+const AuditLog = require('../models/AuditLog');
+const mongoose = require('mongoose');
 
 const applyForLicense = async (licenseData, userId) => {
-    const asset = await Asset.findById(licenseData.assetId);
-    if (!asset) throw new Error('Asset not found');
-    if (asset.approvalStatus !== 'APPROVED') {
-        throw new Error('Can only apply for licenses on approved assets');
-    }
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const asset = await Asset.findById(licenseData.assetId).session(session);
+        if (!asset) throw new Error('Asset not found');
 
-    const license = new License({
-        ...licenseData,
-        applicantId: userId,
-        status: 'PENDING',
-        adminComment: null
-    });
-    return await license.save();
+        if (asset.approvalStatus !== 'APPROVED') {
+            const err = new Error('Can only apply for licenses on approved assets');
+            err.statusCode = 403;
+            throw err;
+        }
+
+        const license = new License({
+            ...licenseData,
+            applicantId: userId,
+            status: 'PENDING'
+        });
+
+        if (licenseData.documentationFileId) {
+            license.documentationFileId = licenseData.documentationFileId;
+        }
+
+        const savedLicense = await license.save({ session });
+
+        await AuditLog.create([{
+            userId,
+            userRole: 'general',
+            action: 'LICENSE_APPLY',
+            resourceId: savedLicense._id,
+            details: `License applied for Asset ${license.assetId}. Type: ${license.licenseType}`,
+        }], { session });
+
+        await session.commitTransaction();
+        return savedLicense;
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        session.endSession();
+    }
 };
 
 const getMyLicenses = async (userId) => {
     return await License.find({ applicantId: userId })
-        .populate('assetId', 'title type communityName mediaUrl recordeeName')
+        .populate('assetId', 'title communityName')
         .sort({ createdAt: -1 });
 };
 
 const getPendingLicenses = async () => {
-    // Admin sees PENDING + MODIFICATION_REQUIRED that have been resubmitted (i.e., back to PENDING)
     return await License.find({ status: 'PENDING' })
-        .populate('assetId', 'title type communityName mediaUrl recordeeName')
+        .populate('assetId', 'title communityName')
         .populate('applicantId', 'name email')
         .sort({ updatedAt: -1 });
 };
 
 const getAllLicenses = async () => {
     return await License.find()
-        .populate('assetId', 'title type communityName mediaUrl recordeeName')
+        .populate('assetId', 'title communityName')
         .populate('applicantId', 'name email')
         .sort({ updatedAt: -1 });
 };
 
-// Get licenses for a specific asset (community visibility — who has been granted a license)
 const getLicensesForAsset = async (assetId) => {
-    return await License.find({ assetId, status: 'APPROVED' })
+    return await License.find({ assetId })
         .populate('applicantId', 'name email')
         .sort({ updatedAt: -1 });
 };
 
-// ADMIN: PENDING → APPROVED
-const approveLicense = async (licenseId) => {
-    const license = await License.findById(licenseId).populate('assetId');
-    if (!license) throw new Error('License not found');
+const approveLicense = async (licenseId, adminId) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const license = await License.findById(licenseId).populate('assetId').session(session);
+        if (!license) throw new Error('License application not found');
 
-    enforceTransition(license.status, ['PENDING'], 'APPROVED');
+        if (license.status !== 'PENDING') {
+            const err = new Error(`Cannot approve license with status "${license.status}"`);
+            err.statusCode = 409;
+            throw err;
+        }
 
-    const agreementText = generateAgreementText(
-        license.assetId.title,
-        license.assetId.communityName,
-        license.licenseType
-    );
+        license.status = 'APPROVED';
+        license.adminComment = null;
+        license.agreementText = `This agreement is between the Community and the Applicant for the use of ${license.assetId.title}. [Standard Agreement Terms Apply]`;
+        const savedLicense = await license.save({ session });
 
-    license.status = 'APPROVED';
-    license.adminComment = null;
-    license.agreementText = agreementText;
-    return await license.save();
+        await AuditLog.create([{
+            userId: adminId,
+            userRole: 'admin',
+            action: 'LICENSE_APPROVE',
+            resourceId: savedLicense._id,
+            details: `License approved for Asset ${license.assetId._id}`,
+        }], { session });
+
+        await session.commitTransaction();
+        return savedLicense;
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        session.endSession();
+    }
 };
 
-// ADMIN: PENDING → REJECTED (comment required)
-const rejectLicense = async (licenseId, adminComment) => {
+const rejectLicense = async (licenseId, adminComment, adminId) => {
     if (!adminComment || adminComment.trim() === '') {
-        const err = new Error('Rejection requires an admin comment explaining the reason');
+        const err = new Error('Rejection requires an admin comment');
         err.statusCode = 400;
         throw err;
     }
 
-    const license = await License.findById(licenseId);
-    if (!license) throw new Error('License not found');
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const license = await License.findById(licenseId).session(session);
+        if (!license) throw new Error('License application not found');
 
-    enforceTransition(license.status, ['PENDING'], 'REJECTED');
+        if (license.status !== 'PENDING') {
+            const err = new Error(`Cannot reject license with status "${license.status}"`);
+            err.statusCode = 409;
+            throw err;
+        }
 
-    license.status = 'REJECTED';
-    license.adminComment = adminComment;
-    return await license.save();
+        license.status = 'REJECTED';
+        license.adminComment = adminComment;
+        const savedLicense = await license.save({ session });
+
+        await AuditLog.create([{
+            userId: adminId,
+            userRole: 'admin',
+            action: 'LICENSE_REJECT',
+            resourceId: savedLicense._id,
+            details: `License rejected. Reason: ${adminComment}`,
+        }], { session });
+
+        await session.commitTransaction();
+        return savedLicense;
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        session.endSession();
+    }
 };
 
-// ADMIN: PENDING → MODIFICATION_REQUIRED (comment required)
-const requestModification = async (licenseId, adminComment) => {
+const requestModification = async (licenseId, adminComment, adminId) => {
     if (!adminComment || adminComment.trim() === '') {
-        const err = new Error('Modification request requires a comment explaining what needs to be changed');
+        const err = new Error('Modification request requires a comment');
         err.statusCode = 400;
         throw err;
     }
 
-    const license = await License.findById(licenseId);
-    if (!license) throw new Error('License not found');
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const license = await License.findById(licenseId).session(session);
+        if (!license) throw new Error('License application not found');
 
-    enforceTransition(license.status, ['PENDING'], 'MODIFICATION_REQUIRED');
+        if (license.status !== 'PENDING') {
+            const err = new Error(`Cannot request modification for license with status "${license.status}"`);
+            err.statusCode = 409;
+            throw err;
+        }
 
-    license.status = 'MODIFICATION_REQUIRED';
-    license.adminComment = adminComment;
-    return await license.save();
+        license.status = 'MODIFICATION_REQUIRED';
+        license.adminComment = adminComment;
+        const savedLicense = await license.save({ session });
+
+        await AuditLog.create([{
+            userId: adminId,
+            userRole: 'admin',
+            action: 'LICENSE_MOD_REQ',
+            resourceId: savedLicense._id,
+            details: `License modification requested. Comment: ${adminComment}`,
+        }], { session });
+
+        await session.commitTransaction();
+        return savedLicense;
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        session.endSession();
+    }
 };
 
-// GENERAL USER: MODIFICATION_REQUIRED → PENDING (clears adminComment, updates fields)
 const resubmitLicense = async (licenseId, updateData, userId) => {
-    const license = await License.findById(licenseId);
-    if (!license) throw new Error('License not found');
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const license = await License.findById(licenseId).session(session);
+        if (!license) throw new Error('License application not found');
 
-    // Only the original applicant can resubmit
-    if (license.applicantId.toString() !== userId) {
-        const err = new Error('Unauthorized: You can only resubmit your own license application');
-        err.statusCode = 403;
-        throw err;
+        if (license.applicantId.toString() !== userId.toString()) {
+            const err = new Error('Unauthorized');
+            err.statusCode = 403;
+            throw err;
+        }
+
+        if (license.status !== 'MODIFICATION_REQUIRED') {
+            const err = new Error('Resubmission only allowed for licenses requiring modification');
+            err.statusCode = 409;
+            throw err;
+        }
+
+        // Update editable fields
+        if (updateData.purpose) license.purpose = updateData.purpose;
+        if (updateData.documentation) license.documentation = updateData.documentation;
+        if (updateData.documentationFileId) license.documentationFileId = updateData.documentationFileId;
+
+        license.status = 'PENDING';
+        license.adminComment = null;
+        const savedLicense = await license.save({ session });
+
+        await AuditLog.create([{
+            userId,
+            userRole: 'general',
+            action: 'LICENSE_APPLY',
+            resourceId: savedLicense._id,
+            details: `License resubmitted for Asset ${license.assetId}`,
+        }], { session });
+
+        await session.commitTransaction();
+        return savedLicense;
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        session.endSession();
     }
-
-    enforceTransition(license.status, ['MODIFICATION_REQUIRED'], 'PENDING');
-
-    // Update editable fields
-    if (updateData.purpose) license.purpose = updateData.purpose;
-    if (updateData.documentation) license.documentation = updateData.documentation;
-    if (updateData.fee !== undefined) license.fee = updateData.fee;
-
-    license.status = 'PENDING';
-    license.adminComment = null;  // Clear the modification request comment
-    return await license.save();
 };
 
 module.exports = {

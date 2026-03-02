@@ -1,14 +1,42 @@
 const Asset = require('../models/Asset');
+const AuditLog = require('../models/AuditLog');
+const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 const createAsset = async (assetData, userId, communityName) => {
-    const asset = new Asset({
-        ...assetData,
-        createdBy: userId,
-        communityName: communityName,
-        approvalStatus: 'PENDING',
-        reviewComment: null
-    });
-    return await asset.save();
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const asset = new Asset({
+            ...assetData,
+            createdBy: userId,
+            communityName: communityName,
+            approvalStatus: 'PENDING',
+            reviewComment: null
+        });
+
+        if (assetData.mediaFileId) {
+            asset.mediaFileId = assetData.mediaFileId;
+        }
+
+        const savedAsset = await asset.save({ session });
+
+        await AuditLog.create([{
+            userId,
+            userRole: 'community',
+            action: 'ASSET_CREATE',
+            resourceId: savedAsset._id,
+            details: `Asset created: ${savedAsset.title}`,
+        }], { session });
+
+        await session.commitTransaction();
+        return savedAsset;
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        session.endSession();
+    }
 };
 
 const getMyAssets = async (userId) => {
@@ -22,48 +50,85 @@ const getPendingAssets = async () => {
 };
 
 const getPublicAssets = async () => {
-    // ONLY APPROVED assets exposed publicly — no transcript, no sensitive data
     return await Asset.find({ approvalStatus: 'APPROVED' })
         .select('-transcript -metadata')
         .sort({ createdAt: -1 });
 };
 
-const approveAsset = async (assetId) => {
-    const asset = await Asset.findById(assetId);
-    if (!asset) throw new Error('Asset not found');
+const approveAsset = async (assetId, reviewerId) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const asset = await Asset.findById(assetId).session(session);
+        if (!asset) throw new Error('Asset not found');
 
-    // STATE MACHINE ENFORCEMENT: Only PENDING can be approved
-    if (asset.approvalStatus !== 'PENDING') {
-        const err = new Error(`Cannot approve asset with status "${asset.approvalStatus}". Only PENDING assets can be approved.`);
-        err.statusCode = 409;
-        throw err;
+        if (asset.approvalStatus !== 'PENDING') {
+            const err = new Error(`Cannot approve asset with status "${asset.approvalStatus}"`);
+            err.statusCode = 409;
+            throw err;
+        }
+
+        asset.approvalStatus = 'APPROVED';
+        asset.reviewComment = null;
+        const savedAsset = await asset.save({ session });
+
+        await AuditLog.create([{
+            userId: reviewerId,
+            userRole: 'review',
+            action: 'ASSET_APPROVE',
+            resourceId: savedAsset._id,
+            details: `Asset approved: ${savedAsset.title}`,
+        }], { session });
+
+        await session.commitTransaction();
+        return savedAsset;
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        session.endSession();
     }
-
-    asset.approvalStatus = 'APPROVED';
-    asset.reviewComment = null;
-    return await asset.save();
 };
 
-const rejectAsset = async (assetId, reviewComment) => {
+const rejectAsset = async (assetId, reviewComment, reviewerId) => {
     if (!reviewComment || reviewComment.trim() === '') {
         const err = new Error('Rejection requires a review comment');
         err.statusCode = 400;
         throw err;
     }
 
-    const asset = await Asset.findById(assetId);
-    if (!asset) throw new Error('Asset not found');
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const asset = await Asset.findById(assetId).session(session);
+        if (!asset) throw new Error('Asset not found');
 
-    // STATE MACHINE ENFORCEMENT: Only PENDING can be rejected
-    if (asset.approvalStatus !== 'PENDING') {
-        const err = new Error(`Cannot reject asset with status "${asset.approvalStatus}". Only PENDING assets can be rejected.`);
-        err.statusCode = 409;
-        throw err;
+        if (asset.approvalStatus !== 'PENDING') {
+            const err = new Error(`Cannot reject asset with status "${asset.approvalStatus}"`);
+            err.statusCode = 409;
+            throw err;
+        }
+
+        asset.approvalStatus = 'REJECTED';
+        asset.reviewComment = reviewComment;
+        const savedAsset = await asset.save({ session });
+
+        await AuditLog.create([{
+            userId: reviewerId,
+            userRole: 'review',
+            action: 'ASSET_REJECT',
+            resourceId: savedAsset._id,
+            details: `Asset rejected. Reason: ${reviewComment}`,
+        }], { session });
+
+        await session.commitTransaction();
+        return savedAsset;
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        session.endSession();
     }
-
-    asset.approvalStatus = 'REJECTED';
-    asset.reviewComment = reviewComment;
-    return await asset.save();
 };
 
 const getReviewedAssets = async () => {

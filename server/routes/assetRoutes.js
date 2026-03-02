@@ -1,7 +1,6 @@
 const express = require('express');
 const assetController = require('../controllers/assetController');
-const auth = require('../middleware/auth');
-const roleGuard = require('../middleware/roleGuard');
+const { protect, roleGuard } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -9,7 +8,7 @@ const router = express.Router();
 router.get('/public', assetController.getPublicAssets);
 
 // All routes below require auth
-router.use(auth);
+router.use(protect);
 
 // Community role only
 router.post('/', roleGuard(['community']), assetController.createAsset);

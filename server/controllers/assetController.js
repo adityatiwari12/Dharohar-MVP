@@ -1,4 +1,5 @@
 const assetService = require('../services/assetService');
+const logger = require('../utils/logger');
 
 const createAsset = async (req, res, next) => {
     try {
@@ -42,10 +43,9 @@ const getPublicAssets = async (req, res, next) => {
 
 const approveAsset = async (req, res, next) => {
     try {
-        const asset = await assetService.approveAsset(req.params.id);
+        const asset = await assetService.approveAsset(req.params.id, req.user.id);
         res.status(200).json(asset);
     } catch (error) {
-        if (error.statusCode) res.status(error.statusCode);
         next(error);
     }
 };
@@ -53,10 +53,9 @@ const approveAsset = async (req, res, next) => {
 const rejectAsset = async (req, res, next) => {
     try {
         const { reviewComment } = req.body;
-        const asset = await assetService.rejectAsset(req.params.id, reviewComment);
+        const asset = await assetService.rejectAsset(req.params.id, reviewComment, req.user.id);
         res.status(200).json(asset);
     } catch (error) {
-        if (error.statusCode) res.status(error.statusCode);
         next(error);
     }
 };

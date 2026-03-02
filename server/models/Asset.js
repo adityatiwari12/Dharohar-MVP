@@ -3,56 +3,71 @@ const mongoose = require('mongoose');
 const AssetSchema = new mongoose.Schema({
     type: {
         type: String,
-        enum: ['BIO', 'SONIC'],
-        required: true
+        enum: {
+            values: ['BIO', 'SONIC'],
+            message: '{VALUE} is not a valid asset type'
+        },
+        required: [true, 'Asset type is required'],
+        index: true
     },
     title: {
         type: String,
-        required: true
+        required: [true, 'Title is required'],
+        trim: true,
+        maxlength: [200, 'Title cannot exceed 200 characters']
     },
     description: {
         type: String,
-        required: true
+        required: [true, 'Description is required'],
+        maxlength: [2000, 'Description cannot exceed 2000 characters']
     },
     communityName: {
         type: String,
-        required: true
+        required: [true, 'Community name is required']
     },
     recordeeName: {
         type: String,
-        required: true
+        required: [true, 'Recordee name is required']
     },
     transcript: {
         type: String
     },
     mediaUrl: {
-        type: String   // URL or path to the recorded audio/video file
+        type: String   // Legacy support / External links
+    },
+    mediaFileId: {
+        type: mongoose.Schema.Types.ObjectId, // GridFS File ID
+        index: true
     },
     metadata: {
-        type: Object
-    },
-    fingerprint: {
-        type: String
+        type: Map,
+        of: mongoose.Schema.Types.Mixed
     },
     riskTier: {
-        type: String
-    },
-    suggestedLicenseType: {
-        type: String
+        type: String,
+        enum: ['LOW', 'MEDIUM', 'HIGH'],
+        default: 'LOW',
+        index: true
     },
     approvalStatus: {
         type: String,
         enum: ['PENDING', 'APPROVED', 'REJECTED'],
-        default: 'PENDING'
+        default: 'PENDING',
+        index: true
     },
     reviewComment: {
-        type: String
+        type: String,
+        maxlength: [500, 'Comment cannot exceed 500 characters']
     },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: true,
+        index: true
     }
 }, { timestamps: true });
+
+// Text index for site-wide search
+AssetSchema.index({ title: 'text', description: 'text', communityName: 'text' });
 
 module.exports = mongoose.model('Asset', AssetSchema);

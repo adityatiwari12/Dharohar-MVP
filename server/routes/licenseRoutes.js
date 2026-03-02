@@ -1,12 +1,11 @@
 const express = require('express');
 const licenseController = require('../controllers/licenseController');
-const auth = require('../middleware/auth');
-const roleGuard = require('../middleware/roleGuard');
+const { protect, roleGuard } = require('../middleware/auth');
 
 const router = express.Router();
 
 // All routes require authentication
-router.use(auth);
+router.use(protect);
 
 // ── GENERAL user routes ──────────────────────────────────────────────────────
 // Apply for license on an approved asset

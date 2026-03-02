@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
+const roleGuard = require('./roleGuard');
 
-const authMiddleware = (req, res, next) => {
+const protect = (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -16,8 +17,8 @@ const authMiddleware = (req, res, next) => {
         req.user = decoded;
         next();
     } catch (error) {
-        return res.status(401).json({ error: 'Token verification failed' });
+        return res.status(401).json({ error: 'Token verification failed or expired' });
     }
 };
 
-module.exports = authMiddleware;
+module.exports = { protect, roleGuard };

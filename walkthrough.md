@@ -1,3 +1,64 @@
+# DHAROHAR - Production MongoDB Architecture
+
+This update transitions the DHAROHAR backend from a basic mock-ready state to a robust, production-grade architecture.
+
+## 1. Advanced Database Foundation
+*   **Centralized Connection**: Refactored `db.js` for managed Mongoose connections with production-ready error handling.
+*   **GridFS Integration**: Initialized a dedicated `uploads` bucket within MongoDB for secure, scalable binary storage of cultural media (Sonic/Bio).
+
+## 2. Refined Schema Design & Validation
+*   **Asset & License Models**: Added multi-level validation, text indexing for global search, and GridFS linkage (`mediaFileId`, `documentationFileId`).
+*   **User Model**: Enforced role-based constraints and secure credential isolation (`select: false` for password hashes).
+*   **New Community Model**: Dedicated structure for tracking tribal organizations and their verified status.
+*   **Audit Logging**: Introduced a high-integrity `AuditLog` model to track every governance action (Archival, Licensing, Access).
+
+## 3. Transactional Governance Workflows
+*   **ACID Compliance**: Critical operations like `approveAsset` and `approveLicense` now utilize **MongoDB Transactions**.
+*   **Atomic Auditing**: State changes and audit logs are recorded as a single atomic unit, ensuring no governance action goes unrecorded.
+
+## 4. Observability & Error Handling
+*   **Winston Logging**: Structured JSON logging for production monitoring, with dedicated `error.log` and `combined.log` files.
+*   **Morgan Integration**: Real-time HTTP request logging streamed directly into the Winston transport.
+*   **Global Error Middleware**: Standardized error responses across all API endpoints, including environment-aware stack traces.
+
+## 5. File Storage API
+*   **Storage Routes**: New `/storage` endpoints for secure file uploads via Multer and authenticated streaming of archived media.
+
+## 6. Verification Summary
+*   **Server Stability**: Confirmed successful startup with GridFS bucket initialization.
+*   **Logging Verification**: Verified that Winston correctly captures startup events and API requests.
+*   **Schema Integrity**: Validated syntax and logic across all refactored models.
+
+---
+
+# DHAROHAR - Submission Details & Governance Polish
+
+This update introduces a detailed view for community submissions, enabling users to see all metadata and transcripts associated with their archival records.
+
+## 1. Submission Details View (Community Dashboard)
+Community members can now click **"View Details"** on any of their submissions to open a comprehensive dossier modal.
+
+### Key Capabilities:
+*   **Archival Info**: Displays submission date, risk tier, and recordee name.
+*   **Metadata Inspection**: Full visibility into performance context, categories, and categories.
+*   **Media Preview**: Embedded audio or video player to verify the recorded cultural asset.
+*   **Transcript Access**: Clearly displays oral history transcripts for verification.
+*   **Reviewer Feedback**: Rejection reasons are shown prominently within the modal.
+
+![Submission Detail Modal](file:///C:/Users/ASUS/.gemini/antigravity/brain/c99c7110-5574-44f8-8c20-e94228a5b010/.system_generated/screenshots/screenshot_1772434604928.png)
+
+## 2. Technical Polish
+*   **TypeScript Integrity**: Updated the `Asset` interface to include `metadata` and `transcript` for type-safe data handling.
+*   **UX Consistency**: Utilized the platform's glassmorphic modal design and framed sections for a premium, institutional feel.
+*   **Lint Cleanliness**: Removed unused imports across dashboard components to maintain codebase health.
+
+## 3. Verification Summary
+*   **Frontend**: Verified the modal opens, closes, and renders data correctly across different statuses.
+*   **Backend Integration**: Confirmed `getMyAssets` correctly feeds the detailed data to the frontend.
+*   **Responsive Design**: Verified modal scrolling and layout on various viewport sizes.
+
+---
+
 # DHAROHAR - Phase 1 Frontend Documentation
 
 This document outlines the architecture, features, and current state of the Phase 1 development for the DHAROHAR platform's frontend.

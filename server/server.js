@@ -1,20 +1,16 @@
 require('dotenv').config();
-const mongoose = require('mongoose');
+const { connectDB } = require('./config/db');
 const app = require('./app');
+const logger = require('./utils/logger');
 
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/dharohar';
 
-// Connect to MongoDB
-mongoose.connect(MONGO_URI)
-    .then(() => {
-        console.log('Connected to MongoDB');
-        // Start the server
-        app.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}`);
-        });
-    })
-    .catch((error) => {
-        console.error('Error connecting to MongoDB:', error.message);
-        process.exit(1);
+// Connect to MongoDB and Start Server
+connectDB().then(() => {
+    app.listen(PORT, () => {
+        logger.info(`Server is running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`);
     });
+}).catch(err => {
+    logger.error('Failed to start server due to connection error');
+    process.exit(1);
+});

@@ -6,7 +6,9 @@ const register = async (userData) => {
     // Check if user exists
     const existingUser = await User.findOne({ email: userData.email });
     if (existingUser) {
-        throw new Error('User already exists');
+        const error = new Error('User already exists');
+        error.statusCode = 400;
+        throw error;
     }
 
     // Hash password
@@ -26,14 +28,19 @@ const register = async (userData) => {
 };
 
 const login = async (email, password) => {
-    const user = await User.findOne({ email });
+    // passwordHash is select: false, so we must explicitly select it
+    const user = await User.findOne({ email }).select('+passwordHash');
     if (!user) {
-        throw new Error('Invalid credentials');
+        const error = new Error('Invalid credentials');
+        error.statusCode = 401;
+        throw error;
     }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
-        throw new Error('Invalid credentials');
+        const error = new Error('Invalid credentials');
+        error.statusCode = 401;
+        throw error;
     }
 
     const token = jwt.sign(

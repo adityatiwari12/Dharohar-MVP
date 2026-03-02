@@ -1,13 +1,24 @@
-const errorHandler = (err, req, res, next) => {
-    console.error(err.stack);
+const logger = require('../utils/logger');
 
-    // Use statusCode from the error object if set (custom service errors), then res.statusCode, then 500
+const errorHandler = (err, req, res, next) => {
+    // Log the error
+    logger.error(`${err.message} - ${req.method} ${req.originalUrl} - ${req.ip}`, {
+        stack: err.stack,
+        user: req.user ? req.user.id : 'Guest'
+    });
+
     const statusCode = err.statusCode || (res.statusCode === 200 ? 500 : res.statusCode);
 
-    res.status(statusCode).json({
+    const response = {
         message: err.message || 'Internal Server Error',
-        stack: process.env.NODE_ENV === 'production' ? null : err.stack,
-    });
+        status: 'error'
+    };
+
+    if (process.env.NODE_ENV !== 'production') {
+        response.stack = err.stack;
+    }
+
+    res.status(statusCode).json(response);
 };
 
 module.exports = errorHandler;
