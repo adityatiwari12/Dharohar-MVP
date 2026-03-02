@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../features/auth/AuthContext';
-import { FiLogOut, FiHome, FiUploadCloud, FiList, FiCheckSquare, FiGlobe, FiFileText, FiClock } from 'react-icons/fi';
+import { FiLogOut, FiHome, FiUploadCloud, FiList, FiCheckSquare, FiGlobe, FiFileText, FiClock, FiMenu, FiX } from 'react-icons/fi';
 import { BackButton } from '../Navigation/BackButton';
 import './DashboardLayout.css';
 
@@ -13,6 +13,7 @@ interface LayoutProps {
 export const DashboardLayout: React.FC<LayoutProps> = ({ title, children }) => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const handleLogout = () => {
         logout();
@@ -21,13 +22,9 @@ export const DashboardLayout: React.FC<LayoutProps> = ({ title, children }) => {
 
     const getRoleLinks = () => {
         if (!user) return [];
-
-        // We can show different links depending on user's first role
-        // Or aggregate them if they have multiple roles
         const roles = user.roles;
         const links = [];
 
-        // General user links
         links.push({ to: '/dashboard', label: 'Dashboard', icon: <FiHome /> });
 
         const isGovernanceUser = roles.includes('community') || roles.includes('review') || roles.includes('admin');
@@ -58,8 +55,40 @@ export const DashboardLayout: React.FC<LayoutProps> = ({ title, children }) => {
 
     return (
         <div className="layout-container">
-            <nav className="sidebar">
+            {/* ── Mobile top bar ── */}
+            <div className="mobile-topbar">
+                <button
+                    className="hamburger-btn"
+                    onClick={() => setSidebarOpen(true)}
+                    aria-label="Open navigation"
+                >
+                    <FiMenu />
+                </button>
+                <Link to="/" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <img src="/logo.png" alt="Dharohar Logo" style={{ height: '32px' }} />
+                    <span className="brand-logo" style={{ fontSize: '1.2rem', margin: 0 }}>DHAROHAR</span>
+                </Link>
+                <div style={{ width: 44 }} /> {/* spacer to center brand */}
+            </div>
+
+            {/* ── Overlay (mobile only) ── */}
+            {sidebarOpen && (
+                <div
+                    className="sidebar-overlay"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+
+            {/* ── Sidebar ── */}
+            <nav className={`sidebar${sidebarOpen ? ' sidebar--open' : ''}`}>
                 <div className="brand-section">
+                    <button
+                        className="sidebar-close-btn"
+                        onClick={() => setSidebarOpen(false)}
+                        aria-label="Close navigation"
+                    >
+                        <FiX />
+                    </button>
                     <Link to="/" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                         <img src="/logo.png" alt="Dharohar Logo" className="brand-logo-img" style={{ maxWidth: '100px', marginBottom: '10px' }} />
                         <h1 className="brand-logo">DHAROHAR</h1>
@@ -75,6 +104,7 @@ export const DashboardLayout: React.FC<LayoutProps> = ({ title, children }) => {
                                 to={link.to}
                                 end={link.to === '/dashboard'}
                                 className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+                                onClick={() => setSidebarOpen(false)}
                             >
                                 {link.icon}
                                 <span>{link.label}</span>

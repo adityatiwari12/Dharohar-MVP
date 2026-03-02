@@ -102,3 +102,36 @@
     color: var(--color-text-light);
     font-style: italic;
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MOBILE: max 767px
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 767px) {
+    .review-card {
+        padding: 1.25rem !important;
+    }
+
+    .review-card-header {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .review-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding-top: 1rem;
+    }
+
+    .review-actions button {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    .empty-state {
+        padding: 2rem 1rem;
+    }
+
+    .dashboard-header-inner {
+        margin-bottom: 1.25rem;
+    }
+}

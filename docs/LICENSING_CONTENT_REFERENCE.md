@@ -43,7 +43,7 @@ This file contains all content, copy, and data for the Licensing Section in the 
   
   duration: "1-3 years (renewable)",
   
-  communityBenefit: "10% of license fee goes directly to the community",
+  communityBenefit: "80% of license fee goes directly to the community",
   
   requirements: [
     "Proper attribution in all publications",
@@ -99,7 +99,7 @@ This file contains all content, copy, and data for the Licensing Section in the 
   
   duration: "3-5 years (renewable with mutual consent)",
   
-  communityBenefit: "40% of upfront fee + 40% of ongoing royalties go to the community",
+  communityBenefit: "80% of upfront fee + 80% of ongoing royalties go directly to the community",
   
   requirements: [
     "Product packaging must credit the community",
@@ -109,10 +109,10 @@ This file contains all content, copy, and data for the Licensing Section in the 
   ],
   
   benefitSharing: {
-    community: "40%",
-    stateBiodiversityBoard: "30%",
-    nationalAuthority: "20%",
-    platform: "10%"
+    community: "80%",
+    stateBiodiversityBoard: "10%",
+    nationalAuthority: "5%",
+    platform: "5%"
   },
   
   legalFramework: "Governed by Biological Diversity Act, 2002 & Nagoya Protocol"
@@ -163,7 +163,7 @@ This file contains all content, copy, and data for the Licensing Section in the 
   
   duration: "1 year (renewable)",
   
-  communityBenefit: "50% of all fees and royalties go directly to the community",
+  communityBenefit: "80% of all fees and royalties go directly to the community",
   
   requirements: [
     "End credits must display: 'Traditional Music: [Community Name] | Courtesy: Dharohar'",
@@ -236,7 +236,7 @@ This file contains all content, copy, and data for the Licensing Section in the 
   
   duration: "1-3 years (renewable)",
   
-  communityBenefit: "50% of upfront fee + 50% of ongoing royalties",
+  communityBenefit: "80% of upfront fee + 80% of ongoing royalties go directly to the community",
   
   requirements: [
     "Quarterly royalty statements and payments",
@@ -246,9 +246,9 @@ This file contains all content, copy, and data for the Licensing Section in the 
   ],
   
   revenueShare: {
-    community: "50%",
-    platform: "30%",
-    preservationFund: "20%"
+    community: "80%",
+    platform: "10%",
+    preservationFund: "10%"
   },
   
   legalFramework: "Governed by Copyright Act, 1957 & IPRS Regulations"

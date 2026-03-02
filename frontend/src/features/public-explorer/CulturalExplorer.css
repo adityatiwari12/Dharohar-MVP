@@ -190,3 +190,95 @@
     display: block;
     margin-top: 0.25rem;
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TABLET: 768px – 1023px
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 1023px) {
+    .hero-section {
+        flex-direction: column;
+    }
+
+    .hero-right-pane {
+        width: 100%;
+        min-height: auto;
+        padding: 2.5rem 2rem;
+        order: 2;
+    }
+
+    .hero-left-pane {
+        min-height: 50vh;
+        order: 1;
+        border-right: none;
+        border-bottom: 1px solid rgba(176, 141, 87, 0.3);
+    }
+
+    .hero-title {
+        font-size: 3rem;
+    }
+
+    .ceremonial-symbol {
+        width: 400px;
+        height: 400px;
+    }
+
+    .grid-layout {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .explorer-container {
+        padding: 0 1.5rem;
+    }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MOBILE: max 767px
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 767px) {
+    .hero-section {
+        flex-direction: column;
+        min-height: auto;
+    }
+
+    .hero-left-pane {
+        min-height: 55vw;
+        order: 1;
+        border-right: none;
+        border-bottom: 1px solid rgba(176, 141, 87, 0.2);
+    }
+
+    .hero-right-pane {
+        width: 100%;
+        order: 2;
+        padding: 2rem 1.25rem;
+        box-shadow: none;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+        letter-spacing: 3px;
+    }
+
+    .ceremonial-symbol {
+        width: 250px;
+        height: 250px;
+    }
+
+    .grid-layout {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .explorer-container {
+        padding: 0 1rem;
+    }
+
+    .section-banner h2 {
+        font-size: 1.5rem;
+    }
+
+    .structured-card {
+        padding: 1.25rem;
+    }
+}

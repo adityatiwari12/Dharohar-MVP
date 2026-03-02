@@ -8,7 +8,8 @@ export interface Asset {
     communityName: string;
     recordeeName: string;
     riskTier?: string;
-    mediaUrl?: string;
+    mediaUrl?: string;       // Synthesized on backend: /api/files/{mediaFileId}
+    mediaFileId?: string;    // Raw GridFS ObjectId (also present)
     approvalStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
     reviewComment?: string | null;
     createdBy?: { name: string; email: string };

@@ -392,16 +392,41 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 640px) {
+@media (max-width: 767px) {
+    .lis-root {
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+    }
+
     .lis-cards {
         grid-template-columns: 1fr;
     }
 
     .lis-card {
-        padding: 18px;
+        padding: 16px;
     }
 
     .lis-how-it-works {
-        padding: 16px 18px;
+        padding: 14px 16px;
+    }
+
+    .lis-community-benefit {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .lis-benefit-percent {
+        font-size: 1.4rem;
+    }
+
+    .lis-apply-btn {
+        width: 100%;
+        padding: 0.8rem 1rem;
+    }
+
+    .lis-card-apply-btn {
+        min-height: 44px;
+        padding: 0.8rem 1rem;
     }
 }

@@ -367,3 +367,112 @@
         transform: rotate(360deg);
     }
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TABLET: 768px – 1023px
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 1023px) {
+    .selection-grid {
+        gap: 1.25rem;
+    }
+
+    .selection-card {
+        padding: 2rem 1.5rem;
+    }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MOBILE: max 767px
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 767px) {
+    .upload-container {
+        padding: 0;
+    }
+
+    /* Side-by-side form row → stack vertically */
+    .form-row {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .form-group.half {
+        flex: unset;
+        width: 100%;
+    }
+
+    /* BIO/SONIC selection cards → single column */
+    .selection-grid {
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 1.25rem;
+    }
+
+    .selection-card {
+        padding: 1.5rem 1.25rem;
+        flex: unset;
+        width: 100%;
+    }
+
+    .selection-card h3 {
+        font-size: 1.4rem;
+    }
+
+    /* Record/Upload buttons → stack */
+    .media-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .media-btn {
+        min-height: 50px;
+        padding: 0.9rem 1rem;
+    }
+
+    /* Metadata bar wraps on small screens */
+    .metadata-bar {
+        flex-direction: column;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    /* Summary pills wrap */
+    .summary-pills {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: flex-start;
+    }
+
+    /* Form label font size */
+    .form-group label {
+        font-size: 1rem;
+    }
+
+    /* Action area: submit button full width */
+    .form-actions {
+        justify-content: stretch;
+    }
+
+    .form-actions .primary-btn {
+        width: 100%;
+        min-height: 48px;
+    }
+
+    /* Media preview containers: stack controls */
+    .media-preview-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .audio-preview-player {
+        width: 100%;
+    }
+
+    .video-preview-player {
+        max-width: 100%;
+    }
+
+    .live-camera-preview {
+        max-width: 100%;
+    }
+}

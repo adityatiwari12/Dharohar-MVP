@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../../components/Layout/DashboardLayout';
 import { StatusBadge } from '../../components/StatusBadge';
+import { RoleMediaPlayer } from '../../components/RoleMediaPlayer';
 import { getMyLicenses, resubmitLicense } from '../../services/licenseService';
 import type { License, ResubmitPayload } from '../../services/licenseService';
 
@@ -104,15 +105,35 @@ export const MyLicenses = () => {
                                 {/* Media access */}
                                 <div style={{ marginTop: '1rem' }}>
                                     {license.status === 'APPROVED' && (asset as any)?.mediaUrl ? (
-                                        <div style={{ padding: '0.75rem', background: 'rgba(34,197,94,0.05)', border: '1px solid #22c55e', borderRadius: '4px' }}>
-                                            <p style={{ fontSize: '0.8rem', fontWeight: 600, color: '#14532d', marginBottom: '0.5rem' }}>
-                                                🔓 Full Media Access Granted
-                                            </p>
-                                            {(asset as any).mediaUrl.match(/\.(mp4|webm|ogv)$/i) ? (
-                                                <video controls style={{ width: '100%', maxHeight: '200px', borderRadius: '2px' }} src={(asset as any).mediaUrl} />
-                                            ) : (
-                                                <audio controls style={{ width: '100%' }} src={(asset as any).mediaUrl} />
-                                            )}
+                                        <div style={{ padding: '1rem', background: 'rgba(34,197,94,0.05)', border: '1px solid #22c55e', borderRadius: '4px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                                <p style={{ fontSize: '0.82rem', fontWeight: 700, color: '#14532d', margin: 0 }}>
+                                                    🔓 Full Media Access Granted
+                                                </p>
+                                                <a
+                                                    href={(asset as any).mediaUrl}
+                                                    download
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{
+                                                        fontSize: '0.78rem',
+                                                        padding: '4px 14px',
+                                                        background: '#14532d',
+                                                        color: '#fff',
+                                                        borderRadius: '4px',
+                                                        textDecoration: 'none',
+                                                        fontWeight: 700,
+                                                        letterSpacing: '0.03em',
+                                                    }}
+                                                >
+                                                    ⬇ Download Full File
+                                                </a>
+                                            </div>
+                                            <RoleMediaPlayer
+                                                src={(asset as any).mediaUrl}
+                                                mode="full"
+                                                label={(asset as any).type === 'SONIC' ? '🎵 Licensed Sonic Asset' : '🎙 Licensed Voice Recording'}
+                                            />
                                         </div>
                                     ) : license.status !== 'APPROVED' ? (
                                         <div style={{ padding: '0.75rem 1rem', background: 'rgba(0,0,0,0.03)', border: '1px dashed var(--color-muted-gold)', borderRadius: '4px', textAlign: 'center' }}>

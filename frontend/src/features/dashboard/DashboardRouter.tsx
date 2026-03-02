@@ -106,7 +106,7 @@ const Overview = () => {
                             {[
                                 '4 license types: Research, Commercial, Media & Music',
                                 'Fees range from ₹10,000 to ₹50,00,000',
-                                'Communities receive 10%–50% of all fees',
+                                'Communities receive 80% of all license fees and royalties',
                                 'Approval takes 2–5 business days',
                             ].map(item => (
                                 <li key={item} style={{ fontSize: '0.85rem', color: 'var(--color-text-main)', display: 'flex', gap: '0.5rem' }}>

@@ -3,6 +3,7 @@ import { DashboardLayout } from '../../components/Layout/DashboardLayout';
 import { StatusBadge } from '../../components/StatusBadge';
 import { getMyAssets } from '../../services/assetService';
 import type { Asset } from '../../services/assetService';
+import { RoleMediaPlayer } from '../../components/RoleMediaPlayer';
 import { FiX, FiInfo, FiFileText, FiClock } from 'react-icons/fi';
 
 export const MySubmissions = () => {
@@ -183,12 +184,12 @@ export const MySubmissions = () => {
                             {selectedAsset.mediaUrl && (
                                 <div style={{ marginBottom: '2rem' }}>
                                     <h5 style={{ margin: '0 0 0.5rem', borderBottom: '1px solid var(--color-muted-gold)', paddingBottom: '0.25rem' }}>Media Asset</h5>
-                                    <div style={{ padding: '1rem', background: 'rgba(0,0,0,0.03)', border: '1px solid var(--color-muted-gold)' }}>
-                                        {selectedAsset.mediaUrl.match(/\.(mp4|webm|ogv)$/i) ? (
-                                            <video controls style={{ width: '100%', maxHeight: '300px', background: '#000' }} src={selectedAsset.mediaUrl} />
-                                        ) : (
-                                            <audio controls style={{ width: '100%' }} src={selectedAsset.mediaUrl} />
-                                        )}
+                                    <div style={{ padding: '0.75rem', background: 'rgba(0,0,0,0.02)', border: '1px solid var(--color-muted-gold)' }}>
+                                        <RoleMediaPlayer
+                                            src={selectedAsset.mediaUrl}
+                                            mode="full"
+                                            label={selectedAsset.type === 'SONIC' ? '🎵 Your Sonic Archive' : '🎙 Your Voice Recording'}
+                                        />
                                     </div>
                                 </div>
                             )}

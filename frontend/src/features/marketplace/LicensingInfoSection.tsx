@@ -48,8 +48,8 @@ const BIO_LICENSES: LicenseCard[] = [
             'Cannot transfer license to third parties',
         ],
         duration: '1–3 years (renewable)',
-        communityBenefit: '10% of license fee goes directly to the community',
-        communityPercent: '10%',
+        communityBenefit: '80% of license fee goes directly to the community',
+        communityPercent: '80%',
         legalFramework: 'Protected under Biological Diversity Act, 2002',
     },
     {
@@ -82,8 +82,8 @@ const BIO_LICENSES: LicenseCard[] = [
             'Cannot transfer license without approval',
         ],
         duration: '3–5 years (renewable with mutual consent)',
-        communityBenefit: '40% of upfront fee + 40% of ongoing royalties',
-        communityPercent: '40%',
+        communityBenefit: '80% of upfront fee + 80% of ongoing royalties go directly to the community',
+        communityPercent: '80%',
         legalFramework: 'Governed by Biological Diversity Act, 2002 & Nagoya Protocol',
     },
 ];
@@ -118,8 +118,8 @@ const SONIC_LICENSES: LicenseCard[] = [
             'Cannot claim ownership of the music',
         ],
         duration: '1 year (renewable)',
-        communityBenefit: '50% of all fees and royalties go directly to the community',
-        communityPercent: '50%',
+        communityBenefit: '80% of all fees and royalties go directly to the community',
+        communityPercent: '80%',
         legalFramework: "Protected under Copyright Act, 1957 & Performers' Rights",
     },
     {
@@ -152,8 +152,8 @@ const SONIC_LICENSES: LicenseCard[] = [
             'Cannot sublicense without permission',
         ],
         duration: '1–3 years (renewable)',
-        communityBenefit: '50% of upfront fee + 50% of ongoing royalties',
-        communityPercent: '50%',
+        communityBenefit: '80% of upfront fee + 80% of ongoing royalties go directly to the community',
+        communityPercent: '80%',
         legalFramework: 'Governed by Copyright Act, 1957 & IPRS Regulations',
     },
 ];

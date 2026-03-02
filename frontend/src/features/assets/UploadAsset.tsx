@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiMic, FiVideo, FiUpload, FiArrowLeft, FiMapPin, FiClock, FiCheckCircle, FiX } from 'react-icons/fi';
 import { submitAsset } from '../../services/assetService';
+import apiClient from '../../services/apiClient';
 import { Loader } from '../../components/Loader/Loader';
 import { HeritageAudioPlayer } from './HeritageAudioPlayer';
 import './UploadAsset.css';
@@ -167,20 +168,37 @@ export const UploadAsset = () => {
         setLoading(true);
         setSubmitError('');
         try {
+            // ── Step 1: upload media blob to GridFS (if any) ──────────────
+            let mediaFileId: string | undefined;
+            if (mediaBlob) {
+                const fd = new FormData();
+                const ext = recordingType === 'VIDEO'
+                    ? 'webm'
+                    : (mediaBlob.type.includes('video') ? 'webm' : 'webm');
+                const mimeType = mediaBlob.type || (recordingType === 'VIDEO' ? 'video/webm' : 'audio/webm');
+                fd.append('file', new File([mediaBlob], `recording.${ext}`, { type: mimeType }));
+                const uploadRes = await apiClient.post('/files/upload', fd, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                mediaFileId = uploadRes.data.fileId;
+            }
+
+            // ── Step 2: submit asset with optional mediaFileId ─────────────
             await submitAsset({
                 type: type!,
                 title: formData.title,
                 description: formData.description,
-                recordeeName: formData.tribalMember,   // form field → model field
-                communityName: formData.community,      // form field → model field
+                recordeeName: formData.tribalMember,
+                communityName: formData.community,
                 riskTier: formData.riskTier,
+                ...(mediaFileId ? { mediaFileId } : {}),
                 metadata: {
                     category: formData.category,
                     performanceContext: formData.performanceContext,
                     location: formData.location,
                     timestamp: formData.timestamp,
                 }
-            });
+            } as any);
             setSuccess(true);
         } catch (err: any) {
             setSubmitError(err.response?.data?.message || 'Submission failed. Please check your connection and try again.');

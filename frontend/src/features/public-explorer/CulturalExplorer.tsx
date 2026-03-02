@@ -6,6 +6,7 @@ import { CommunityDossier } from './CommunityDossier';
 import { mockCommunities } from '../../data/mockData';
 import { getPublicAssets } from '../../services/assetService';
 import type { Asset } from '../../services/assetService';
+import { RoleMediaPlayer } from '../../components/RoleMediaPlayer';
 import heroImage from '../../assets/beautiful.png';
 import ceremonialSymbol from '../../assets/image copy 2.png';
 import './CulturalExplorer.css';
@@ -195,6 +196,23 @@ export const CulturalExplorer = () => {
                                     </div>
                                     <h5 className="card-subtitle">{asset.communityName}</h5>
                                     <p className="card-desc">{asset.description}</p>
+
+                                    {/* 30-second public preview for BIO voice recordings */}
+                                    {asset.mediaUrl ? (
+                                        <div style={{ margin: '1rem 0' }}>
+                                            <RoleMediaPlayer
+                                                src={asset.mediaUrl}
+                                                mode="preview"
+                                                previewSeconds={30}
+                                                label="🎙 Voice Recording Preview"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div style={{ margin: '1rem 0', padding: '0.75rem', background: 'var(--color-bg-light)', border: '1px dashed var(--color-muted-gold)', borderRadius: '2px', textAlign: 'center', fontSize: '0.82rem', color: 'var(--color-text-light)' }}>
+                                            📄 Text-based knowledge record
+                                        </div>
+                                    )}
+
                                     <button className="minimal-btn" onClick={() => navigate('/marketplace')} style={{ width: '100%' }}>
                                         Apply for License
                                     </button>
@@ -225,9 +243,23 @@ export const CulturalExplorer = () => {
                                     </div>
                                     <h5 className="card-subtitle">{asset.communityName}</h5>
                                     <p className="card-desc">{asset.description}</p>
-                                    <div style={{ margin: '1.5rem 0', padding: '1rem', backgroundColor: 'var(--color-bg-light)', border: '1px solid var(--color-muted-gold)', textAlign: 'center' }}>
-                                        <span style={{ fontSize: '0.9rem', color: 'var(--color-burnt-umber)', fontWeight: '600' }}>▶ Preview available after licensing</span>
-                                    </div>
+
+                                    {/* 30-second public preview for all SONIC assets */}
+                                    {asset.mediaUrl ? (
+                                        <div style={{ margin: '1rem 0' }}>
+                                            <RoleMediaPlayer
+                                                src={asset.mediaUrl}
+                                                mode="preview"
+                                                previewSeconds={30}
+                                                label="🎵 Sonic Preview (30s)"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div style={{ margin: '1rem 0', padding: '0.75rem', background: 'var(--color-bg-light)', border: '1px dashed var(--color-muted-gold)', borderRadius: '2px', textAlign: 'center', fontSize: '0.82rem', color: 'var(--color-text-light)' }}>
+                                            🎶 Preview available after licensing
+                                        </div>
+                                    )}
+
                                     <button className="minimal-btn" onClick={() => navigate('/marketplace')} style={{ width: '100%' }}>
                                         Apply for Media License
                                     </button>

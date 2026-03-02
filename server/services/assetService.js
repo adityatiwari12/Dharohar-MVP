@@ -3,6 +3,18 @@ const AuditLog = require('../models/AuditLog');
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 
+// Helper: attach computed mediaUrl to an asset plain object
+const withMediaUrl = (asset) => {
+    const obj = asset.toObject ? asset.toObject() : asset;
+    if (obj.mediaFileId) {
+        obj.mediaUrl = `/api/files/${obj.mediaFileId}`;
+    }
+    return obj;
+};
+
+// Helper for arrays
+const withMediaUrls = (assets) => assets.map(withMediaUrl);
+
 const createAsset = async (assetData, userId, communityName) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -40,19 +52,22 @@ const createAsset = async (assetData, userId, communityName) => {
 };
 
 const getMyAssets = async (userId) => {
-    return await Asset.find({ createdBy: userId }).sort({ createdAt: -1 });
+    const assets = await Asset.find({ createdBy: userId }).sort({ createdAt: -1 });
+    return withMediaUrls(assets);
 };
 
 const getPendingAssets = async () => {
-    return await Asset.find({ approvalStatus: 'PENDING' })
+    const assets = await Asset.find({ approvalStatus: 'PENDING' })
         .populate('createdBy', 'name email communityName')
         .sort({ createdAt: -1 });
+    return withMediaUrls(assets);
 };
 
 const getPublicAssets = async () => {
-    return await Asset.find({ approvalStatus: 'APPROVED' })
+    const assets = await Asset.find({ approvalStatus: 'APPROVED' })
         .select('-transcript -metadata')
         .sort({ createdAt: -1 });
+    return withMediaUrls(assets);
 };
 
 const approveAsset = async (assetId, reviewerId) => {
@@ -132,9 +147,10 @@ const rejectAsset = async (assetId, reviewComment, reviewerId) => {
 };
 
 const getReviewedAssets = async () => {
-    return await Asset.find({ approvalStatus: { $in: ['APPROVED', 'REJECTED'] } })
+    const assets = await Asset.find({ approvalStatus: { $in: ['APPROVED', 'REJECTED'] } })
         .populate('createdBy', 'name email communityName')
         .sort({ updatedAt: -1 });
+    return withMediaUrls(assets);
 };
 
 module.exports = {

@@ -3,6 +3,7 @@ import { FiMic } from 'react-icons/fi';
 import { StatusBadge } from '../../components/StatusBadge';
 import { getPendingAssets, approveAsset, rejectAsset } from '../../services/assetService';
 import type { Asset } from '../../services/assetService';
+import { RoleMediaPlayer } from '../../components/RoleMediaPlayer';
 import { Loader } from '../../components/Loader/Loader';
 import notificationSound from '../../assets/Notification_Sound.wav';
 import './ReviewDashboard.css';
@@ -126,17 +127,14 @@ export const ReviewDashboard = () => {
                             <div className="archive-dossier" style={{ marginTop: '1.5rem', background: 'rgba(0,0,0,0.02)', padding: '1rem', border: '1px solid var(--color-muted-gold)' }}>
                                 <p className="asset-description" style={{ fontStyle: 'italic', marginBottom: '1rem' }}>"{asset.description}"</p>
 
-                                {/* Real media player for reviewer */}
+                                {/* Full media player for reviewer — no restrictions */}
                                 {asset.mediaUrl ? (
                                     <div style={{ marginTop: '0.75rem' }}>
-                                        <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.5rem' }}>
-                                            {asset.type === 'SONIC' ? '🎵 Sonic Archive — Listen before reviewing:' : '🎙 Voice Archive — Listen before reviewing:'}
-                                        </p>
-                                        {asset.mediaUrl.match(/\.(mp4|webm|ogv)$/i) ? (
-                                            <video controls style={{ width: '100%', borderRadius: '2px', maxHeight: '200px', background: '#000' }} src={asset.mediaUrl} />
-                                        ) : (
-                                            <audio controls style={{ width: '100%' }} src={asset.mediaUrl} />
-                                        )}
+                                        <RoleMediaPlayer
+                                            src={asset.mediaUrl}
+                                            mode="full"
+                                            label={asset.type === 'SONIC' ? '🎵 Sonic Archive — Listen before reviewing:' : '🎙 Voice Archive — Listen before reviewing:'}
+                                        />
                                     </div>
                                 ) : (
                                     <div className="media-verification" style={{ display: 'flex', gap: '1rem' }}>

@@ -92,3 +92,164 @@ button {
   color: var(--color-terracotta);
   font-size: 1.5rem;
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   GLOBAL RESPONSIVE UTILITIES
+   Breakpoints:
+     Mobile:  max-width: 767px
+     Tablet:  768px – 1023px
+     Desktop: 1024px+
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ── Global button touch targets ── */
+.primary-btn,
+.minimal-btn {
+  min-height: 44px;
+  font-size: 0.9rem;
+  padding: 0.75rem 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: var(--border-radius, 2px);
+  white-space: nowrap;
+}
+
+/* ── Ensure all forms are readable ── */
+input,
+select,
+textarea {
+  font-size: 1rem !important;
+  /* prevents iOS zoom on focus */
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TABLET: 768px – 1023px
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 1023px) {
+  .framed-section {
+    padding: 1.5rem;
+  }
+
+  /* Grid layouts collapse to 2 cols */
+  .grid-layout {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.5rem !important;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MOBILE: max 767px
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 767px) {
+  html {
+    font-size: 16px;
+    /* Enforce minimum readable font size */
+  }
+
+  body {
+    background-attachment: scroll;
+    /* Fixed bg degrades on mobile */
+  }
+
+  /* ── Framed section ── */
+  .framed-section {
+    padding: 1.25rem 1rem;
+  }
+
+  /* ── Grid layouts → single column ── */
+  .grid-layout {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  /* ── Audio/Video players ── */
+  audio,
+  video {
+    width: 100% !important;
+  }
+
+  /* ── Cards and list rows ── */
+  .audio-row,
+  .review-card,
+  .request-card {
+    flex-direction: column !important;
+    gap: 1rem !important;
+    padding: 1.25rem !important;
+  }
+
+  /* ── Action button rows → stacked ── */
+  .review-actions,
+  .request-actions {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+
+  .review-actions button,
+  .request-actions button {
+    width: 100% !important;
+    min-height: 44px;
+  }
+
+  /* ── Headings scale down on mobile ── */
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+
+  h4 {
+    font-size: 1.1rem;
+  }
+
+  /* ── Button row in forms ── */
+  .btn-row {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    padding: 0.5rem !important;
+    align-items: flex-end !important;
+  }
+
+  .modal-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 12px 12px 0 0 !important;
+    max-height: 92vh !important;
+    padding: 1.25rem !important;
+  }
+
+  /* ── License application doc ── */
+  .doc-modal-overlay {
+    padding: 0 !important;
+    align-items: flex-end !important;
+  }
+
+  .doc-modal-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+  }
+
+  /* ── Upload form ── */
+  .upload-type-selector {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+
+  /* ── Hide decorative pseudo elements on tiny screens ── */
+  .framed-section::before,
+  .framed-section::after {
+    display: none;
+  }
+}

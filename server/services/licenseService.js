@@ -47,23 +47,45 @@ const applyForLicense = async (licenseData, userId) => {
 };
 
 const getMyLicenses = async (userId) => {
-    return await License.find({ applicantId: userId })
-        .populate('assetId', 'title communityName')
+    const licenses = await License.find({ applicantId: userId })
+        .populate('assetId', 'title communityName type mediaFileId mediaUrl riskTier')
         .sort({ createdAt: -1 });
+    // Synthesize mediaUrl on nested asset
+    return licenses.map(l => {
+        const obj = l.toObject();
+        if (obj.assetId && obj.assetId.mediaFileId) {
+            obj.assetId.mediaUrl = `/api/files/${obj.assetId.mediaFileId}`;
+        }
+        return obj;
+    });
 };
 
 const getPendingLicenses = async () => {
-    return await License.find({ status: 'PENDING' })
-        .populate('assetId', 'title communityName')
+    const licenses = await License.find({ status: 'PENDING' })
+        .populate('assetId', 'title communityName type mediaFileId mediaUrl riskTier')
         .populate('applicantId', 'name email')
         .sort({ updatedAt: -1 });
+    return licenses.map(l => {
+        const obj = l.toObject();
+        if (obj.assetId && obj.assetId.mediaFileId) {
+            obj.assetId.mediaUrl = `/api/files/${obj.assetId.mediaFileId}`;
+        }
+        return obj;
+    });
 };
 
 const getAllLicenses = async () => {
-    return await License.find()
-        .populate('assetId', 'title communityName')
+    const licenses = await License.find()
+        .populate('assetId', 'title communityName type mediaFileId mediaUrl riskTier')
         .populate('applicantId', 'name email')
         .sort({ updatedAt: -1 });
+    return licenses.map(l => {
+        const obj = l.toObject();
+        if (obj.assetId && obj.assetId.mediaFileId) {
+            obj.assetId.mediaUrl = `/api/files/${obj.assetId.mediaFileId}`;
+        }
+        return obj;
+    });
 };
 
 const getLicensesForAsset = async (assetId) => {
