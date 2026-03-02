@@ -1,5 +1,14 @@
 # DHAROHAR - Comprehensive Project Documentation (MVP)
 
+---
+
+### 📖 Platform Guides
+*   **[Quick Start Setup](./QUICKSTART.md)** — Step-by-step local installation.
+*   **[System Architecture](./ARCHITECTURE.md)** — Tech stack, data flow, and RBAC design.
+*   **[File Structure](./FILE_STRUCTURE.md)** — Annotated directory tree and module map.
+
+---
+
 ## 1. Project Overview
 DHAROHAR is an institutional governance platform designed to manage, protect, and license indigenous cultural knowledge and media. The platform focuses on high-fidelity archival practices, structured licensing frameworks, and educational exploration, bridging the gap between traditional communities, researchers, and commercial entities while ensuring ethical attribution and compensation.
 

@@ -24,7 +24,13 @@ This update transitions the DHAROHAR backend from a basic mock-ready state to a 
 ## 5. File Storage API
 *   **Storage Routes**: New `/storage` endpoints for secure file uploads via Multer and authenticated streaming of archived media.
 
-## 6. Verification Summary
+## 6. Tribal Imagery Integration
+*   **Authentic Visuals**: Replaced generic placeholders with high-quality images for the **Warli Tribe** and **Gond Community**.
+*   **Vite Optimization**: Switched to structured TypeScript imports in `mockData.ts` to ensure consistent asset resolution and bundling.
+
+![Featured Communities with Tribal Imagery](file:///C:/Users/ASUS/.gemini/antigravity/brain/c99c7110-5574-44f8-8c20-e94228a5b010/featured_communities_verification_1772438156737.png)
+
+## 7. Verification Summary
 *   **Server Stability**: Confirmed successful startup with GridFS bucket initialization.
 *   **Logging Verification**: Verified that Winston correctly captures startup events and API requests.
 *   **Schema Integrity**: Validated syntax and logic across all refactored models.
@@ -73,13 +79,13 @@ DHAROHAR is an institutional governance platform designed to manage and license 
 *   **3D Rendering**: Three.js, `@react-three/fiber`, `@react-three/drei`
 *   **Styling**: Vanilla CSS with strict variable-based design system (Earth Tones, Serif Headers).
 *   **Icons**: `react-icons`
-*   **State Management**: React Context ([AuthContext](file:///c:/Users/ASUS/Desktop/Dharohar/frontend/src/features/auth/AuthContext.tsx#10-16))
+*   **State Management**: React Context ([AuthContext](../frontend/src/features/auth/AuthContext.tsx#10-16))
 
 ## 3. Architecture & Routing Systems
-The application adheres to a feature-based folder structure (`src/features/...`). Route protection is handled via the [ProtectedRoute](file:///c:/Users/ASUS/Desktop/Dharohar/frontend/src/routes/ProtectedRoute.tsx#9-29) component and [AuthContext](file:///c:/Users/ASUS/Desktop/Dharohar/frontend/src/features/auth/AuthContext.tsx#10-16).
+The application adheres to a feature-based folder structure (`src/features/...`). Route protection is handled via the [ProtectedRoute](../frontend/src/routes/ProtectedRoute.tsx#9-29) component and [AuthContext](../frontend/src/features/auth/AuthContext.tsx#10-16).
 
 ### 3.1 Public & Gateway Routes
-*   `/` (Root public route): Automatically renders the [CulturalExplorer](file:///c:/Users/ASUS/Desktop/Dharohar/frontend/src/features/public-explorer/CulturalExplorer.tsx#22-176) component.
+*   `/` (Root public route): Automatically renders the [CulturalExplorer](../frontend/src/features/public-explorer/CulturalExplorer.tsx#22-176) component.
 *   `/login`: A gateway for governance users to sign in. Includes dev-mock logins for different roles (`community`, `review`, `admin`, `general`).
 *   `/register`: Currently a placeholder route for future institution onboarding.
 *   `/cultural-explorer`: The split-screen homepage.
@@ -96,18 +102,18 @@ Protected routes sit behind `/dashboard` and render dynamically based on the cur
 
 ## 4. Completed Interfaces & Features
 
-### 4.1 Cultural Explorer & Login Gateway ([CulturalExplorer.tsx](file:///c:/Users/ASUS/Desktop/Dharohar/frontend/src/features/public-explorer/CulturalExplorer.tsx))
+### 4.1 Cultural Explorer & Login Gateway ([CulturalExplorer.tsx](../frontend/src/features/public-explorer/CulturalExplorer.tsx))
 A split-screen introduction to the platform.
-*   **Left Pane (Immersive)**: Features an interactive 3D tree ([TreeExplorer.tsx](file:///c:/Users/ASUS/Desktop/Dharohar/frontend/src/features/public-explorer/TreeExplorer.tsx)) using Three.js. Includes slow ambient rotation, 8 interacting hovering nodes that display community names, and seamless click routing to the community dossier. Features the rotating `image copy 2.png` ceremonial symbol.
+*   **Left Pane (Immersive)**: Features an interactive 3D tree ([TreeExplorer.tsx](../frontend/src/features/public-explorer/TreeExplorer.tsx)) using Three.js. Includes slow ambient rotation, 8 interacting hovering nodes that display community names, and seamless click routing to the community dossier. Features the rotating `image copy 2.png` ceremonial symbol.
 *   **Right Pane (Login)**: Directly embeds the institutional role selection and login mechanism.
-*   **Data Showcase**: Displays dynamic cards for Featured Communities, BioKnowledge, and Sonic Assets pulled from the central [mockData.ts](file:///c:/Users/ASUS/Desktop/Dharohar/frontend/src/data/mockData.ts).
+*   **Data Showcase**: Displays dynamic cards for Featured Communities, BioKnowledge, and Sonic Assets pulled from the central [mockData.ts](../frontend/src/data/mockData.ts).
 
-### 4.2 Community Cultural Dossier ([CommunityDetail.tsx](file:///c:/Users/ASUS/Desktop/Dharohar/frontend/src/features/public-explorer/CommunityDetail.tsx))
+### 4.2 Community Cultural Dossier ([CommunityDetail.tsx](../frontend/src/features/public-explorer/CommunityDetail.tsx))
 A deeply structured detail view mapping to `/community/:id`.
 *   **Architecture**: Header with attribution, overview text, and distinct sections for Traditional Knowledge (Bio) and Folk Music (Sonic).
 *   **Functionality**: Clicking a knowledge card opens a full-screen React modal detailing the asset and license types.
 
-### 4.3 Asset Marketplace ([Marketplace.tsx](file:///c:/Users/ASUS/Desktop/Dharohar/frontend/src/features/marketplace/Marketplace.tsx))
+### 4.3 Asset Marketplace ([Marketplace.tsx](../frontend/src/features/marketplace/Marketplace.tsx))
 A filtering and browsing interface for licensable cultural assets.
 *   **Features**: Sidebar filtering by `Asset Type` and `Risk Tier`. Sorting by Community name.
 *   **Flow**: "Apply for License" buttons redirect unauthenticated users back to the root login gateway.
@@ -115,7 +121,7 @@ A filtering and browsing interface for licensable cultural assets.
 ### 4.4 Governance Dashboards
 *   **Review Dashboard**: Displays incoming assets (`mockPendingAssets`). Reviewers can verify cultural accuracy.
 *   **Admin Dashboard**: Displays incoming marketplace applications (`mockLicenseRequests`). Admins can approve or deny contracts.
-*   **Audio Triggers**: Both dashboards trigger [Notification_Sound.wav](file:///c:/Users/ASUS/Desktop/Dharohar/Assets/Notification_Sound.wav) strictly upon approving an asset or license request.
+*   **Audio Triggers**: Both dashboards trigger [Notification_Sound.wav](../Assets/Notification_Sound.wav) strictly upon approving an asset or license request.
 
 ---
 
@@ -123,15 +129,15 @@ A filtering and browsing interface for licensable cultural assets.
 
 Phase 1 provides the UI/UX scaffolding. The following areas represent "empty" working logic awaiting backend integration in Phase 2:
 
-### 5.1 Authentication ([AuthContext.tsx](file:///c:/Users/ASUS/Desktop/Dharohar/frontend/src/features/auth/AuthContext.tsx))
+### 5.1 Authentication ([AuthContext.tsx](../frontend/src/features/auth/AuthContext.tsx))
 *   **Current State**: Handled entirely via mock data. Tokens are hardcoded (`mock-token-123`) and roles are injected via the frontend UI toggle.
 *   **Pending**: Real JWT validation against the NodeJS backend.
 
-### 5.2 Database & API Client ([apiClient.ts](file:///c:/Users/ASUS/Desktop/Dharohar/frontend/src/services/apiClient.ts))
-*   **Current State**: Present and configured with interceptors, but currently unused. All data driving the Explorer, Marketplace, and Dashboards is static inside [src/data/mockData.ts](file:///c:/Users/ASUS/Desktop/Dharohar/frontend/src/data/mockData.ts).
+### 5.2 Database & API Client ([apiClient.ts](../frontend/src/services/apiClient.ts))
+*   **Current State**: Present and configured with interceptors, but currently unused. All data driving the Explorer, Marketplace, and Dashboards is static inside [src/data/mockData.ts](../frontend/src/data/mockData.ts).
 *   **Pending**: Replacing `mockCommunities`, `mockPendingAssets`, and `mockLicenseRequests` with strict Axios `GET` requests to the upcoming MongoDB schemas.
 
-### 5.3 File Uploads ([UploadAsset.tsx](file:///c:/Users/ASUS/Desktop/Dharohar/frontend/src/features/assets/UploadAsset.tsx))
+### 5.3 File Uploads ([UploadAsset.tsx](../frontend/src/features/assets/UploadAsset.tsx))
 *   **Current State**: The UI allows selecting files and entering metadata, but submission only triggers an alert.
 *   **Pending**: Actual `multipart/form-data` asset transmission to cloud storage (e.g., AWS S3).
 

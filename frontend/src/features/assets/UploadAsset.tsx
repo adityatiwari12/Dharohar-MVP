@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FiMic, FiVideo, FiUpload, FiArrowLeft, FiMapPin, FiClock, FiCheckCircle, FiX } from 'react-icons/fi';
 import { submitAsset } from '../../services/assetService';
 import { Loader } from '../../components/Loader/Loader';
+import { HeritageAudioPlayer } from './HeritageAudioPlayer';
 import './UploadAsset.css';
 
 type SubmissionType = 'BIO' | 'SONIC' | null;
@@ -321,8 +322,8 @@ export const UploadAsset = () => {
                                     </label>
                                 </div>
                             ) : (
-                                <div className="media-preview-container">
-                                    <audio src={mediaUrl!} controls className="audio-preview-player" />
+                                <div className="media-preview-container-custom">
+                                    <HeritageAudioPlayer src={mediaUrl!} title="Voice Archive Preview" />
                                     <button type="button" className="remove-media-btn" onClick={resetMedia} title="Remove Media">
                                         <FiX />
                                     </button>
@@ -384,11 +385,11 @@ export const UploadAsset = () => {
                                     </label>
                                 </div>
                             ) : (
-                                <div className="media-preview-container">
+                                <div className="media-preview-container-custom">
                                     {mediaBlob?.type.startsWith('video') ? (
                                         <video src={mediaUrl!} controls className="video-preview-player" />
                                     ) : (
-                                        <audio src={mediaUrl!} controls className="audio-preview-player" />
+                                        <HeritageAudioPlayer src={mediaUrl!} title="Sonic Archive Preview" />
                                     )}
                                     <button type="button" className="remove-media-btn" onClick={resetMedia} title="Remove Media">
                                         <FiX />

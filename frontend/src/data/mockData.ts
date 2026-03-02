@@ -1,3 +1,7 @@
+import wariImg from '../assets/wari_tribe.jpg';
+import gondImg from '../assets/gond_community.jpg';
+import defaultImg from '../assets/image.png';
+
 export interface BioKnowledge {
     id: string;
     title: string;
@@ -62,7 +66,7 @@ export const mockCommunities: Community[] = [
         region: 'Maharashtra',
         culturalIdentity: 'Traditional mural art and harmony with nature.',
         description: 'The Warli community is known for their distinctive art style that uses geometric shapes to depict daily life, nature, and rituals. They have a deep-rooted belief in the sacredness of nature.',
-        image: '/assets/image.png',
+        image: wariImg,
         bioKnowledge: [
             {
                 id: 'bk-w1',
@@ -88,7 +92,7 @@ export const mockCommunities: Community[] = [
             {
                 id: 'v-w1',
                 title: 'Annual Tarpa Dance',
-                thumbnail: '/assets/image copy.png',
+                thumbnail: defaultImg,
                 description: 'Archived under structured community consent.'
             }
         ]
@@ -99,7 +103,7 @@ export const mockCommunities: Community[] = [
         region: 'Madhya Pradesh',
         culturalIdentity: 'Intricate pointillist storytelling art.',
         description: 'The Gond people have a rich tradition of painting that illustrates their deep connection with nature, myths, and legends. Their knowledge extends to forest ecology and sustainable practices.',
-        image: '/assets/image.png',
+        image: gondImg,
         bioKnowledge: [
             {
                 id: 'bk-g1',
