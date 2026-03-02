@@ -310,7 +310,11 @@ export const CulturalExplorer = () => {
                                 <button
                                     className="minimal-btn"
                                     style={{ width: '100%' }}
-                                    onClick={(e) => { e.stopPropagation(); navigate(`/community/${community.id}`); }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        navigate(`/community/${community.id}`);
+                                    }}
                                 >
                                     View Full Dossier
                                 </button>
