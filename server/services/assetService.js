@@ -7,7 +7,7 @@ const logger = require('../utils/logger');
 const withMediaUrl = (asset) => {
     const obj = asset.toObject ? asset.toObject() : asset;
     if (obj.mediaFileId) {
-        obj.mediaUrl = `/api/files/${obj.mediaFileId}`;
+        obj.mediaUrl = `/storage/${obj.mediaFileId}`;
     }
     return obj;
 };

@@ -177,7 +177,7 @@ export const UploadAsset = () => {
                     : (mediaBlob.type.includes('video') ? 'webm' : 'webm');
                 const mimeType = mediaBlob.type || (recordingType === 'VIDEO' ? 'video/webm' : 'audio/webm');
                 fd.append('file', new File([mediaBlob], `recording.${ext}`, { type: mimeType }));
-                const uploadRes = await apiClient.post('/assets/files/upload', fd, {
+                const uploadRes = await apiClient.post('/storage/upload', fd, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 mediaFileId = uploadRes.data.fileId;

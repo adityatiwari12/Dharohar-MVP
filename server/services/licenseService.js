@@ -54,7 +54,7 @@ const getMyLicenses = async (userId) => {
     return licenses.map(l => {
         const obj = l.toObject();
         if (obj.assetId && obj.assetId.mediaFileId) {
-            obj.assetId.mediaUrl = `/api/files/${obj.assetId.mediaFileId}`;
+            obj.assetId.mediaUrl = `/storage/${obj.assetId.mediaFileId}`;
         }
         return obj;
     });
