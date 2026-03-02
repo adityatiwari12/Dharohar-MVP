@@ -30,80 +30,9 @@ function getTranscodeTarget(mimetype, originalname) {
 }
 
 /**
- * Transcode a GridFS stream to a standard format and re-save to GridFS.
- * Returns the new GridFS document id.
+ * Upload an asset directly from the local tmp storage to GridFS.
+ * Will transcode audio/video on the fly.
  */
-async function transcodeAndReplace(gfs, originalFile) {
-    const target = getTranscodeTarget(originalFile.contentType, originalFile.filename);
-    if (!target) {
-        logger.info(`Skipping transcode for ${originalFile.filename} — unknown type`);
-        return originalFile._id;
-    }
-
-    const tmpIn = path.join(os.tmpdir(), `dh-in-${originalFile._id}`);
-    const outExt = target === 'video' ? '.mp4' : '.mp3';
-    const tmpOut = path.join(os.tmpdir(), `dh-out-${originalFile._id}${outExt}`);
-    const outMime = target === 'video' ? 'video/mp4' : 'audio/mpeg';
-    const outFilename = path.parse(originalFile.filename).name + outExt;
-
-    // 1. Download original from GridFS to a temp file
-    await new Promise((resolve, reject) => {
-        const readStream = gfs.openDownloadStream(originalFile._id);
-        const writeStream = fs.createWriteStream(tmpIn);
-        readStream.pipe(writeStream);
-        writeStream.on('finish', resolve);
-        readStream.on('error', reject);
-        writeStream.on('error', reject);
-    });
-
-    // 2. Transcode with ffmpeg
-    await new Promise((resolve, reject) => {
-        const cmd = ffmpeg(tmpIn).on('error', reject).on('end', resolve);
-
-        if (target === 'video') {
-            cmd
-                .videoCodec('libx264')
-                .audioCodec('aac')
-                .outputOptions(['-crf 28', '-preset fast', '-movflags +faststart'])
-                .format('mp4');
-        } else {
-            cmd
-                .audioCodec('libmp3lame')
-                .audioBitrate('128k')
-                .format('mp3');
-        }
-
-        cmd.save(tmpOut);
-    });
-
-    // 3. Upload transcoded file back to GridFS
-    const newId = new mongoose.Types.ObjectId();
-    await new Promise((resolve, reject) => {
-        const uploadStream = gfs.openUploadStreamWithId(newId, outFilename, {
-            contentType: outMime
-        });
-        const readStream = fs.createReadStream(tmpOut);
-        readStream.pipe(uploadStream);
-        uploadStream.on('finish', resolve);
-        uploadStream.on('error', reject);
-        readStream.on('error', reject);
-    });
-
-    // 4. Delete original from GridFS
-    try { await gfs.delete(originalFile._id); } catch (e) {
-        logger.warn(`Could not delete original GridFS file ${originalFile._id}: ${e.message}`);
-    }
-
-    // 5. Cleanup temp files
-    [tmpIn, tmpOut].forEach(f => fs.unlink(f, () => { }));
-
-    logger.info(`Transcoded ${originalFile.filename} → ${outFilename}`);
-    return newId;
-}
-
-// ── Route Handlers ────────────────────────────────────────────────────────────
-
-/** Upload + optional transcode */
 exports.uploadFile = async (req, res, next) => {
     if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });
@@ -111,29 +40,82 @@ exports.uploadFile = async (req, res, next) => {
 
     try {
         const gfs = getGFS();
-        const files = await gfs.find({ _id: req.file.id }).toArray();
+        const originalFile = req.file;
+        const target = getTranscodeTarget(originalFile.mimetype, originalFile.originalname);
 
-        let finalId = req.file.id;
+        let fileToUploadPath = originalFile.path;
+        let outMime = originalFile.mimetype;
+        let outFilename = originalFile.filename;
+        let requiresCleanup = [originalFile.path]; // array of local temp files to delete
 
-        if (files && files.length > 0) {
-            finalId = await transcodeAndReplace(gfs, files[0]);
+        // 1. Transcode if needed
+        if (target) {
+            const outExt = target === 'video' ? '.mp4' : '.mp3';
+            outMime = target === 'video' ? 'video/mp4' : 'audio/mpeg';
+            outFilename = path.parse(originalFile.filename).name + outExt;
+            fileToUploadPath = path.join(os.tmpdir(), `dh-out-${path.parse(originalFile.filename).name}${outExt}`);
+            requiresCleanup.push(fileToUploadPath);
+
+            logger.info(`Transcoding ${target} from ${originalFile.mimetype} to ${outMime}...`);
+
+            await new Promise((resolve, reject) => {
+                const cmd = ffmpeg(originalFile.path).on('error', reject).on('end', resolve);
+
+                if (target === 'video') {
+                    cmd
+                        .videoCodec('libx264')
+                        .audioCodec('aac')
+                        .outputOptions(['-crf 28', '-preset fast', '-movflags +faststart'])
+                        .format('mp4');
+                } else {
+                    cmd
+                        .audioCodec('libmp3lame')
+                        .audioBitrate('128k')
+                        .format('mp3');
+                }
+
+                cmd.save(fileToUploadPath);
+            });
+            logger.info('Transcoding completed successfully.');
         }
 
+        // 2. Upload the final local file directly into GridFS
+        const newId = new mongoose.Types.ObjectId();
+        await new Promise((resolve, reject) => {
+            const uploadStream = gfs.openUploadStreamWithId(newId, outFilename, {
+                contentType: outMime
+            });
+            const readStream = fs.createReadStream(fileToUploadPath);
+            readStream.pipe(uploadStream);
+            uploadStream.on('finish', resolve);
+            uploadStream.on('error', reject);
+            readStream.on('error', reject);
+        });
+
+        // 3. Cleanup local temp files
+        requiresCleanup.forEach(f => {
+            if (fs.existsSync(f)) fs.unlink(f, () => { });
+        });
+
+        // 4. Respond
         res.status(201).json({
             message: 'File uploaded and processed successfully',
-            fileId: finalId,
-            filename: req.file.filename,
-            contentType: req.file.contentType
+            fileId: newId,
+            filename: outFilename,
+            contentType: outMime
         });
+
     } catch (error) {
-        logger.error(`Transcode error: ${error.message}`);
-        // Fallback — return original file without transcoding
-        res.status(201).json({
-            message: 'File uploaded (transcoding failed, raw file stored)',
-            fileId: req.file.id,
-            filename: req.file.filename,
-            contentType: req.file.contentType
-        });
+        logger.error(`Upload/Transcode error: ${error.message}`);
+
+        // Attempt cleanup on failure
+        if (req.file && fs.existsSync(req.file.path)) {
+            fs.unlink(req.file.path, () => { });
+        }
+
+        const err = new Error('File upload and processing failed');
+        err.statusCode = 500;
+        next(err);
     }
 };
 
