@@ -1,14 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { TreeExplorer } from './TreeExplorer';
 import { CommunityDossier } from './CommunityDossier';
 import { mockCommunities } from '../../data/mockData';
 import { getPublicAssets } from '../../services/assetService';
 import type { Asset } from '../../services/assetService';
 import { RoleMediaPlayer } from '../../components/RoleMediaPlayer';
-import heroImage from '../../assets/beautiful.png';
-import ceremonialSymbol from '../../assets/image copy 2.png';
+import { FiVolume2, FiVolumeX } from 'react-icons/fi';
 import './CulturalExplorer.css';
 
 const PAGE_SIZE = 8;
@@ -29,7 +27,17 @@ export const CulturalExplorer = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
-    const communityGridRef = useRef<HTMLDivElement>(null);
+
+    // Video hero audio state
+    const [isMuted, setIsMuted] = useState(true);
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    const toggleAudio = () => {
+        if (videoRef.current) {
+            videoRef.current.muted = !videoRef.current.muted;
+            setIsMuted(videoRef.current.muted);
+        }
+    };
 
     // Paginated asset state
     const [approvedAssets, setApprovedAssets] = useState<Asset[]>([]);
@@ -44,17 +52,6 @@ export const CulturalExplorer = () => {
     const bioObserverRef = useRef<IntersectionObserver | null>(null);
     const sonicObserverRef = useRef<IntersectionObserver | null>(null);
 
-    const handleNodeClick = (id: string) => {
-        if (!id.startsWith('placeholder')) {
-            const element = document.getElementById(`community-card-${id}`);
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                setTimeout(() => setSelectedCommunityId(id), 600);
-            } else if (communityGridRef.current) {
-                communityGridRef.current.scrollIntoView({ behavior: 'smooth' });
-            }
-        }
-    };
 
     const fetchPage = useCallback(async (pageNum: number) => {
         if (pageNum === 1) setAssetsLoading(true);
@@ -110,69 +107,171 @@ export const CulturalExplorer = () => {
     return (
         <div style={{ backgroundColor: 'var(--color-parchment)', minHeight: '100vh' }}>
 
-            {/* SECTION 1 - Hero */}
-            <section className="hero-section" style={{ backgroundImage: `url(${heroImage})` }}>
-                <div className="hero-overlay"></div>
+            {/* ═══════════════ SECTION 1 — Video Hero ═══════════════ */}
+            <section style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
 
-                {/* LEFT PANE - Visualization */}
-                <div className="hero-left-pane">
-                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2 }}>
-                        <TreeExplorer onNodeClick={handleNodeClick} />
+                {/* Background video */}
+                <video
+                    ref={videoRef}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    style={{
+                        position: 'absolute',
+                        inset: 0,
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        zIndex: 0
+                    }}
+                >
+                    <source src="/homepage_video.mp4" type="video/mp4" />
+                </video>
+
+                {/* Dark gradient overlay — bottom to top for text contrast */}
+                <div style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(to bottom, rgba(10,6,3,0.55) 0%, rgba(10,6,3,0.30) 50%, rgba(10,6,3,0.75) 100%)',
+                    zIndex: 1
+                }} />
+
+                {/* ── Centered Brand Block ── */}
+                <div style={{
+                    position: 'absolute',
+                    inset: 0,
+                    zIndex: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textAlign: 'center',
+                    padding: '0 2rem'
+                }}>
+                    <p style={{
+                        color: 'var(--color-muted-gold)',
+                        fontSize: '0.85rem',
+                        letterSpacing: '0.35em',
+                        textTransform: 'uppercase',
+                        fontFamily: 'var(--font-sans)',
+                        fontWeight: 600,
+                        marginBottom: '1.25rem',
+                        opacity: 0.9
+                    }}>India's Digital Cultural Archive</p>
+
+                    <h1 style={{
+                        fontFamily: 'var(--font-serif)',
+                        fontSize: 'clamp(4rem, 10vw, 9rem)',
+                        fontWeight: 700,
+                        color: '#F5EDD8',
+                        letterSpacing: '0.12em',
+                        textTransform: 'uppercase',
+                        lineHeight: 1,
+                        margin: 0,
+                        textShadow: '0 4px 24px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.8)'
+                    }}>DHAROHAR</h1>
+
+                    <div style={{
+                        width: '80px',
+                        height: '2px',
+                        background: 'var(--color-muted-gold)',
+                        margin: '1.75rem auto'
+                    }} />
+
+                    <p style={{
+                        color: '#E8DCC8',
+                        fontSize: 'clamp(1rem, 2.5vw, 1.35rem)',
+                        fontFamily: 'var(--font-serif)',
+                        fontStyle: 'italic',
+                        letterSpacing: '0.03em',
+                        maxWidth: '620px',
+                        lineHeight: 1.6,
+                        textShadow: '0 2px 12px rgba(0,0,0,0.6)'
+                    }}>Safeguarding India's Wisdom with Digital Sovereignty</p>
+
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '3rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                        <button
+                            className="primary-btn"
+                            style={{ padding: '0.85rem 2.5rem', fontSize: '0.95rem', letterSpacing: '0.05em' }}
+                            onClick={() => navigate(user ? '/dashboard' : '/login')}
+                        >
+                            {user ? 'Go to Dashboard' : 'Enter Platform'}
+                        </button>
+                        <button
+                            className="minimal-btn"
+                            style={{
+                                padding: '0.85rem 2.5rem',
+                                fontSize: '0.95rem',
+                                letterSpacing: '0.05em',
+                                color: '#F5EDD8',
+                                borderColor: 'rgba(245,237,216,0.5)',
+                                backgroundColor: 'transparent'
+                            }}
+                            onClick={() => navigate('/marketplace')}
+                        >
+                            Browse Archives
+                        </button>
                     </div>
 
-                    <div className="hero-content" style={{ zIndex: 3 }}>
-                        <img src={ceremonialSymbol} alt="Ceremonial Rotation" className="ceremonial-symbol" />
-                        <h1 className="hero-title">DHAROHAR</h1>
-                        <p style={{ color: 'var(--color-parchment)', fontSize: '1.2rem', marginTop: '1rem', textShadow: '0 2px 4px rgba(0,0,0,0.5)', letterSpacing: '1px' }}>
-                            Cultural Knowledge & Licensing
+                    {!user && (
+                        <p style={{ marginTop: '2rem', fontSize: '0.82rem', color: 'rgba(245,237,216,0.6)', fontFamily: 'var(--font-sans)' }}>
+                            New to the platform?{' '}
+                            <a href="/register" style={{ color: 'var(--color-muted-gold)', fontWeight: 600, textDecoration: 'underline' }}>Apply for Access</a>
                         </p>
-                    </div>
+                    )}
                 </div>
 
-                {/* RIGHT PANE - Auth / Welcome */}
-                <div className="hero-right-pane">
-                    <Link to="/" style={{ display: 'block', margin: '0 auto 1.5rem', textAlign: 'center' }}>
-                        <img src="/logo.png" alt="Dharohar Logo" style={{ maxWidth: '100px' }} />
-                    </Link>
+                {/* ── Audio Control ── */}
+                <button
+                    onClick={toggleAudio}
+                    style={{
+                        position: 'absolute',
+                        bottom: '2rem',
+                        right: '2rem',
+                        zIndex: 3,
+                        background: 'rgba(10,6,3,0.5)',
+                        border: '1px solid rgba(245,237,216,0.3)',
+                        color: '#F5EDD8',
+                        width: '44px',
+                        height: '44px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(10,6,3,0.8)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(10,6,3,0.5)'}
+                    title={isMuted ? "Unmute audio" : "Mute audio"}
+                >
+                    {isMuted ? <FiVolumeX size={20} /> : <FiVolume2 size={20} />}
+                </button>
 
-                    {user ? (
-                        /* Logged-in welcome */
-                        <div style={{ textAlign: 'center' }}>
-                            <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Welcome back</h2>
-                            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-light)', marginBottom: '2rem' }}>
-                                Logged in as <strong>{user.roles[0]}</strong>
-                            </p>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                <button className="primary-btn" onClick={() => navigate('/dashboard')} style={{ width: '100%' }}>
-                                    Go to Dashboard
-                                </button>
-                                <button className="minimal-btn" onClick={() => navigate('/marketplace')} style={{ width: '100%' }}>
-                                    Browse Marketplace
-                                </button>
-                            </div>
-                        </div>
-                    ) : (
-                        /* Guest login prompt */
-                        <div style={{ textAlign: 'center' }}>
-                            <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Institutional Access</h2>
-                            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-light)', marginBottom: '2rem' }}>
-                                Sign in to access your governance dashboard.
-                            </p>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                <button className="primary-btn" onClick={() => navigate('/login')} style={{ width: '100%' }}>
-                                    Sign In
-                                </button>
-                                <button className="minimal-btn" onClick={() => navigate('/marketplace')} style={{ width: '100%' }}>
-                                    Browse Marketplace
-                                </button>
-                            </div>
-                            <div className="decorative-divider-small" style={{ margin: '2.5rem auto 1.5rem', width: '80%' }}></div>
-                            <p style={{ fontSize: '0.8rem', color: 'var(--color-text-main)' }}>
-                                New to the governance platform? <br />
-                                <a href="/register" style={{ fontWeight: '600', marginTop: '0.5rem', display: 'inline-block' }}>Apply for Access</a>
-                            </p>
-                        </div>
-                    )}
+                {/* ── Scroll indicator ── */}
+                <div style={{
+                    position: 'absolute',
+                    bottom: '2.5rem',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    color: 'rgba(245,237,216,0.5)',
+                    fontSize: '0.7rem',
+                    letterSpacing: '0.2em',
+                    textTransform: 'uppercase'
+                }}>
+                    <span>Scroll</span>
+                    <div style={{
+                        width: '1px',
+                        height: '48px',
+                        background: 'linear-gradient(to bottom, rgba(245,237,216,0.5), transparent)',
+                        animation: 'pulse 2s ease-in-out infinite'
+                    }} />
                 </div>
             </section>
 
@@ -187,7 +286,7 @@ export const CulturalExplorer = () => {
                 {/* SECTION 3 - Featured Communities Grid */}
                 <section style={{ marginBottom: '6rem' }}>
                     <h3 style={{ fontSize: '2rem', marginBottom: '2rem', textAlign: 'center' }}>Featured Communities</h3>
-                    <div className="grid-layout" ref={communityGridRef}>
+                    <div className="grid-layout">
                         {mockCommunities.map(community => (
                             <div
                                 key={community.id}
