@@ -48,9 +48,16 @@ export const getPendingAssets = async (): Promise<Asset[]> => {
     return resp.data;
 };
 
-// Marketplace / General: get approved-only assets
-export const getPublicAssets = async (): Promise<Asset[]> => {
-    const resp = await apiClient.get<Asset[]>('/assets/public');
+export interface PaginatedAssets {
+    assets: Asset[];
+    total: number;
+    page: number;
+    hasMore: boolean;
+}
+
+// Marketplace / General: get approved-only assets (paginated)
+export const getPublicAssets = async (page = 1, limit = 12): Promise<PaginatedAssets> => {
+    const resp = await apiClient.get<PaginatedAssets>('/assets/public', { params: { page, limit } });
     return resp.data;
 };
 

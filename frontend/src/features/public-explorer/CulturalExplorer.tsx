@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { TreeExplorer } from './TreeExplorer';
@@ -10,6 +10,8 @@ import { RoleMediaPlayer } from '../../components/RoleMediaPlayer';
 import heroImage from '../../assets/beautiful.png';
 import ceremonialSymbol from '../../assets/image copy 2.png';
 import './CulturalExplorer.css';
+
+const PAGE_SIZE = 8;
 
 const AttributionBlock = ({ text }: { text: string }) => {
     const parts = text.split('\n');
@@ -28,8 +30,19 @@ export const CulturalExplorer = () => {
     const { user } = useAuth();
     const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
     const communityGridRef = useRef<HTMLDivElement>(null);
+
+    // Paginated asset state
     const [approvedAssets, setApprovedAssets] = useState<Asset[]>([]);
     const [assetsLoading, setAssetsLoading] = useState(true);
+    const [assetPage, setAssetPage] = useState(1);
+    const [hasMoreAssets, setHasMoreAssets] = useState(true);
+    const [isFetchingMore, setIsFetchingMore] = useState(false);
+
+    // Sentinel refs for BIO + SONIC sections
+    const bioSentinelRef = useRef<HTMLDivElement>(null);
+    const sonicSentinelRef = useRef<HTMLDivElement>(null);
+    const bioObserverRef = useRef<IntersectionObserver | null>(null);
+    const sonicObserverRef = useRef<IntersectionObserver | null>(null);
 
     const handleNodeClick = (id: string) => {
         if (!id.startsWith('placeholder')) {
@@ -43,20 +56,51 @@ export const CulturalExplorer = () => {
         }
     };
 
-    // Load real approved assets from the API (public endpoint, no auth needed)
-    useEffect(() => {
-        const load = async () => {
-            try {
-                const data = await getPublicAssets();
-                setApprovedAssets(data);
-            } catch {
-                // silently fail — page still works with mock communities
-            } finally {
-                setAssetsLoading(false);
-            }
-        };
-        load();
+    const fetchPage = useCallback(async (pageNum: number) => {
+        if (pageNum === 1) setAssetsLoading(true);
+        else setIsFetchingMore(true);
+        try {
+            const result = await getPublicAssets(pageNum, PAGE_SIZE);
+            setApprovedAssets(prev => pageNum === 1 ? result.assets : [...prev, ...result.assets]);
+            setHasMoreAssets(result.hasMore);
+        } catch {
+            // silently fail — page still works with mock communities
+        } finally {
+            setAssetsLoading(false);
+            setIsFetchingMore(false);
+        }
     }, []);
+
+    // Initial load
+    useEffect(() => { fetchPage(1); }, [fetchPage]);
+
+    // Wire IntersectionObserver to BIO sentinel
+    useEffect(() => {
+        bioObserverRef.current?.disconnect();
+        bioObserverRef.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMoreAssets && !isFetchingMore && !assetsLoading) {
+                const next = assetPage + 1;
+                setAssetPage(next);
+                fetchPage(next);
+            }
+        }, { rootMargin: '200px' });
+        if (bioSentinelRef.current) bioObserverRef.current.observe(bioSentinelRef.current);
+        return () => bioObserverRef.current?.disconnect();
+    }, [hasMoreAssets, isFetchingMore, assetsLoading, assetPage, fetchPage]);
+
+    // SONIC sentinel mirrors same logic
+    useEffect(() => {
+        sonicObserverRef.current?.disconnect();
+        sonicObserverRef.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMoreAssets && !isFetchingMore && !assetsLoading) {
+                const next = assetPage + 1;
+                setAssetPage(next);
+                fetchPage(next);
+            }
+        }, { rootMargin: '200px' });
+        if (sonicSentinelRef.current) sonicObserverRef.current.observe(sonicSentinelRef.current);
+        return () => sonicObserverRef.current?.disconnect();
+    }, [hasMoreAssets, isFetchingMore, assetsLoading, assetPage, fetchPage]);
 
     const selectedCommunity = mockCommunities.find(c => c.id === selectedCommunityId);
 
@@ -197,14 +241,13 @@ export const CulturalExplorer = () => {
                                     <h5 className="card-subtitle">{asset.communityName}</h5>
                                     <p className="card-desc">{asset.description}</p>
 
-                                    {/* 30-second public preview for BIO voice recordings */}
                                     {asset.mediaUrl ? (
                                         <div style={{ margin: '1rem 0' }}>
                                             <RoleMediaPlayer
                                                 src={asset.mediaUrl}
                                                 mode="preview"
                                                 previewSeconds={30}
-                                                label="🎙 Voice Recording Preview"
+                                                label="� Voice Recording Preview"
                                             />
                                         </div>
                                     ) : (
@@ -221,6 +264,9 @@ export const CulturalExplorer = () => {
                             ))}
                         </div>
                     )}
+                    {/* BIO sentinel */}
+                    <div ref={bioSentinelRef} style={{ height: '1px' }} aria-hidden="true" />
+                    {isFetchingMore && <p style={{ textAlign: 'center', color: 'var(--color-text-light)', fontSize: '0.85rem' }}>Loading more archives...</p>}
                 </section>
 
                 {/* SECTION 5 - Live Approved SONIC Assets */}
@@ -244,7 +290,6 @@ export const CulturalExplorer = () => {
                                     <h5 className="card-subtitle">{asset.communityName}</h5>
                                     <p className="card-desc">{asset.description}</p>
 
-                                    {/* 30-second public preview for all SONIC assets */}
                                     {asset.mediaUrl ? (
                                         <div style={{ margin: '1rem 0' }}>
                                             <RoleMediaPlayer
@@ -268,6 +313,9 @@ export const CulturalExplorer = () => {
                             ))}
                         </div>
                     )}
+                    {/* SONIC sentinel */}
+                    <div ref={sonicSentinelRef} style={{ height: '1px' }} aria-hidden="true" />
+                    {isFetchingMore && <p style={{ textAlign: 'center', color: 'var(--color-text-light)', fontSize: '0.85rem' }}>Loading more archives...</p>}
                 </section>
 
             </main>

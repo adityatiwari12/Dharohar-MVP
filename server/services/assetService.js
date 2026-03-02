@@ -63,11 +63,22 @@ const getPendingAssets = async () => {
     return withMediaUrls(assets);
 };
 
-const getPublicAssets = async () => {
-    const assets = await Asset.find({ approvalStatus: 'APPROVED' })
-        .select('-transcript -metadata')
-        .sort({ createdAt: -1 });
-    return withMediaUrls(assets);
+const getPublicAssets = async (page = 1, limit = 12) => {
+    const skip = (page - 1) * limit;
+    const [assets, total] = await Promise.all([
+        Asset.find({ approvalStatus: 'APPROVED' })
+            .select('-transcript -metadata')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit),
+        Asset.countDocuments({ approvalStatus: 'APPROVED' })
+    ]);
+    return {
+        assets: withMediaUrls(assets),
+        total,
+        page,
+        hasMore: skip + assets.length < total
+    };
 };
 
 const approveAsset = async (assetId, reviewerId) => {

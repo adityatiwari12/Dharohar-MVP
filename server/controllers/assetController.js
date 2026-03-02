@@ -34,8 +34,10 @@ const getPendingAssets = async (req, res, next) => {
 
 const getPublicAssets = async (req, res, next) => {
     try {
-        const assets = await assetService.getPublicAssets();
-        res.status(200).json(assets);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 12;
+        const result = await assetService.getPublicAssets(page, limit);
+        res.status(200).json(result);
     } catch (error) {
         next(error);
     }

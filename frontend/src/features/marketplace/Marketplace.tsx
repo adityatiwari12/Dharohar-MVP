@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getPublicAssets } from '../../services/assetService';
 import type { Asset } from '../../services/assetService';
@@ -7,6 +7,8 @@ import { BackButton } from '../../components/Navigation/BackButton';
 import { useAuth } from '../../features/auth/AuthContext';
 import { LicensingInfoSection } from './LicensingInfoSection';
 import './Marketplace.css';
+
+const PAGE_SIZE = 12;
 
 const AttributionBlock = ({ text }: { text: string }) => {
     const parts = (text || '').split('\n');
@@ -23,19 +25,27 @@ const AttributionBlock = ({ text }: { text: string }) => {
 export const Marketplace = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+
+    // ── All loaded assets (accumulated across pages) ──────────────────
     const [assets, setAssets] = useState<Asset[]>([]);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isFetchingMore, setIsFetchingMore] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    // ── Filter / sort (applied client-side on accumulated data) ───────
     const [filterType, setFilterType] = useState('ALL');
     const [filterRisk, setFilterRisk] = useState('ALL');
     const [sortBy, setSortBy] = useState('COMMUNITY');
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [expandedAssetId, setExpandedAssetId] = useState<string | null>(null);
 
+    // ── Sentinel ref for IntersectionObserver ─────────────────────────
+    const sentinelRef = useRef<HTMLDivElement>(null);
+    const observerRef = useRef<IntersectionObserver | null>(null);
+
     const handleApply = (asset: Asset, licenseType?: string) => {
-        if (!user) {
-            navigate('/login');
-            return;
-        }
+        if (!user) { navigate('/login'); return; }
         navigate(`/apply/${asset._id}?assetType=${asset.type}&title=${encodeURIComponent(asset.title)}&lt=${licenseType || ''}`);
     };
 
@@ -43,21 +53,42 @@ export const Marketplace = () => {
         setExpandedAssetId(prev => (prev === assetId ? null : assetId));
     };
 
-    useEffect(() => {
-        const load = async () => {
-            setIsLoading(true);
-            try {
-                const data = await getPublicAssets();
-                setAssets(data);
-            } catch (e: any) {
-                setError(e.response?.data?.message || 'Failed to load marketplace. Is the server running?');
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        load();
+    // ── Fetch a single page ───────────────────────────────────────────
+    const fetchPage = useCallback(async (pageNum: number) => {
+        if (pageNum === 1) setIsLoading(true);
+        else setIsFetchingMore(true);
+        try {
+            const result = await getPublicAssets(pageNum, PAGE_SIZE);
+            setAssets(prev => pageNum === 1 ? result.assets : [...prev, ...result.assets]);
+            setHasMore(result.hasMore);
+        } catch (e: any) {
+            setError(e.response?.data?.message || 'Failed to load marketplace.');
+        } finally {
+            setIsLoading(false);
+            setIsFetchingMore(false);
+        }
     }, []);
 
+    // Initial load
+    useEffect(() => { fetchPage(1); }, [fetchPage]);
+
+    // ── Wire IntersectionObserver to sentinel ─────────────────────────
+    useEffect(() => {
+        if (observerRef.current) observerRef.current.disconnect();
+
+        observerRef.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMore && !isFetchingMore && !isLoading) {
+                const next = page + 1;
+                setPage(next);
+                fetchPage(next);
+            }
+        }, { rootMargin: '200px' });
+
+        if (sentinelRef.current) observerRef.current.observe(sentinelRef.current);
+        return () => observerRef.current?.disconnect();
+    }, [hasMore, isFetchingMore, isLoading, page, fetchPage]);
+
+    // ── Client-side filter + sort ─────────────────────────────────────
     const displayedAssets = assets
         .filter(a => filterType === 'ALL' || a.type === filterType)
         .filter(a => filterRisk === 'ALL' || a.riskTier === filterRisk)
@@ -90,7 +121,7 @@ export const Marketplace = () => {
                         <h3>Filter Knowledge</h3>
                         <div className="filter-group">
                             <label>Asset Type</label>
-                            <select value={filterType} onChange={e => setFilterType(e.target.value)}>
+                            <select value={filterType} onChange={e => { setFilterType(e.target.value); }}>
                                 <option value="ALL">All Types</option>
                                 <option value="BIO">Biological Knowledge</option>
                                 <option value="SONIC">Sonic / Musical</option>
@@ -151,9 +182,9 @@ export const Marketplace = () => {
                                             {asset.mediaUrl && (
                                                 <div style={{ margin: '1rem 0', padding: '0.75rem', background: 'rgba(0,0,0,0.03)', border: '1px solid var(--color-muted-gold)', borderRadius: '2px' }}>
                                                     <p style={{ fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--color-text-light)' }}>
-                                                        {asset.type === 'SONIC' ? '🎵 Listen to Preview' : '🎙 Voice Archive'}
+                                                        {asset.type === 'SONIC' ? '🎵 30s Preview' : '🎙 Voice Sample'}
                                                     </p>
-                                                    {asset.mediaUrl.match(/\.(mp4|webm|ogg)$/i) ? (
+                                                    {asset.mediaUrl.match(/\.(mp4|webm|mov)$/i) ? (
                                                         <video controls style={{ width: '100%', borderRadius: '2px', maxHeight: '180px' }} src={asset.mediaUrl} />
                                                     ) : (
                                                         <audio controls style={{ width: '100%' }} src={asset.mediaUrl} />
@@ -191,7 +222,6 @@ export const Marketplace = () => {
                                                 </button>
                                             </div>
 
-                                            {/* ── Inline Licensing Info Section ── */}
                                             {isLicensingOpen && (
                                                 <LicensingInfoSection
                                                     assetType={asset.type as 'BIO' | 'SONIC'}
@@ -205,10 +235,27 @@ export const Marketplace = () => {
                                 })
                             )}
                         </div>
+
+                        {/* ── Infinite scroll: loading skeleton row ── */}
+                        {isFetchingMore && (
+                            <div className="grid-layout" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', marginTop: '1.5rem' }}>
+                                {Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={`more-${i}`} />)}
+                            </div>
+                        )}
+
+                        {/* ── Sentinel: IntersectionObserver target ── */}
+                        <div ref={sentinelRef} style={{ height: '1px', marginTop: '2rem' }} aria-hidden="true" />
+
+                        {/* ── End of list message ── */}
+                        {!hasMore && assets.length > 0 && (
+                            <p style={{ textAlign: 'center', color: 'var(--color-text-light)', fontSize: '0.85rem', marginTop: '1.5rem', fontStyle: 'italic' }}>
+                                All {assets.length} assets loaded.
+                            </p>
+                        )}
                     </main>
                 </div>
 
-                {/* ── General Licensing Guide (shown when no specific asset selected) ── */}
+                {/* General Licensing Guide (empty state) */}
                 {!isLoading && assets.length === 0 && (
                     <div style={{ marginTop: '4rem' }}>
                         <hr style={{ borderColor: 'var(--color-muted-gold)', marginBottom: '3rem' }} />

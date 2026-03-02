@@ -4,13 +4,14 @@ import { StatusBadge } from '../../components/StatusBadge';
 import { getMyAssets } from '../../services/assetService';
 import type { Asset } from '../../services/assetService';
 import { RoleMediaPlayer } from '../../components/RoleMediaPlayer';
-import { FiX, FiInfo, FiFileText, FiClock } from 'react-icons/fi';
+import { FiX, FiInfo, FiFileText, FiClock, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 
 export const MySubmissions = () => {
     const [assets, setAssets] = useState<Asset[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+    const [expandedMediaId, setExpandedMediaId] = useState<string | null>(null);
 
     useEffect(() => {
         const load = async () => {
@@ -51,40 +52,64 @@ export const MySubmissions = () => {
 
                 <div className="audio-list">
                     {assets.map(asset => (
-                        <div key={asset._id} className="audio-row framed-section" style={{ padding: '1.5rem' }}>
-                            <div className="audio-info">
-                                <h4 style={{ margin: 0, marginBottom: '0.25rem' }}>{asset.title}</h4>
-                                <span style={{ fontSize: '0.85rem', color: 'var(--color-text-light)' }}>
-                                    {asset.communityName} • {asset.type} •{' '}
-                                    Submitted: {new Date(asset.createdAt).toLocaleDateString('en-IN')}
-                                </span>
+                        <div key={asset._id} className="audio-row framed-section" style={{ padding: '1.5rem', flexDirection: 'column', gap: '1rem' }}>
+                            {/* Top row: info + controls */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
+                                <div className="audio-info" style={{ flex: 1 }}>
+                                    <h4 style={{ margin: 0, marginBottom: '0.25rem' }}>{asset.title}</h4>
+                                    <span style={{ fontSize: '0.85rem', color: 'var(--color-text-light)' }}>
+                                        {asset.communityName} • {asset.type} •{' '}
+                                        Submitted: {new Date(asset.createdAt).toLocaleDateString('en-IN')}
+                                    </span>
 
-                                {/* Show rejection comment prominently */}
-                                {asset.approvalStatus === 'REJECTED' && asset.reviewComment && (
-                                    <div style={{
-                                        marginTop: '0.75rem',
-                                        padding: '0.75rem 1rem',
-                                        background: 'rgba(239,68,68,0.06)',
-                                        border: '1px solid #ef4444',
-                                        borderRadius: '4px',
-                                        fontSize: '0.875rem',
-                                        color: '#7f1d1d'
-                                    }}>
-                                        <strong>Reviewer Feedback:</strong> {asset.reviewComment}
-                                    </div>
-                                )}
+                                    {asset.approvalStatus === 'REJECTED' && asset.reviewComment && (
+                                        <div style={{
+                                            marginTop: '0.75rem',
+                                            padding: '0.75rem 1rem',
+                                            background: 'rgba(239,68,68,0.06)',
+                                            border: '1px solid #ef4444',
+                                            borderRadius: '4px',
+                                            fontSize: '0.875rem',
+                                            color: '#7f1d1d'
+                                        }}>
+                                            <strong>Reviewer Feedback:</strong> {asset.reviewComment}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+                                    {asset.mediaUrl && (
+                                        <button
+                                            className="minimal-btn"
+                                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                                            onClick={() => setExpandedMediaId(prev => prev === asset._id ? null : asset._id)}
+                                            title={expandedMediaId === asset._id ? 'Hide media' : 'Play media'}
+                                        >
+                                            {expandedMediaId === asset._id ? <FiChevronUp size={14} /> : <FiChevronDown size={14} />}
+                                            {expandedMediaId === asset._id ? 'Hide' : 'Play'}
+                                        </button>
+                                    )}
+                                    <button
+                                        className="minimal-btn"
+                                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                                        onClick={() => setSelectedAsset(asset)}
+                                    >
+                                        Details
+                                    </button>
+                                    <StatusBadge status={asset.approvalStatus} />
+                                </div>
                             </div>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexShrink: 0 }}>
-                                <button
-                                    className="minimal-btn"
-                                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
-                                    onClick={() => setSelectedAsset(asset)}
-                                >
-                                    View Details
-                                </button>
-                                <StatusBadge status={asset.approvalStatus} />
-                            </div>
+                            {/* Inline media player (expanded on demand) */}
+                            {asset.mediaUrl && expandedMediaId === asset._id && (
+                                <div style={{ padding: '0.75rem', background: 'rgba(0,0,0,0.02)', border: '1px solid var(--color-muted-gold)', borderRadius: '4px' }}>
+                                    <RoleMediaPlayer
+                                        src={asset.mediaUrl}
+                                        mode="full"
+                                        label={asset.type === 'SONIC' ? '🎵 Your Sonic Archive' : '🎙 Your Voice Recording'}
+                                    />
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>
