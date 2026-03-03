@@ -5,12 +5,49 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  min-width: 0;
+  /* prevents flex/grid children overflowing their container */
+}
+
+html {
+  overflow-x: hidden;
+  /* prevent horizontal scroll at root level */
+}
+
+/* Prevent text from breaking outside its container */
+p,
+span,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+li,
+td,
+th,
+label,
+a {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* All media and tables must never exceed their parent */
+img,
+video,
+audio,
+svg,
+table {
+  max-width: 100%;
+  height: auto;
 }
 
 body {
   background-color: var(--color-parchment);
   color: var(--color-text-main);
   font-family: var(--font-sans);
+  overflow-x: hidden;
+  /* clip any accidental child overflow */
 
   /* Subtle CSS Texture from user Assets */
   background-image: url('./assets/image.png');

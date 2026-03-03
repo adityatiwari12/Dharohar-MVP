@@ -1,6 +1,7 @@
 .tree-container {
     width: 100%;
-    height: 600px;
+    height: clamp(320px, 60vw, 600px);
+    /* responsive: 320px min, 600px max */
     position: relative;
     background: radial-gradient(circle at center, #F4EDE4 0%, #E8DFD3 100%);
     border-radius: var(--border-radius);
@@ -63,4 +64,46 @@
 .fallback-list li {
     padding: 1rem;
     border-bottom: 1px solid var(--color-muted-gold);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TABLET: 768px – 1023px
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 1023px) {
+    .metadata-panel {
+        width: 240px;
+        padding: 1rem;
+    }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MOBILE: max 767px
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 767px) {
+
+    /* Metadata panel: pull out of absolute positioning, become a regular block */
+    .metadata-panel {
+        position: static;
+        width: 100%;
+        border-radius: var(--border-radius);
+        margin-top: 0.75rem;
+        backdrop-filter: none;
+    }
+
+    .metadata-title {
+        font-size: 1.1rem;
+    }
+
+    .metadata-desc {
+        font-size: 0.88rem;
+    }
+
+    /* Fallback explorer */
+    .fallback-explorer {
+        padding: 1.5rem 1rem;
+    }
+
+    .fallback-list {
+        max-width: 100%;
+    }
 }

@@ -22,6 +22,8 @@
     width: 100%;
     display: block;
     accent-color: var(--color-terracotta, #A14B3B);
+    height: 44px;
+    /* explicit touch-target height; overrides global height:auto for audio */
 }
 
 .rmp-video {
@@ -62,4 +64,23 @@
     font-weight: 400;
     color: var(--color-text-light, #888);
     font-style: italic;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MOBILE: max 767px
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 767px) {
+    .rmp-video {
+        max-height: 180px;
+    }
+
+    .rmp-label {
+        font-size: 0.72rem;
+    }
+
+    .rmp-preview-banner {
+        flex-direction: column;
+        gap: 4px;
+        font-size: 0.75rem;
+    }
 }
