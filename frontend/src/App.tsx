@@ -35,6 +35,10 @@ const AppShell = () => {
       {/* Protected Routes */}
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard/*" element={<PageTransition><DashboardRouter /></PageTransition>} />
+      </Route>
+
+      {/* General User Only Routes */}
+      <Route element={<ProtectedRoute allowedRoles={['general']} />}>
         <Route path="/apply/:assetId" element={<PageTransition><ApplyForLicense /></PageTransition>} />
       </Route>
     </Routes>

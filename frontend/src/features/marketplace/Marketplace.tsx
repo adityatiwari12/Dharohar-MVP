@@ -26,6 +26,9 @@ export const Marketplace = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
 
+    // True for logged-out users OR users with no governance role
+    const isGeneralUser = !user || !['community', 'review', 'admin'].some(r => user.roles?.includes(r));
+
     // ── All loaded assets (accumulated across pages) ──────────────────
     const [assets, setAssets] = useState<Asset[]>([]);
     const [page, setPage] = useState(1);
@@ -178,16 +181,33 @@ export const Marketplace = () => {
 
                                             <p className="card-desc">{asset.description}</p>
 
-                                            {/* ── Media Preview ── */}
                                             {asset.mediaUrl && (
                                                 <div style={{ margin: '1rem 0', padding: '0.75rem', background: 'rgba(0,0,0,0.03)', border: '1px solid var(--color-muted-gold)', borderRadius: '2px' }}>
                                                     <p style={{ fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--color-text-light)' }}>
                                                         {asset.type === 'SONIC' ? '🎵 30s Preview' : '🎙 Voice Sample'}
                                                     </p>
                                                     {asset.mediaUrl.match(/\.(mp4|webm|mov)$/i) ? (
-                                                        <video controls style={{ width: '100%', borderRadius: '2px', maxHeight: '180px' }} src={asset.mediaUrl} />
+                                                        <video controls preload="metadata" style={{ width: '100%', borderRadius: '2px', maxHeight: '180px' }} src={asset.mediaUrl} />
                                                     ) : (
-                                                        <audio controls style={{ width: '100%' }} src={asset.mediaUrl} />
+                                                        <audio controls preload="metadata" style={{ width: '100%' }} src={asset.mediaUrl} />
+                                                    )}
+
+                                                    {/* ── Public Restriction Notice (general users only) ── */}
+                                                    {isGeneralUser && (
+                                                        <div className="public-restriction-notice">
+                                                            <p className="restriction-text">
+                                                                ⚠️ This cultural archive is protected under indigenous heritage law.
+                                                                You may not commercially use, reproduce, or publish this material under your name.
+                                                                Please review licensing details for authorised usage.
+                                                            </p>
+                                                            <button
+                                                                type="button"
+                                                                className="restriction-license-btn"
+                                                                onClick={() => toggleLicensingSection(asset._id)}
+                                                            >
+                                                                {expandedAssetId === asset._id ? '▲ Hide Licensing Terms' : '📋 View Licensing Terms'}
+                                                            </button>
+                                                        </div>
                                                     )}
                                                 </div>
                                             )}

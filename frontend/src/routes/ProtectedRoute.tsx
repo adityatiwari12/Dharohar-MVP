@@ -20,7 +20,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) 
     if (allowedRoles && allowedRoles.length > 0) {
         const hasAccess = allowedRoles.some(role => user.roles.includes(role));
         if (!hasAccess) {
-            return <Navigate to="/" replace />; // Or point to an unauthorized page
+            return <Navigate to="/dashboard" replace />; // Bounces to dispatcher which resolves correct role view
         }
     }
 

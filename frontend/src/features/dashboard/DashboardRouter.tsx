@@ -10,6 +10,7 @@ import { LicenseHistory } from './LicenseHistory';
 import { MySubmissions } from './MySubmissions';
 import { MyLicenses } from './MyLicenses';
 import { GeneralDashboard } from './GeneralDashboard';
+import { ProtectedRoute } from '../../routes/ProtectedRoute';
 
 const AnimatedCounter = ({ value, label }: { value: number, label: string }) => {
     const [count, setCount] = useState(0);
@@ -132,15 +133,32 @@ const Overview = () => {
 export const DashboardRouter = () => {
     return (
         <Routes>
+            {/* The root dispatcher (resolves correct workspace based on role) */}
             <Route path="/" element={<DashboardLayout title="Overview"><Overview /></DashboardLayout>} />
-            <Route path="/assets/new" element={<DashboardLayout title="Upload Asset"><UploadAsset /></DashboardLayout>} />
-            <Route path="/assets/mine" element={<MySubmissions />} />
-            <Route path="/review-queue" element={<DashboardLayout title="Review Queue"><ReviewDashboard /></DashboardLayout>} />
-            <Route path="/review-history" element={<ReviewHistory />} />
-            <Route path="/license-requests" element={<DashboardLayout title="License Requests"><AdminDashboard /></DashboardLayout>} />
-            <Route path="/license-history" element={<LicenseHistory />} />
-            <Route path="/licenses/mine" element={<MyLicenses />} />
-            <Route path="/home" element={<GeneralDashboard />} />
+
+            {/* Community Role */}
+            <Route element={<ProtectedRoute allowedRoles={['community']} />}>
+                <Route path="/assets/new" element={<DashboardLayout title="Upload Asset"><UploadAsset /></DashboardLayout>} />
+                <Route path="/assets/mine" element={<MySubmissions />} />
+            </Route>
+
+            {/* Review Role */}
+            <Route element={<ProtectedRoute allowedRoles={['review']} />}>
+                <Route path="/review-queue" element={<DashboardLayout title="Review Queue"><ReviewDashboard /></DashboardLayout>} />
+                <Route path="/review-history" element={<ReviewHistory />} />
+            </Route>
+
+            {/* Admin Role */}
+            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+                <Route path="/license-requests" element={<DashboardLayout title="License Requests"><AdminDashboard /></DashboardLayout>} />
+                <Route path="/license-history" element={<LicenseHistory />} />
+            </Route>
+
+            {/* General Role */}
+            <Route element={<ProtectedRoute allowedRoles={['general']} />}>
+                <Route path="/licenses/mine" element={<MyLicenses />} />
+                <Route path="/home" element={<GeneralDashboard />} />
+            </Route>
         </Routes>
     );
 };

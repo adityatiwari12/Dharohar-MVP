@@ -259,3 +259,50 @@
         gap: 0.25rem;
     }
 }
+
+/* ── Public Restriction Notice (general users) ── */
+.public-restriction-notice {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: rgba(245, 158, 11, 0.06);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-radius: 4px;
+    border-left: 3px solid var(--color-warning, #F57C00);
+}
+
+.restriction-text {
+    font-size: 0.78rem;
+    color: var(--color-text-main);
+    line-height: 1.55;
+    margin: 0 0 0.6rem;
+}
+
+.restriction-license-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: transparent;
+    border: 1px solid var(--color-terracotta);
+    color: var(--color-terracotta);
+    border-radius: 20px;
+    padding: 0.3rem 0.9rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+    min-height: 36px;
+}
+
+.restriction-license-btn:hover {
+    background: var(--color-terracotta);
+    color: #fff;
+}
+
+@media (max-width: 767px) {
+    .restriction-license-btn {
+        width: 100%;
+        justify-content: center;
+        min-height: 44px;
+    }
+}

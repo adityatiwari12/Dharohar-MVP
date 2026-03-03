@@ -119,7 +119,7 @@ exports.uploadFile = async (req, res, next) => {
     }
 };
 
-/** Stream a file from GridFS (public) */
+/** Stream a file from GridFS with full HTTP Range support (required for audio/video seeking) */
 exports.getFile = async (req, res, next) => {
     try {
         const gfs = getGFS();
@@ -139,22 +139,61 @@ exports.getFile = async (req, res, next) => {
         }
 
         const file = files[0];
-        res.set('Content-Type', file.contentType);
-        res.set('Accept-Ranges', 'bytes');
+        const fileSize = file.length;
+        const contentType = file.contentType || 'application/octet-stream';
+        const rangeHeader = req.headers.range;
 
-        const readStream = gfs.openDownloadStream(file._id);
-        readStream.pipe(res);
+        if (rangeHeader) {
+            // ── Partial content (206) — required by browsers for audio/video seeking ──
+            const [startStr, endStr] = rangeHeader.replace(/bytes=/, '').split('-');
+            const start = parseInt(startStr, 10);
+            const end = endStr && endStr.trim() !== ''
+                ? Math.min(parseInt(endStr, 10), fileSize - 1)
+                : fileSize - 1;
 
-        readStream.on('error', (err) => {
-            logger.error(`Read Stream Error: ${err.message}`);
-            if (!res.headersSent) {
-                res.status(500).json({ message: 'Error streaming file' });
+            if (start > end || start < 0 || end >= fileSize) {
+                res.status(416).set('Content-Range', `bytes */${fileSize}`).end();
+                return;
             }
-        });
+
+            const chunkSize = end - start + 1;
+
+            res.status(206).set({
+                'Content-Type': contentType,
+                'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+                'Accept-Ranges': 'bytes',
+                'Content-Length': chunkSize,
+            });
+
+            // GridFS range: end is exclusive in openDownloadStream options
+            const readStream = gfs.openDownloadStream(file._id, { start, end: end + 1 });
+            readStream.pipe(res);
+            readStream.on('error', (err) => {
+                logger.error(`Range stream error: ${err.message}`);
+                if (!res.headersSent) res.status(500).end();
+            });
+
+        } else {
+            // ── Full file (200) ──
+            res.status(200).set({
+                'Content-Type': contentType,
+                'Accept-Ranges': 'bytes',
+                'Content-Length': fileSize,
+            });
+
+            const readStream = gfs.openDownloadStream(file._id);
+            readStream.pipe(res);
+            readStream.on('error', (err) => {
+                logger.error(`Stream error: ${err.message}`);
+                if (!res.headersSent) res.status(500).json({ message: 'Error streaming file' });
+            });
+        }
+
     } catch (error) {
         next(error);
     }
 };
+
 
 /** Delete a file from GridFS (admin only) */
 exports.deleteFile = async (req, res, next) => {
