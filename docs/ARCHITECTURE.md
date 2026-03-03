@@ -72,3 +72,17 @@ Dharohar implements a strict RBAC policy across four distinct roles:
 - **BCrypt**: Hashing and salting of user passwords.
 - **Role Guards**: Backend middleware that intercepts requests and validates roles before execution.
 - **Protected Routes**: Frontend navigation guards that prevent unauthorized access.
+
+---
+
+## 📚 Deep Dive Documentation
+
+Detailed technical and governance narratives for each core system:
+
+| Document | Contents |
+|:---------|:---------|
+| [ROLE_BASED_WORKFLOW.md](./ROLE_BASED_WORKFLOW.md) | Four-role model, per-role workflow diagrams, route guards, middleware chain |
+| [STATE_MACHINE.md](./STATE_MACHINE.md) | Asset & License state machines, transition diagrams, enforcement gates, transaction safety |
+| [DATA_VALIDATION.md](./DATA_VALIDATION.md) | Mongoose schema rules, service-layer business rule validation, error format |
+| [GOVERNANCE_LOGIC.md](./GOVERNANCE_LOGIC.md) | The two governance gates, mandatory accountability, risk tiering, audit trail, no-automation principle |
+| [LICENSE_MODIFICATION_LOOP.md](./LICENSE_MODIFICATION_LOOP.md) | Full modification loop (step-by-step), resubmission constraints, agreement generation |
