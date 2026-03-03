@@ -1,63 +1,371 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { applyForLicense } from '../../services/licenseService';
 import { LicenseApplicationDoc } from '../dashboard/LicenseApplicationDoc';
 import type { ApplicationData } from '../dashboard/LicenseApplicationDoc';
 import { useAuth } from '../auth/AuthContext';
+import apiClient from '../../services/apiClient';
 
 type LicenseType = 'RESEARCH' | 'COMMERCIAL' | 'MEDIA';
 
-const inputStyle = {
-    width: '100%',
-    padding: '0.75rem',
-    border: '1px solid var(--color-muted-gold)',
-    borderRadius: '2px',
-    background: 'white',
-    fontSize: '0.9rem',
-    boxSizing: 'border-box' as const,
-    marginBottom: '0',
+// ── Validation helpers ────────────────────────────────────────────────────────
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_RE = /^\d{10}$/;
+const GST_RE = /^[0-9A-Z]{15}$/;
+
+const countWords = (text: string) =>
+    text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+
+// ── Common field types ────────────────────────────────────────────────────────
+interface CommonFields {
+    fullName: string;
+    email: string;
+    phone: string;
+    organizationName: string;
+    gstNumber: string;
+    intendedUse: string;
+}
+
+interface CommonErrors {
+    fullName?: string;
+    email?: string;
+    phone?: string;
+    organizationName?: string;
+    gstNumber?: string;
+    intendedUse?: string;
+    docFile?: string;
+}
+
+const validateCommon = (fields: CommonFields, file: File | null): CommonErrors => {
+    const errors: CommonErrors = {};
+    if (!fields.fullName || fields.fullName.trim().length < 3)
+        errors.fullName = 'Full name must be at least 3 characters.';
+    if (!fields.email || !EMAIL_RE.test(fields.email))
+        errors.email = 'Enter a valid email address.';
+    if (!fields.phone || !PHONE_RE.test(fields.phone))
+        errors.phone = 'Phone number must be exactly 10 digits.';
+    if (!fields.organizationName || fields.organizationName.trim().length < 2)
+        errors.organizationName = 'Organization name is required.';
+    if (!fields.gstNumber || !GST_RE.test(fields.gstNumber.toUpperCase()))
+        errors.gstNumber = 'GST number must be exactly 15 alphanumeric characters (uppercase).';
+    const words = countWords(fields.intendedUse);
+    if (words < 30)
+        errors.intendedUse = `Minimum 30 words required. Currently: ${words}.`;
+    else if (words > 300)
+        errors.intendedUse = `Maximum 300 words allowed. Currently: ${words}.`;
+    if (file) {
+        if (file.type !== 'application/pdf')
+            errors.docFile = 'Only PDF files are accepted.';
+        else if (file.size > 5 * 1024 * 1024)
+            errors.docFile = 'File size must not exceed 5 MB.';
+    }
+    return errors;
 };
 
-const Field = ({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-        <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-            {label} {required && <span style={{ color: '#ef4444' }}>*</span>}
+// ── Shared style tokens ───────────────────────────────────────────────────────
+const baseInput: React.CSSProperties = {
+    width: '100%',
+    padding: '0.75rem',
+    border: '1.5px solid var(--color-muted-gold)',
+    borderRadius: '4px',
+    background: 'white',
+    fontSize: '0.9rem',
+    boxSizing: 'border-box',
+    fontFamily: 'var(--font-sans)',
+    outline: 'none',
+    transition: 'border-color 200ms ease',
+};
+
+const errorInput: React.CSSProperties = {
+    ...baseInput,
+    border: '1.5px solid #ef4444',
+    background: '#fff8f8',
+};
+
+const errorMsg: React.CSSProperties = {
+    fontSize: '0.78rem',
+    color: '#dc2626',
+    marginTop: '0.3rem',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.25rem',
+};
+
+const fieldWrap: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.35rem',
+};
+
+const labelStyle: React.CSSProperties = {
+    fontSize: '0.85rem',
+    fontWeight: 600,
+    color: 'var(--color-text-main)',
+};
+
+const reqStar: React.CSSProperties = { color: '#ef4444', marginLeft: '2px' };
+
+// ── Reusable Field wrapper ────────────────────────────────────────────────────
+const Field = ({
+    label, required, error, hint, children,
+}: {
+    label: string; required?: boolean; error?: string; hint?: string; children: React.ReactNode;
+}) => (
+    <div style={fieldWrap}>
+        <label style={labelStyle}>
+            {label}{required && <span style={reqStar}>*</span>}
         </label>
         {children}
+        {hint && !error && (
+            <span style={{ fontSize: '0.76rem', color: 'var(--color-text-light)' }}>{hint}</span>
+        )}
+        {error && (
+            <span style={errorMsg}>⚠ {error}</span>
+        )}
     </div>
 );
 
-const ResearchForm = ({ data, onChange }: { data: any; onChange: (k: string, v: string) => void }) => (
+// ── Common Applicant Identity Section ─────────────────────────────────────────
+const CommonApplicantFields = ({
+    fields,
+    errors,
+    touched,
+    docFile,
+    onFieldChange,
+    onFileChange,
+    onBlur,
+}: {
+    fields: CommonFields;
+    errors: CommonErrors;
+    touched: Set<string>;
+    docFile: File | null;
+    onFieldChange: (k: keyof CommonFields, v: string) => void;
+    onFileChange: (f: File | null) => void;
+    onBlur: (k: string) => void;
+}) => {
+    const fileRef = useRef<HTMLInputElement>(null);
+    const wordCount = countWords(fields.intendedUse);
+    const wordCountColor =
+        wordCount < 30 ? '#d97706' : wordCount > 300 ? '#dc2626' : '#16a34a';
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {/* Section header */}
+            <div style={{
+                padding: '0.8rem 1rem',
+                background: 'rgba(176,141,87,0.07)',
+                border: '1px solid var(--color-muted-gold)',
+                borderRadius: '4px',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                color: 'var(--color-burnt-umber)',
+                letterSpacing: '0.02em',
+            }}>
+                👤 Applicant Identity &amp; Contact
+            </div>
+
+            {/* Row: Full Name + Email */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <Field label="Full Name" required error={touched.has('fullName') ? errors.fullName : undefined}>
+                    <input
+                        style={touched.has('fullName') && errors.fullName ? errorInput : baseInput}
+                        value={fields.fullName}
+                        placeholder="e.g. Arjun Sharma"
+                        onChange={e => onFieldChange('fullName', e.target.value)}
+                        onBlur={() => onBlur('fullName')}
+                    />
+                </Field>
+                <Field label="Email Address" required error={touched.has('email') ? errors.email : undefined}>
+                    <input
+                        type="email"
+                        style={touched.has('email') && errors.email ? errorInput : baseInput}
+                        value={fields.email}
+                        placeholder="you@institution.ac.in"
+                        onChange={e => onFieldChange('email', e.target.value)}
+                        onBlur={() => onBlur('email')}
+                    />
+                </Field>
+            </div>
+
+            {/* Row: Phone + Organization */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <Field
+                    label="Phone Number"
+                    required
+                    error={touched.has('phone') ? errors.phone : undefined}
+                    hint="10-digit mobile number"
+                >
+                    <input
+                        style={touched.has('phone') && errors.phone ? errorInput : baseInput}
+                        value={fields.phone}
+                        placeholder="9876543210"
+                        maxLength={10}
+                        onChange={e => onFieldChange('phone', e.target.value.replace(/\D/g, ''))}
+                        onBlur={() => onBlur('phone')}
+                    />
+                </Field>
+                <Field label="Organization / Institution Name" required error={touched.has('organizationName') ? errors.organizationName : undefined}>
+                    <input
+                        style={touched.has('organizationName') && errors.organizationName ? errorInput : baseInput}
+                        value={fields.organizationName}
+                        placeholder="IIT Bombay, Acme Ltd., etc."
+                        onChange={e => onFieldChange('organizationName', e.target.value)}
+                        onBlur={() => onBlur('organizationName')}
+                    />
+                </Field>
+            </div>
+
+            {/* GST Number */}
+            <Field
+                label="GST Number"
+                required
+                error={touched.has('gstNumber') ? errors.gstNumber : undefined}
+                hint="15-character alphanumeric (e.g. 27ABCDE1234F1Z5)"
+            >
+                <input
+                    style={touched.has('gstNumber') && errors.gstNumber ? errorInput : baseInput}
+                    value={fields.gstNumber}
+                    placeholder="27ABCDE1234F1Z5"
+                    maxLength={15}
+                    onChange={e => onFieldChange('gstNumber', e.target.value.toUpperCase())}
+                    onBlur={() => onBlur('gstNumber')}
+                />
+            </Field>
+
+            {/* Intended Use Description */}
+            <Field
+                label="Intended Use Description"
+                required
+                error={touched.has('intendedUse') ? errors.intendedUse : undefined}
+            >
+                <div style={{ position: 'relative' }}>
+                    <textarea
+                        style={{
+                            ...(touched.has('intendedUse') && errors.intendedUse ? errorInput : baseInput),
+                            minHeight: '130px',
+                            resize: 'vertical',
+                            paddingBottom: '2rem',
+                        }}
+                        value={fields.intendedUse}
+                        placeholder="Describe in detail how you intend to use this cultural asset. Include your objective, methodology, and expected outcomes... (minimum 30 words, maximum 300 words)"
+                        onChange={e => onFieldChange('intendedUse', e.target.value)}
+                        onBlur={() => onBlur('intendedUse')}
+                    />
+                    {/* Live counter badge */}
+                    <div style={{
+                        position: 'absolute',
+                        bottom: '0.5rem',
+                        right: '0.75rem',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: wordCountColor,
+                        background: 'white',
+                        padding: '1px 6px',
+                        borderRadius: '10px',
+                        border: `1px solid ${wordCountColor}`,
+                        pointerEvents: 'none',
+                    }}>
+                        {wordCount} / 300 words
+                        {wordCount < 30 && <span style={{ marginLeft: '4px' }}>(min 30)</span>}
+                    </div>
+                </div>
+            </Field>
+
+            {/* Supporting Document Upload */}
+            <Field
+                label="Supporting Document"
+                error={touched.has('docFile') ? errors.docFile : undefined}
+                hint="Upload a PDF (max 5 MB) — ethics approval, company registration, press credentials, etc."
+            >
+                <div
+                    onClick={() => fileRef.current?.click()}
+                    style={{
+                        border: `1.5px dashed ${touched.has('docFile') && errors.docFile ? '#ef4444' : 'var(--color-muted-gold)'}`,
+                        borderRadius: '4px',
+                        padding: '1rem 1.25rem',
+                        cursor: 'pointer',
+                        background: docFile ? 'rgba(22,163,74,0.04)' : 'rgba(176,141,87,0.04)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        transition: 'background 200ms',
+                    }}
+                >
+                    <span style={{ fontSize: '1.4rem' }}>{docFile ? '📄' : '📎'}</span>
+                    <div style={{ flex: 1 }}>
+                        {docFile ? (
+                            <>
+                                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#16a34a' }}>
+                                    {docFile.name}
+                                </div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-light)' }}>
+                                    {(docFile.size / 1024 / 1024).toFixed(2)} MB — PDF
+                                </div>
+                            </>
+                        ) : (
+                            <div style={{ fontSize: '0.85rem', color: 'var(--color-text-light)' }}>
+                                Click to select a PDF file <span style={{ fontSize: '0.78rem' }}>(optional but recommended)</span>
+                            </div>
+                        )}
+                    </div>
+                    {docFile && (
+                        <button
+                            type="button"
+                            onClick={e => { e.stopPropagation(); onFileChange(null); if (fileRef.current) fileRef.current.value = ''; onBlur('docFile'); }}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', fontSize: '1rem', padding: '0' }}
+                            title="Remove file"
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
+                <input
+                    ref={fileRef}
+                    type="file"
+                    accept="application/pdf"
+                    style={{ display: 'none' }}
+                    onChange={e => {
+                        onFileChange(e.target.files?.[0] || null);
+                        onBlur('docFile');
+                    }}
+                />
+            </Field>
+
+            {/* Divider */}
+            <div style={{ borderTop: '1px dashed var(--color-muted-gold)', marginTop: '0.25rem' }} />
+        </div>
+    );
+};
+
+// ── License-type sub-forms ────────────────────────────────────────────────────
+const ResearchForm = ({ data, onChange }: {
+    data: any;
+    onChange: (k: string, v: string) => void;
+}) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         <div style={{ padding: '0.75rem 1rem', background: 'rgba(59,130,246,0.06)', border: '1px solid #3b82f6', borderRadius: '4px', fontSize: '0.85rem' }}>
             🔬 <strong>Research License</strong> — For academic/scientific use. Requires institutional affiliation and IRB/ethics approval.
         </div>
         <Field label="Lead Researcher Full Name" required>
-            <input style={inputStyle} required value={data.leadResearcher || ''} onChange={e => onChange('leadResearcher', e.target.value)} placeholder="Dr. Priya Sharma" />
-        </Field>
-        <Field label="Institution / University Name" required>
-            <input style={inputStyle} required value={data.institutionName || ''} onChange={e => onChange('institutionName', e.target.value)} placeholder="IIT Bombay, TISS, etc." />
+            <input style={baseInput} value={data.leadResearcher || ''} onChange={e => onChange('leadResearcher', e.target.value)} placeholder="Dr. Priya Sharma" />
         </Field>
         <Field label="Research Project Title" required>
-            <input style={inputStyle} required value={data.researchTitle || ''} onChange={e => onChange('researchTitle', e.target.value)} placeholder="Study on Warli Ethnobotanical Practices" />
+            <input style={baseInput} value={data.researchTitle || ''} onChange={e => onChange('researchTitle', e.target.value)} placeholder="Study on Warli Ethnobotanical Practices" />
         </Field>
         <Field label="Research Objective" required>
-            <textarea style={{ ...inputStyle, minHeight: '80px' }} required value={data.researchObjective || ''} onChange={e => onChange('researchObjective', e.target.value)} placeholder="Describe the academic objective and intended contribution..." />
+            <textarea style={{ ...baseInput, minHeight: '80px' }} value={data.researchObjective || ''} onChange={e => onChange('researchObjective', e.target.value)} placeholder="Describe the academic objective and intended contribution..." />
         </Field>
         <Field label="Detailed Purpose of Use" required>
-            <textarea style={{ ...inputStyle, minHeight: '80px' }} required value={data.purpose || ''} onChange={e => onChange('purpose', e.target.value)} placeholder="How specifically will you use this cultural asset in your research?" />
+            <textarea style={{ ...baseInput, minHeight: '80px' }} value={data.purpose || ''} onChange={e => onChange('purpose', e.target.value)} placeholder="How specifically will you use this cultural asset in your research?" />
         </Field>
-        <Field label="IRB / Ethics Board Reference or Approval Document">
-            <input style={inputStyle} value={data.irb_ethics_approval || ''} onChange={e => onChange('irb_ethics_approval', e.target.value)} placeholder="IRB-2024-xxxxx or document URL" />
+        <Field label="IRB / Ethics Board Reference">
+            <input style={baseInput} value={data.irb_ethics_approval || ''} onChange={e => onChange('irb_ethics_approval', e.target.value)} placeholder="IRB-2024-xxxxx or document URL" />
         </Field>
         <Field label="Expected Research Duration">
-            <input style={inputStyle} value={data.expectedDuration || ''} onChange={e => onChange('expectedDuration', e.target.value)} placeholder="e.g. 12 months (Jan 2025 – Dec 2025)" />
+            <input style={baseInput} value={data.expectedDuration || ''} onChange={e => onChange('expectedDuration', e.target.value)} placeholder="e.g. 12 months (Jan 2025 – Dec 2025)" />
         </Field>
         <Field label="Publication / Dissemination Plan">
-            <textarea style={{ ...inputStyle, minHeight: '60px' }} value={data.publicationPlan || ''} onChange={e => onChange('publicationPlan', e.target.value)} placeholder="Peer-reviewed journal, conference presentation, open access, etc." />
-        </Field>
-        <Field label="Supporting Documentation (URL or description)">
-            <input style={inputStyle} value={data.documentation || ''} onChange={e => onChange('documentation', e.target.value)} placeholder="Link to your institution letter, ethics cert, etc." />
+            <textarea style={{ ...baseInput, minHeight: '60px' }} value={data.publicationPlan || ''} onChange={e => onChange('publicationPlan', e.target.value)} placeholder="Peer-reviewed journal, conference presentation, open access, etc." />
         </Field>
     </div>
 );
@@ -68,31 +376,28 @@ const CommercialForm = ({ data, onChange }: { data: any; onChange: (k: string, v
             🏢 <strong>Commercial License</strong> — For product development, branding, or commercial exploitation. Revenue sharing with the originating community may apply.
         </div>
         <Field label="Company / Organization Name" required>
-            <input style={inputStyle} required value={data.companyName || ''} onChange={e => onChange('companyName', e.target.value)} placeholder="Acme Naturals Pvt. Ltd." />
+            <input style={baseInput} value={data.companyName || ''} onChange={e => onChange('companyName', e.target.value)} placeholder="Acme Naturals Pvt. Ltd." />
         </Field>
         <Field label="Company Registration Number">
-            <input style={inputStyle} value={data.companyRegistration || ''} onChange={e => onChange('companyRegistration', e.target.value)} placeholder="CIN / GST No." />
+            <input style={baseInput} value={data.companyRegistration || ''} onChange={e => onChange('companyRegistration', e.target.value)} placeholder="CIN No." />
         </Field>
         <Field label="Product / Service Name" required>
-            <input style={inputStyle} required value={data.productName || ''} onChange={e => onChange('productName', e.target.value)} placeholder="Product name using this cultural knowledge" />
+            <input style={baseInput} value={data.productName || ''} onChange={e => onChange('productName', e.target.value)} placeholder="Product name using this cultural knowledge" />
         </Field>
         <Field label="Detailed Description of Commercial Use" required>
-            <textarea style={{ ...inputStyle, minHeight: '90px' }} required value={data.commercialUseDescription || ''} onChange={e => onChange('commercialUseDescription', e.target.value)} placeholder="Describe exactly how this asset will be used in your product/service..." />
+            <textarea style={{ ...baseInput, minHeight: '90px' }} value={data.commercialUseDescription || ''} onChange={e => onChange('commercialUseDescription', e.target.value)} placeholder="Describe exactly how this asset will be used in your product/service..." />
         </Field>
         <Field label="Detailed Purpose" required>
-            <textarea style={{ ...inputStyle, minHeight: '70px' }} required value={data.purpose || ''} onChange={e => onChange('purpose', e.target.value)} placeholder="What business need does this fulfill?" />
+            <textarea style={{ ...baseInput, minHeight: '70px' }} value={data.purpose || ''} onChange={e => onChange('purpose', e.target.value)} placeholder="What business need does this fulfill?" />
         </Field>
         <Field label="Expected Annual Revenue from this use">
-            <input style={inputStyle} value={data.expectedRevenue || ''} onChange={e => onChange('expectedRevenue', e.target.value)} placeholder="e.g. ₹50 Lakhs – ₹1 Crore" />
+            <input style={baseInput} value={data.expectedRevenue || ''} onChange={e => onChange('expectedRevenue', e.target.value)} placeholder="e.g. ₹50 Lakhs – ₹1 Crore" />
         </Field>
         <Field label="Proposed Royalty / Revenue Share with Community">
-            <input style={inputStyle} value={data.proposedRoyaltyRate || ''} onChange={e => onChange('proposedRoyaltyRate', e.target.value)} placeholder="e.g. 5% of net revenue" />
+            <input style={baseInput} value={data.proposedRoyaltyRate || ''} onChange={e => onChange('proposedRoyaltyRate', e.target.value)} placeholder="e.g. 5% of net revenue" />
         </Field>
         <Field label="Community Benefit Plan">
-            <textarea style={{ ...inputStyle, minHeight: '70px' }} value={data.communityBenefitPlan || ''} onChange={e => onChange('communityBenefitPlan', e.target.value)} placeholder="How will the originating community directly benefit?" />
-        </Field>
-        <Field label="Supporting Documentation (URL or description)">
-            <input style={inputStyle} value={data.documentation || ''} onChange={e => onChange('documentation', e.target.value)} placeholder="Company registration docs, business proposal, etc." />
+            <textarea style={{ ...baseInput, minHeight: '70px' }} value={data.communityBenefitPlan || ''} onChange={e => onChange('communityBenefitPlan', e.target.value)} placeholder="How will the originating community directly benefit?" />
         </Field>
     </div>
 );
@@ -103,40 +408,33 @@ const MediaForm = ({ data, onChange }: { data: any; onChange: (k: string, v: str
             🎬 <strong>Media License</strong> — For films, documentaries, podcasts, journalism, or digital media featuring this sonic cultural asset.
         </div>
         <Field label="Project Title" required>
-            <input style={inputStyle} required value={data.projectTitle || ''} onChange={e => onChange('projectTitle', e.target.value)} placeholder="e.g. 'Echoes of the Forest' — Documentary Film" />
+            <input style={baseInput} value={data.projectTitle || ''} onChange={e => onChange('projectTitle', e.target.value)} placeholder="e.g. 'Echoes of the Forest' — Documentary Film" />
         </Field>
         <Field label="Media Type" required>
-            <select style={inputStyle} required value={data.mediaType || ''} onChange={e => onChange('mediaType', e.target.value)}>
+            <select style={baseInput} value={data.mediaType || ''} onChange={e => onChange('mediaType', e.target.value)}>
                 <option value="">Select media type...</option>
-                <option value="Feature Film">Feature Film</option>
-                <option value="Documentary">Documentary</option>
-                <option value="Short Film">Short Film</option>
-                <option value="Podcast / Audio Series">Podcast / Audio Series</option>
-                <option value="Music Album">Music Album</option>
-                <option value="Advertisement">Advertisement</option>
-                <option value="Digital Content / YouTube">Digital Content / YouTube</option>
-                <option value="News / Journalism">News / Journalism</option>
-                <option value="Other">Other</option>
+                <option>Feature Film</option><option>Documentary</option><option>Short Film</option>
+                <option>Podcast / Audio Series</option><option>Music Album</option>
+                <option>Advertisement</option><option>Digital Content / YouTube</option>
+                <option>News / Journalism</option><option>Other</option>
             </select>
         </Field>
         <Field label="Distribution Platform" required>
-            <input style={inputStyle} required value={data.distributionPlatform || ''} onChange={e => onChange('distributionPlatform', e.target.value)} placeholder="Netflix, YouTube, Spotify, Cinema, etc." />
+            <input style={baseInput} value={data.distributionPlatform || ''} onChange={e => onChange('distributionPlatform', e.target.value)} placeholder="Netflix, YouTube, Spotify, Cinema, etc." />
         </Field>
         <Field label="Detailed Purpose of Use" required>
-            <textarea style={{ ...inputStyle, minHeight: '80px' }} required value={data.purpose || ''} onChange={e => onChange('purpose', e.target.value)} placeholder="How will this asset appear / be used in the project?" />
+            <textarea style={{ ...baseInput, minHeight: '80px' }} value={data.purpose || ''} onChange={e => onChange('purpose', e.target.value)} placeholder="How will this asset appear / be used in the project?" />
         </Field>
         <Field label="Estimated Audience Reach">
-            <input style={inputStyle} value={data.estimatedAudience || ''} onChange={e => onChange('estimatedAudience', e.target.value)} placeholder="e.g. 500,000 viewers, global release" />
+            <input style={baseInput} value={data.estimatedAudience || ''} onChange={e => onChange('estimatedAudience', e.target.value)} placeholder="e.g. 500,000 viewers, global release" />
         </Field>
         <Field label="Attribution / Crediting Plan" required>
-            <textarea style={{ ...inputStyle, minHeight: '60px' }} required value={data.creditingPlan || ''} onChange={e => onChange('creditingPlan', e.target.value)} placeholder="How will the originating community and artists be credited?" />
-        </Field>
-        <Field label="Supporting Documentation (URL or description)">
-            <input style={inputStyle} value={data.documentation || ''} onChange={e => onChange('documentation', e.target.value)} placeholder="Project brief, broadcaster letter, press credentials, etc." />
+            <textarea style={{ ...baseInput, minHeight: '60px' }} value={data.creditingPlan || ''} onChange={e => onChange('creditingPlan', e.target.value)} placeholder="How will the originating community and artists be credited?" />
         </Field>
     </div>
 );
 
+// ── Main component ─────────────────────────────────────────────────────────────
 export const ApplyForLicense = () => {
     const { assetId } = useParams<{ assetId: string }>();
     const [searchParams] = useSearchParams();
@@ -148,57 +446,116 @@ export const ApplyForLicense = () => {
 
     const defaultType: LicenseType = assetType === 'SONIC' ? 'MEDIA' : 'RESEARCH';
     const [licenseType, setLicenseType] = useState<LicenseType>(defaultType);
+
+    // Common fields state
+    const [common, setCommon] = useState<CommonFields>({
+        fullName: '',
+        email: user?.email || '',
+        phone: '',
+        organizationName: '',
+        gstNumber: '',
+        intendedUse: '',
+    });
+    const [touched, setTouched] = useState<Set<string>>(new Set());
+    const [docFile, setDocFile] = useState<File | null>(null);
+    const [commonErrors, setCommonErrors] = useState<CommonErrors>({});
+
+    // Sub-form data
     const [formData, setFormData] = useState<Record<string, string>>({});
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
     const [previewDoc, setPreviewDoc] = useState<ApplicationData | null>(null);
 
-    const userName = user?.email?.split('@')[0] || 'Applicant';
-    const userEmail = user?.email || '';
+    // Re-validate whenever common fields or the file changes
+    useEffect(() => {
+        setCommonErrors(validateCommon(common, docFile));
+    }, [common, docFile]);
+
+    const handleCommonChange = (k: keyof CommonFields, v: string) => {
+        setCommon(prev => ({ ...prev, [k]: v }));
+    };
+
+    const handleBlur = (k: string) => {
+        setTouched(prev => new Set(prev).add(k));
+    };
 
     const handleFieldChange = (key: string, value: string) => {
         setFormData(prev => ({ ...prev, [key]: value }));
     };
 
-    // Build ApplicationData from the current form state
+    const isFormValid = Object.keys(commonErrors).length === 0;
+
+    // Build ApplicationData for PDF preview
     const buildDocData = (): ApplicationData => ({
-        applicantName: formData.leadResearcher || formData.companyName || userName,
-        organizationName: formData.institutionName || formData.companyName || '',
-        email: userEmail,
-        phone: formData.phone || '',
-        address: formData.address || '',
+        applicantName: common.fullName || formData.leadResearcher || formData.companyName || 'Applicant',
+        organizationName: common.organizationName || formData.institutionName || formData.companyName || '',
+        email: common.email || user?.email || '',
+        phone: common.phone || '',
+        address: '',
         assetTitle,
         communityName: communityName || 'Originating Community',
         licenseType,
-        purpose: formData.purpose || formData.commercialUseDescription || '',
+        purpose: formData.purpose || formData.commercialUseDescription || common.intendedUse || '',
         duration: formData.expectedDuration || '1 year',
-        documentation: formData.documentation || '',
-        signedDate: new Date().toLocaleDateString('en-IN', {
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric',
-        }),
+        documentation: docFile?.name || formData.documentation || '',
+        signedDate: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' }),
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formData.purpose?.trim()) {
-            setError('Please fill in the "Purpose" field.');
+
+        // Touch all common fields to surface errors
+        const allCommonKeys: (keyof CommonFields)[] = ['fullName', 'email', 'phone', 'organizationName', 'gstNumber', 'intendedUse'];
+        setTouched(new Set([...allCommonKeys, 'docFile']));
+
+        const errs = validateCommon(common, docFile);
+        if (Object.keys(errs).length > 0) {
+            setError('Please fix the highlighted errors before submitting.');
             return;
         }
+
+        if (!formData.purpose?.trim() && licenseType !== 'COMMERCIAL') {
+            setError('Please fill in the "Purpose of Use" field in the license section.');
+            return;
+        }
+
         setIsSubmitting(true);
         setError('');
+
         try {
+            let documentationFileId: string | undefined;
+
+            // Upload supporting document first if provided
+            if (docFile) {
+                const fd = new FormData();
+                fd.append('file', docFile);
+                const uploadRes = await apiClient.post<{ fileId: string }>('/storage/upload', fd, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
+                documentationFileId = uploadRes.data.fileId;
+            }
+
             await applyForLicense({
                 assetId: assetId!,
                 licenseType,
-                purpose: formData.purpose,
+                purpose: formData.purpose || formData.commercialUseDescription || common.intendedUse,
                 documentation: formData.documentation,
+                // New common applicant fields
+                fullName: common.fullName,
+                email: common.email,
+                phone: common.phone,
+                organizationName: common.organizationName,
+                gstNumber: common.gstNumber,
+                intendedUse: common.intendedUse,
+                ...(documentationFileId && { documentationFileId }),
+                // Sub-form specific extra fields
                 ...Object.fromEntries(
                     Object.entries(formData).filter(([k]) => k !== 'purpose' && k !== 'documentation')
-                )
-            } as any);
+                ),
+            });
+
             setSuccess(true);
         } catch (err: any) {
             setError(err.response?.data?.message || 'Submission failed. Please try again.');
@@ -207,7 +564,7 @@ export const ApplyForLicense = () => {
         }
     };
 
-    // ── Success screen ──
+    // ── Success screen ──────────────────────────────────────────────────────────
     if (success) {
         return (
             <div style={{ minHeight: '100vh', background: 'var(--color-parchment)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
@@ -218,139 +575,103 @@ export const ApplyForLicense = () => {
                         Your <strong>{licenseType}</strong> license application for <em>{assetTitle}</em> has been received and is now under admin review.
                     </p>
                     <p style={{ fontSize: '0.85rem', color: 'var(--color-text-light)', marginTop: '0.5rem' }}>
-                        You'll be notified of the decision. Track your applications in your dashboard.
+                        Track your application status in your dashboard.
                     </p>
-
-                    {/* Download document on success too */}
-                    <div style={{
-                        margin: '1.5rem 0',
-                        padding: '1rem 1.25rem',
-                        background: 'rgba(176,141,87,0.08)',
-                        border: '1px solid var(--color-muted-gold)',
-                        borderRadius: '6px',
-                        textAlign: 'left',
-                    }}>
+                    <div style={{ margin: '1.5rem 0', padding: '1rem 1.25rem', background: 'rgba(176,141,87,0.08)', border: '1px solid var(--color-muted-gold)', borderRadius: '6px', textAlign: 'left' }}>
                         <p style={{ fontSize: '0.85rem', color: 'var(--color-text-main)', margin: '0 0 0.75rem', fontWeight: 600 }}>
-                            📄 Want a copy of your application?
+                            📄 Download a copy of your application?
                         </p>
-                        <p style={{ fontSize: '0.8rem', color: 'var(--color-text-light)', margin: '0 0 0.75rem' }}>
-                            Download a branded PDF copy of your license application for your records.
-                        </p>
-                        <button
-                            type="button"
-                            className="minimal-btn"
-                            style={{ fontSize: '0.85rem' }}
-                            onClick={() => setPreviewDoc(buildDocData())}
-                        >
-                            ⬇ Preview & Download Application Document
+                        <button type="button" className="minimal-btn" style={{ fontSize: '0.85rem' }} onClick={() => setPreviewDoc(buildDocData())}>
+                            ⬇ Preview &amp; Download Application Document
                         </button>
                     </div>
-
                     <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                        <button className="primary-btn" onClick={() => navigate('/dashboard/licenses/mine')}>
-                            View My Applications
-                        </button>
-                        <button className="minimal-btn" onClick={() => navigate('/marketplace')}>
-                            Back to Marketplace
-                        </button>
+                        <button className="primary-btn" onClick={() => navigate('/dashboard/licenses/mine')}>View My Applications</button>
+                        <button className="minimal-btn" onClick={() => navigate('/marketplace')}>Back to Marketplace</button>
                     </div>
                 </div>
-
-                {previewDoc && (
-                    <LicenseApplicationDoc data={previewDoc} onClose={() => setPreviewDoc(null)} />
-                )}
+                {previewDoc && <LicenseApplicationDoc data={previewDoc} onClose={() => setPreviewDoc(null)} />}
             </div>
         );
     }
 
-    // ── Main form ──
+    // ── Main form ───────────────────────────────────────────────────────────────
     return (
         <div style={{ minHeight: '100vh', background: 'var(--color-parchment)', padding: '3rem 2rem' }}>
-            <div style={{ maxWidth: 700, margin: '0 auto' }}>
+            <div style={{ maxWidth: 760, margin: '0 auto' }}>
                 <button className="minimal-btn" style={{ marginBottom: '1.5rem', fontSize: '0.85rem' }} onClick={() => navigate(-1)}>
                     ← Back
                 </button>
 
                 <div className="framed-section" style={{ padding: '2rem' }}>
                     <h2 style={{ marginTop: 0 }}>License Application</h2>
-                    <p style={{ color: 'var(--color-text-light)' }}>
+                    <p style={{ color: 'var(--color-text-light)', marginBottom: '1.5rem' }}>
                         Applying for: <strong>{assetTitle}</strong>
                         {communityName && <span> — <em>{communityName}</em></span>}
                     </p>
 
                     {/* License type selector */}
-                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem', marginTop: '0.5rem' }}>
+                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
                         {assetType === 'BIO' && (
                             <>
-                                <button
-                                    type="button"
-                                    className={licenseType === 'RESEARCH' ? 'primary-btn' : 'minimal-btn'}
-                                    onClick={() => setLicenseType('RESEARCH')}
-                                >
+                                <button type="button" className={licenseType === 'RESEARCH' ? 'primary-btn' : 'minimal-btn'} onClick={() => setLicenseType('RESEARCH')}>
                                     🔬 Research License
                                 </button>
-                                <button
-                                    type="button"
-                                    className={licenseType === 'COMMERCIAL' ? 'primary-btn' : 'minimal-btn'}
-                                    onClick={() => setLicenseType('COMMERCIAL')}
-                                >
+                                <button type="button" className={licenseType === 'COMMERCIAL' ? 'primary-btn' : 'minimal-btn'} onClick={() => setLicenseType('COMMERCIAL')}>
                                     🏢 Commercial License
                                 </button>
                             </>
                         )}
                         {assetType === 'SONIC' && (
-                            <button type="button" className="primary-btn">
-                                🎬 Media License
-                            </button>
+                            <button type="button" className="primary-btn">🎬 Media License</button>
                         )}
                     </div>
 
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        {/* ── Common Identity Fields ── */}
+                        <CommonApplicantFields
+                            fields={common}
+                            errors={commonErrors}
+                            touched={touched}
+                            docFile={docFile}
+                            onFieldChange={handleCommonChange}
+                            onFileChange={setDocFile}
+                            onBlur={handleBlur}
+                        />
+
+                        {/* ── License-type specific fields ── */}
                         {licenseType === 'RESEARCH' && <ResearchForm data={formData} onChange={handleFieldChange} />}
                         {licenseType === 'COMMERCIAL' && <CommercialForm data={formData} onChange={handleFieldChange} />}
                         {licenseType === 'MEDIA' && <MediaForm data={formData} onChange={handleFieldChange} />}
 
+                        {/* Validation summary bar */}
+                        {!isFormValid && touched.size > 0 && (
+                            <div style={{
+                                padding: '0.75rem 1rem',
+                                background: 'rgba(239,68,68,0.06)',
+                                border: '1px solid #fca5a5',
+                                borderRadius: '4px',
+                                fontSize: '0.82rem',
+                                color: '#991b1b',
+                            }}>
+                                ⚠ Please complete all required fields correctly before submitting.
+                            </div>
+                        )}
+
                         {error && (
-                            <div style={{ marginTop: '1.5rem', padding: '0.75rem 1rem', background: 'rgba(239,68,68,0.08)', border: '1px solid #ef4444', borderRadius: '4px', color: '#7f1d1d', fontSize: '0.85rem' }}>
+                            <div style={{ padding: '0.75rem 1rem', background: 'rgba(239,68,68,0.08)', border: '1px solid #ef4444', borderRadius: '4px', color: '#7f1d1d', fontSize: '0.85rem' }}>
                                 ⚠ {error}
                             </div>
                         )}
 
-                        {/* ── Document Preview + Submit row ── */}
-                        <div style={{
-                            marginTop: '2rem',
-                            paddingTop: '1.5rem',
-                            borderTop: '1px solid var(--color-muted-gold)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '0.75rem',
-                        }}>
-                            {/* Document generation tip */}
-                            <div style={{
-                                padding: '0.9rem 1.1rem',
-                                background: 'rgba(176,141,87,0.06)',
-                                border: '1px solid var(--color-muted-gold)',
-                                borderRadius: '6px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                gap: '1rem',
-                                flexWrap: 'wrap',
-                            }}>
+                        {/* ── Footer: Preview + Submit ── */}
+                        <div style={{ paddingTop: '1.5rem', borderTop: '1px solid var(--color-muted-gold)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <div style={{ padding: '0.9rem 1.1rem', background: 'rgba(176,141,87,0.06)', border: '1px solid var(--color-muted-gold)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
                                 <div>
-                                    <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-burnt-umber)' }}>
-                                        📄 Generate Application Document
-                                    </p>
-                                    <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: 'var(--color-text-light)' }}>
-                                        Preview and download a DHAROHAR-branded PDF of your application before or after submitting.
-                                    </p>
+                                    <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-burnt-umber)' }}>📄 Generate Application Document</p>
+                                    <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: 'var(--color-text-light)' }}>Preview and download a DHAROHAR-branded PDF before submitting.</p>
                                 </div>
-                                <button
-                                    type="button"
-                                    className="minimal-btn"
-                                    style={{ fontSize: '0.82rem', flexShrink: 0 }}
-                                    onClick={() => setPreviewDoc(buildDocData())}
-                                >
+                                <button type="button" className="minimal-btn" style={{ fontSize: '0.82rem', flexShrink: 0 }} onClick={() => setPreviewDoc(buildDocData())}>
                                     Preview Document →
                                 </button>
                             </div>
@@ -358,20 +679,30 @@ export const ApplyForLicense = () => {
                             <button
                                 type="submit"
                                 className="primary-btn"
-                                disabled={isSubmitting}
-                                style={{ padding: '0.9rem', fontSize: '1rem' }}
+                                disabled={isSubmitting || (!isFormValid && touched.size > 0)}
+                                style={{
+                                    padding: '0.9rem',
+                                    fontSize: '1rem',
+                                    opacity: (!isFormValid && touched.size > 0) ? 0.55 : 1,
+                                    cursor: (!isFormValid && touched.size > 0) ? 'not-allowed' : 'pointer',
+                                    transition: 'opacity 200ms',
+                                }}
+                                title={!isFormValid && touched.size > 0 ? 'Complete all required fields to submit' : ''}
                             >
                                 {isSubmitting ? 'Submitting Application...' : 'Submit License Application'}
                             </button>
+
+                            {!isFormValid && touched.size > 0 && (
+                                <p style={{ textAlign: 'center', fontSize: '0.78rem', color: '#dc2626', margin: 0 }}>
+                                    {Object.keys(commonErrors).length} field{Object.keys(commonErrors).length > 1 ? 's' : ''} need attention above ↑
+                                </p>
+                            )}
                         </div>
                     </form>
                 </div>
             </div>
 
-            {/* PDF Preview Modal */}
-            {previewDoc && (
-                <LicenseApplicationDoc data={previewDoc} onClose={() => setPreviewDoc(null)} />
-            )}
+            {previewDoc && <LicenseApplicationDoc data={previewDoc} onClose={() => setPreviewDoc(null)} />}
         </div>
     );
 };

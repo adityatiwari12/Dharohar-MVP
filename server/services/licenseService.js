@@ -236,6 +236,12 @@ const resubmitLicense = async (licenseId, updateData, userId) => {
         if (updateData.documentation) license.documentation = updateData.documentation;
         if (updateData.documentationFileId) license.documentationFileId = updateData.documentationFileId;
 
+        // Update enhanced applicant identity fields (if resubmitting with corrections)
+        const identityFields = ['fullName', 'email', 'phone', 'organizationName', 'gstNumber', 'intendedUse'];
+        for (const field of identityFields) {
+            if (updateData[field]) license[field] = updateData[field];
+        }
+
         license.status = 'PENDING';
         license.adminComment = null;
         const savedLicense = await license.save({ session });

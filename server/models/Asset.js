@@ -64,6 +64,20 @@ const AssetSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
         index: true
+    },
+
+    // ── Gemini AI Governance Metadata ──────────────────────────
+    aiMetadata: {
+        domainClassification: { type: String },
+        riskTierSuggestion: { type: String, enum: ['LOW', 'MEDIUM', 'HIGH'] },
+        suggestedLicenseType: { type: String, enum: ['RESEARCH', 'COMMERCIAL', 'MEDIA'] },
+        summary: { type: String },
+        sensitiveContentFlag: { type: Boolean },
+        keywords: [{ type: String }]
+    },
+    aiProcessed: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

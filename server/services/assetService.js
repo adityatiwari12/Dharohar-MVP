@@ -2,20 +2,29 @@ const Asset = require('../models/Asset');
 const AuditLog = require('../models/AuditLog');
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
+const { generateAssetMetadata } = require('./geminiService');
 
 // Helper: attach computed mediaUrl to an asset plain object
 const withMediaUrl = (asset) => {
     const obj = asset.toObject ? asset.toObject() : asset;
     if (obj.mediaFileId) {
-        obj.mediaUrl = `/storage/${obj.mediaFileId}`;
+        // Must be an ABSOLUTE URL — relative paths get resolved against the
+        // frontend origin (e.g. localhost:5173) by the browser, not the backend.
+        const origin = process.env.SERVER_ORIGIN || `http://localhost:${process.env.PORT || 5000}`;
+        obj.mediaUrl = `${origin}/storage/${obj.mediaFileId}`;
     }
     return obj;
 };
+
 
 // Helper for arrays
 const withMediaUrls = (assets) => assets.map(withMediaUrl);
 
 const createAsset = async (assetData, userId, communityName) => {
+    // ── Step 1: Call Gemini AI (outside transaction — AI failure must never block DB write)
+    const { aiMetadata, aiProcessed } = await generateAssetMetadata(assetData);
+
+    // ── Step 2: Persist asset in a transaction
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
@@ -24,7 +33,9 @@ const createAsset = async (assetData, userId, communityName) => {
             createdBy: userId,
             communityName: communityName,
             approvalStatus: 'PENDING',
-            reviewComment: null
+            reviewComment: null,
+            aiMetadata: aiMetadata || undefined,
+            aiProcessed
         });
 
         if (assetData.mediaFileId) {
@@ -38,7 +49,7 @@ const createAsset = async (assetData, userId, communityName) => {
             userRole: 'community',
             action: 'ASSET_CREATE',
             resourceId: savedAsset._id,
-            details: `Asset created: ${savedAsset.title}`,
+            details: `Asset created: ${savedAsset.title} | AI processed: ${aiProcessed}`,
         }], { session });
 
         await session.commitTransaction();

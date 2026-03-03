@@ -22,7 +22,17 @@ export interface ApplyLicensePayload {
     licenseType: 'RESEARCH' | 'COMMERCIAL' | 'MEDIA';
     purpose: string;
     documentation?: string;
+    documentationFileId?: string;
     fee?: number;
+    // Common applicant identity fields
+    fullName?: string;
+    email?: string;
+    phone?: string;
+    organizationName?: string;
+    gstNumber?: string;
+    intendedUse?: string;
+    // Allow additional license-type specific fields
+    [key: string]: unknown;
 }
 
 export interface ResubmitPayload {

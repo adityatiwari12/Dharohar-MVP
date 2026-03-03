@@ -59,6 +59,14 @@ const LicenseSchema = new mongoose.Schema({
     estimatedAudience: { type: String },
     creditingPlan: { type: String },
 
+    // ── Applicant Identity (enhanced form) ─────────────────
+    applicantFullName: { type: String, trim: true, maxlength: 120 },
+    applicantEmail: { type: String, trim: true },
+    applicantPhone: { type: String, trim: true },
+    organizationName: { type: String, trim: true },
+    gstNumber: { type: String, trim: true, uppercase: true },
+    intendedUse: { type: String, maxlength: 3000 },
+
     // ── Financials ──────────────────────────────────────────
     fee: {
         type: Number,

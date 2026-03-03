@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiMic } from 'react-icons/fi';
+import { FiMic, FiCpu, FiAlertTriangle } from 'react-icons/fi';
 import { StatusBadge } from '../../components/StatusBadge';
 import { getPendingAssets, approveAsset, rejectAsset } from '../../services/assetService';
 import type { Asset } from '../../services/assetService';
@@ -144,6 +144,127 @@ export const ReviewDashboard = () => {
                                     </div>
                                 )}
                             </div>
+
+                            {/* ── AI Governance Insight Panel ─────────────────────── */}
+                            <div style={{
+                                marginTop: '1.5rem',
+                                border: '1px solid rgba(99,102,241,0.3)',
+                                borderRadius: '6px',
+                                background: 'rgba(99,102,241,0.04)',
+                                overflow: 'hidden'
+                            }}>
+                                <div style={{
+                                    padding: '0.6rem 1rem',
+                                    background: 'rgba(99,102,241,0.1)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    borderBottom: '1px solid rgba(99,102,241,0.2)'
+                                }}>
+                                    <FiCpu size={14} color="#6366f1" />
+                                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#6366f1', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                                        AI Governance Insight
+                                    </span>
+                                    <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--color-text-light)', fontStyle: 'italic' }}>
+                                        Advisory only — reviewer decision is final
+                                    </span>
+                                </div>
+
+                                {asset.aiProcessed && asset.aiMetadata ? (
+                                    <div style={{ padding: '1rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+
+                                        {/* Domain */}
+                                        <div>
+                                            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.2rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Domain</div>
+                                            <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-ink)' }}>
+                                                {asset.aiMetadata.domainClassification ?? '—'}
+                                            </div>
+                                        </div>
+
+                                        {/* Suggested License Type */}
+                                        <div>
+                                            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.2rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Suggested License</div>
+                                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#6366f1' }}>
+                                                {asset.aiMetadata.suggestedLicenseType ?? '—'}
+                                            </div>
+                                        </div>
+
+                                        {/* Risk Tier Suggestion */}
+                                        <div>
+                                            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI Risk Tier Suggestion</div>
+                                            {asset.aiMetadata.riskTierSuggestion ? (
+                                                <span style={{
+                                                    display: 'inline-block',
+                                                    padding: '0.2rem 0.7rem',
+                                                    borderRadius: '20px',
+                                                    fontSize: '0.78rem',
+                                                    fontWeight: 700,
+                                                    background: asset.aiMetadata.riskTierSuggestion === 'HIGH'
+                                                        ? 'rgba(239,68,68,0.12)'
+                                                        : asset.aiMetadata.riskTierSuggestion === 'MEDIUM'
+                                                            ? 'rgba(245,158,11,0.12)'
+                                                            : 'rgba(34,197,94,0.12)',
+                                                    color: asset.aiMetadata.riskTierSuggestion === 'HIGH'
+                                                        ? '#ef4444'
+                                                        : asset.aiMetadata.riskTierSuggestion === 'MEDIUM'
+                                                            ? '#d97706'
+                                                            : '#16a34a'
+                                                }}>
+                                                    {asset.aiMetadata.riskTierSuggestion} RISK
+                                                </span>
+                                            ) : '—'}
+                                        </div>
+
+                                        {/* Sensitive Content Flag */}
+                                        <div>
+                                            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sensitive Content</div>
+                                            {asset.aiMetadata.sensitiveContentFlag ? (
+                                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.82rem', fontWeight: 700, color: '#dc2626' }}>
+                                                    <FiAlertTriangle size={13} /> Yes — Review Carefully
+                                                </span>
+                                            ) : (
+                                                <span style={{ fontSize: '0.82rem', color: '#16a34a', fontWeight: 600 }}>✓ No sensitive content flagged</span>
+                                            )}
+                                        </div>
+
+                                        {/* AI Summary — full row */}
+                                        {asset.aiMetadata.summary && (
+                                            <div style={{ gridColumn: '1 / -1' }}>
+                                                <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI Summary</div>
+                                                <p style={{ fontSize: '0.87rem', color: 'var(--color-ink)', lineHeight: 1.6, margin: 0, fontStyle: 'italic' }}>
+                                                    {asset.aiMetadata.summary}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {/* Keywords — full row */}
+                                        {asset.aiMetadata.keywords && asset.aiMetadata.keywords.length > 0 && (
+                                            <div style={{ gridColumn: '1 / -1' }}>
+                                                <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Keywords</div>
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                                                    {asset.aiMetadata.keywords.map((kw, i) => (
+                                                        <span key={i} style={{
+                                                            padding: '0.2rem 0.65rem',
+                                                            background: 'rgba(99,102,241,0.1)',
+                                                            color: '#6366f1',
+                                                            borderRadius: '20px',
+                                                            fontSize: '0.78rem',
+                                                            fontWeight: 600
+                                                        }}>
+                                                            {kw}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div style={{ padding: '0.75rem 1rem', fontSize: '0.82rem', color: 'var(--color-text-light)', fontStyle: 'italic' }}>
+                                        AI metadata not generated for this submission.
+                                    </div>
+                                )}
+                            </div>
+                            {/* ────────────────────────────────────────────────────── */}
 
                             <div className="reviewer-input" style={{ marginTop: '1.5rem' }}>
                                 <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>

@@ -1,5 +1,14 @@
 import apiClient from './apiClient';
 
+export interface AiMetadata {
+    domainClassification?: string;
+    riskTierSuggestion?: 'LOW' | 'MEDIUM' | 'HIGH';
+    suggestedLicenseType?: 'RESEARCH' | 'COMMERCIAL' | 'MEDIA';
+    summary?: string;
+    sensitiveContentFlag?: boolean;
+    keywords?: string[];
+}
+
 export interface Asset {
     _id: string;
     type: 'BIO' | 'SONIC';
@@ -17,7 +26,10 @@ export interface Asset {
     transcript?: string;
     createdAt: string;
     updatedAt: string;
+    aiMetadata?: AiMetadata;
+    aiProcessed?: boolean;
 }
+
 
 export interface CreateAssetPayload {
     type: 'BIO' | 'SONIC';
