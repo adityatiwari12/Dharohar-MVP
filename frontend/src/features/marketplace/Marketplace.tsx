@@ -27,7 +27,7 @@ export const Marketplace = () => {
     const { user } = useAuth();
 
     // True for logged-out users OR users with no governance role
-    const isGeneralUser = !user || !['community', 'review', 'admin'].some(r => user.roles?.includes(r));
+    const isGeneralUser = !user || !(['community', 'review', 'admin'] as const).some(r => user.roles?.includes(r));
 
     // ── All loaded assets (accumulated across pages) ──────────────────
     const [assets, setAssets] = useState<Asset[]>([]);
