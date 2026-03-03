@@ -5,7 +5,7 @@ import { getPendingAssets, approveAsset, rejectAsset } from '../../services/asse
 import type { Asset } from '../../services/assetService';
 import { RoleMediaPlayer } from '../../components/RoleMediaPlayer';
 import { Loader } from '../../components/Loader/Loader';
-import notificationSound from '../../assets/Notification_Sound.wav';
+import { useNotificationSound } from '../../hooks/useNotificationSound';
 import './ReviewDashboard.css';
 
 export const ReviewDashboard = () => {
@@ -15,6 +15,7 @@ export const ReviewDashboard = () => {
     const [isActioning, setIsActioning] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [actionError, setActionError] = useState<Record<string, string>>({});
+    const playSound = useNotificationSound();
 
     useEffect(() => {
         const load = async () => {
@@ -34,9 +35,8 @@ export const ReviewDashboard = () => {
         setIsActioning(true);
         try {
             await approveAsset(id);
-            // Play sound on approval only
-            const audio = new Audio(notificationSound);
-            audio.play().catch(e => console.error('Audio playback failed', e));
+            // Play sound on approval
+            playSound();
             // Remove from queue
             setPendingAssets(prev => prev.filter(a => a._id !== id));
             setActionError(prev => ({ ...prev, [id]: '' }));
@@ -56,6 +56,7 @@ export const ReviewDashboard = () => {
         setIsActioning(true);
         try {
             await rejectAsset(id, comment);
+            playSound();
             setPendingAssets(prev => prev.filter(a => a._id !== id));
             setActionError(prev => ({ ...prev, [id]: '' }));
         } catch (e: any) {

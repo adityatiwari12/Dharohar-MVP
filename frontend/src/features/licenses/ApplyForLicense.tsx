@@ -5,6 +5,7 @@ import { LicenseApplicationDoc } from '../dashboard/LicenseApplicationDoc';
 import type { ApplicationData } from '../dashboard/LicenseApplicationDoc';
 import { useAuth } from '../auth/AuthContext';
 import apiClient from '../../services/apiClient';
+import { useNotificationSound } from '../../hooks/useNotificationSound';
 
 type LicenseType = 'RESEARCH' | 'COMMERCIAL' | 'MEDIA';
 
@@ -443,6 +444,7 @@ export const ApplyForLicense = () => {
     const assetType = searchParams.get('assetType') || 'BIO';
     const communityName = searchParams.get('community') || '';
     const navigate = useNavigate();
+    const playSound = useNotificationSound();
 
     const defaultType: LicenseType = assetType === 'SONIC' ? 'MEDIA' : 'RESEARCH';
     const [licenseType, setLicenseType] = useState<LicenseType>(defaultType);
@@ -556,6 +558,7 @@ export const ApplyForLicense = () => {
                 ),
             });
 
+            playSound();
             setSuccess(true);
         } catch (err: any) {
             setError(err.response?.data?.message || 'Submission failed. Please try again.');

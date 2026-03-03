@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { useAuth } from './AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import apiClient from '../../services/apiClient';
+import { useNotificationSound } from '../../hooks/useNotificationSound';
 
 export const Login = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
+    const playSound = useNotificationSound();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -24,6 +26,7 @@ export const Login = () => {
                 email: email,
                 roles: [user.role]
             });
+            playSound();
             navigate('/dashboard');
         } catch (err: any) {
             setError(err.response?.data?.message || 'Invalid credentials. Please try again.');

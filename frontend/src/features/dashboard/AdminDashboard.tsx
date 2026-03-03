@@ -4,7 +4,7 @@ import { getPendingLicenses, approveLicense, rejectLicense, requestModification 
 import type { License } from '../../services/licenseService';
 import { RoleMediaPlayer } from '../../components/RoleMediaPlayer';
 import { Loader } from '../../components/Loader/Loader';
-import notificationSound from '../../assets/Notification_Sound.wav';
+import { useNotificationSound } from '../../hooks/useNotificationSound';
 import './AdminDashboard.css';
 
 export const AdminDashboard = () => {
@@ -14,6 +14,7 @@ export const AdminDashboard = () => {
     const [error, setError] = useState<string | null>(null);
     const [adminComments, setAdminComments] = useState<Record<string, string>>({});
     const [actionError, setActionError] = useState<Record<string, string>>({});
+    const playSound = useNotificationSound();
 
     const load = async () => {
         setIsLoading(true);
@@ -33,8 +34,7 @@ export const AdminDashboard = () => {
         setIsActioning(true);
         try {
             await approveLicense(id);
-            const audio = new Audio(notificationSound);
-            audio.play().catch(e => console.error('Audio playback failed', e));
+            playSound();
             setLicenses(prev => prev.filter(l => l._id !== id));
         } catch (e: any) {
             setActionError(prev => ({ ...prev, [id]: e.response?.data?.message || 'Approval failed' }));
@@ -52,6 +52,7 @@ export const AdminDashboard = () => {
         setIsActioning(true);
         try {
             await rejectLicense(id, comment);
+            playSound();
             setLicenses(prev => prev.filter(l => l._id !== id));
         } catch (e: any) {
             setActionError(prev => ({ ...prev, [id]: e.response?.data?.message || 'Rejection failed' }));
@@ -68,6 +69,7 @@ export const AdminDashboard = () => {
         }
         try {
             await requestModification(id, comment);
+            playSound();
             setLicenses(prev => prev.filter(l => l._id !== id));
         } catch (e: any) {
             setActionError(prev => ({ ...prev, [id]: e.response?.data?.message || 'Failed to send modification request' }));
