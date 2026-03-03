@@ -4,6 +4,7 @@ import './Loader.css';
 
 interface LoaderProps {
     label?: string;
+    exiting?: boolean;
 }
 
 /**
@@ -17,7 +18,7 @@ interface LoaderProps {
  *   <Loader />                        — default, no label
  *   <Loader label="Processing..." />  — with label
  */
-export const Loader = ({ label }: LoaderProps) => {
+export const Loader = ({ label, exiting }: LoaderProps) => {
     const [show, setShow] = useState(false);
 
     // Defer mounting by one frame so the fade-in animation actually plays
@@ -29,7 +30,7 @@ export const Loader = ({ label }: LoaderProps) => {
     if (!show) return null;
 
     return (
-        <div className="dharohar-loader-overlay" role="status" aria-label={label || 'Loading'}>
+        <div className={`dharohar-loader-overlay ${exiting ? 'exiting' : ''}`} role="status" aria-label={label || 'Loading'}>
             <div className="dharohar-loader-symbol-wrap">
                 <div className="dharohar-loader-ring" aria-hidden="true" />
                 <img

@@ -10,6 +10,7 @@ import { ApplyForLicense } from './features/licenses/ApplyForLicense';
 import { LicensingGuide } from './features/licensing/LicensingGuide';
 import { Loader } from './components/Loader/Loader';
 import { PageTransition } from './components/Layout/PageTransition';
+import { SplashLoader } from './components/Loader/SplashLoader';
 import { useAuth } from './features/auth/AuthContext';
 
 /** Inner shell — has access to AuthContext so can show the global auth loader */
@@ -47,11 +48,13 @@ const AppShell = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <AppShell />
-      </BrowserRouter>
-    </AuthProvider>
+    <SplashLoader>
+      <AuthProvider>
+        <BrowserRouter>
+          <AppShell />
+        </BrowserRouter>
+      </AuthProvider>
+    </SplashLoader>
   );
 }
 
