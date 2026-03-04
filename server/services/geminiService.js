@@ -1,5 +1,4 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 
 const MAX_INLINE_BYTES = 10 * 1024 * 1024; // 10 MB cap for inline media

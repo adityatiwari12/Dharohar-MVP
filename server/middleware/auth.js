@@ -1,13 +1,16 @@
+/**
+ * Auth middleware — Cognito JWT verification + DynamoDB user lookup.
+ * Replaces the MongoDB User.findOne() call with userDynamoService.findByEmail().
+ */
 const { CognitoJwtVerifier } = require('aws-jwt-verify');
-const User = require('../models/User');
+const userDynamoService = require('../services/userDynamoService');
 const roleGuard = require('./roleGuard');
 
-// Setup Cognito JWT Verifier
-// It automatically handles JWKS downloading and caching.
+// Setup Cognito JWT Verifier (auto-handles JWKS downloading and caching)
 const verifier = CognitoJwtVerifier.create({
-    userPoolId: process.env.COGNITO_USER_POOL_ID || 'ap-south-1_xxxxxxxxx', // Set in .env
-    tokenUse: "id", // Or "access", depending on frontend usage. Cognito's IdToken has email.
-    clientId: process.env.COGNITO_CLIENT_ID || 'xxxxxxxxxxxxxxxxxxxxxxxxxx', // Set in .env
+    userPoolId: process.env.COGNITO_USER_POOL_ID || 'ap-south-1_xxxxxxxxx',
+    tokenUse: 'id',
+    clientId: process.env.COGNITO_CLIENT_ID || 'xxxxxxxxxxxxxxxxxxxxxxxxxx',
 });
 
 const protect = async (req, res, next) => {
@@ -27,21 +30,20 @@ const protect = async (req, res, next) => {
             return res.status(401).json({ error: 'Token verification failed or expired: ' + verifyErr.message });
         }
 
-        // 2. Find user in MongoDB using the email from Cognito's token
-        const email = payload.email || payload.username;
+        // 2. Find user profile in DynamoDB using the email from the Cognito token
+        const email = payload.email || payload['cognito:username'];
         if (!email) {
             return res.status(401).json({ error: 'Invalid token payload: missing email' });
         }
 
-        const user = await User.findOne({ email });
+        const user = await userDynamoService.findByEmail(email);
         if (!user) {
             return res.status(401).json({ error: 'User profile not found in database' });
         }
 
-        // 3. Attach DB user directly to request so roles and _id work
-        // Express routes expect req.user.id and req.user.role
+        // 3. Attach user profile to request (roles and id now come from DynamoDB)
         req.user = {
-            id: user._id.toString(),
+            id: user.id,
             role: user.role,
             communityName: user.communityName,
             email: user.email,
