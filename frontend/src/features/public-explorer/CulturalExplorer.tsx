@@ -7,18 +7,21 @@ import { getPublicAssets } from '../../services/assetService';
 import type { Asset } from '../../services/assetService';
 import { RoleMediaPlayer } from '../../components/RoleMediaPlayer';
 import { FiVolume2, FiVolumeX } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../../components/Navigation/LanguageSwitcher';
 import './CulturalExplorer.css';
 
 const PAGE_SIZE = 8;
 
 const AttributionBlock = ({ text }: { text: string }) => {
+    const { t } = useTranslation();
     const parts = text.split('\n');
     return (
         <div className="attribution-block">
             {parts.map((part, index) => (
                 <span key={index}>{part}</span>
             ))}
-            <strong>License Required for: Commercial / Research / Media Use</strong>
+            <strong>{t('marketplace.licenseRequired', 'License Required for: Commercial / Research / Media Use')}</strong>
         </div>
     );
 };
@@ -26,6 +29,7 @@ const AttributionBlock = ({ text }: { text: string }) => {
 export const CulturalExplorer = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { t } = useTranslation();
     const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
 
     // Video hero audio state
@@ -109,7 +113,9 @@ export const CulturalExplorer = () => {
 
             {/* ═══════════════ SECTION 1 — Video Hero ═══════════════ */}
             <section style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
-
+                <div style={{ position: 'absolute', top: '2rem', right: '2rem', zIndex: 10 }}>
+                    <LanguageSwitcher variant="dark" />
+                </div>
                 {/* Background video */}
                 <video
                     ref={videoRef}
@@ -158,7 +164,7 @@ export const CulturalExplorer = () => {
                         fontWeight: 600,
                         marginBottom: '1.25rem',
                         opacity: 0.9
-                    }}>India's Digital Cultural Archive</p>
+                    }}>{t('explorer.tagline', "India's Digital Cultural Archive")}</p>
 
                     <h1 style={{
                         fontFamily: 'var(--font-serif)',
@@ -188,7 +194,7 @@ export const CulturalExplorer = () => {
                         maxWidth: '620px',
                         lineHeight: 1.6,
                         textShadow: '0 2px 12px rgba(0,0,0,0.6)'
-                    }}>Safeguarding India's Wisdom with Digital Sovereignty</p>
+                    }}>{t('explorer.subtitle', "Safeguarding India's Wisdom with Digital Sovereignty")}</p>
 
                     <div style={{ display: 'flex', gap: '1rem', marginTop: '3rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                         <button
@@ -196,7 +202,7 @@ export const CulturalExplorer = () => {
                             style={{ padding: '0.85rem 2.5rem', fontSize: '0.95rem', letterSpacing: '0.05em' }}
                             onClick={() => navigate(user ? '/dashboard' : '/login')}
                         >
-                            {user ? 'Go to Dashboard' : 'Enter Platform'}
+                            {user ? t('explorer.goToDashboard', 'Go to Dashboard') : t('explorer.enterPlatform', 'Enter Platform')}
                         </button>
                         <button
                             className="minimal-btn"
@@ -210,14 +216,13 @@ export const CulturalExplorer = () => {
                             }}
                             onClick={() => navigate('/marketplace')}
                         >
-                            Browse Archives
+                            {t('explorer.browseArchives', 'Browse Archives')}
                         </button>
                     </div>
 
                     {!user && (
                         <p style={{ marginTop: '2rem', fontSize: '0.82rem', color: 'rgba(245,237,216,0.6)', fontFamily: 'var(--font-sans)' }}>
-                            New to the platform?{' '}
-                            <a href="/register" style={{ color: 'var(--color-muted-gold)', fontWeight: 600, textDecoration: 'underline' }}>Apply for Access</a>
+                            {t('explorer.newToApp', 'New to the platform?')} <a href="/register" style={{ color: 'var(--color-muted-gold)', fontWeight: 600, textDecoration: 'underline' }}>{t('explorer.applyForAccess', 'Apply for Access')}</a>
                         </p>
                     )}
                 </div>
@@ -265,7 +270,7 @@ export const CulturalExplorer = () => {
                     letterSpacing: '0.2em',
                     textTransform: 'uppercase'
                 }}>
-                    <span>Scroll</span>
+                    <span>{t('explorer.scroll', 'Scroll')}</span>
                     <div style={{
                         width: '1px',
                         height: '48px',
@@ -279,13 +284,13 @@ export const CulturalExplorer = () => {
 
                 {/* SECTION 2 - Introduction Banner */}
                 <section className="section-banner">
-                    <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Preserving and Licensing Indigenous Knowledge through Structured Governance</h2>
+                    <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{t('explorer.introHeading', 'Preserving and Licensing Indigenous Knowledge through Structured Governance')}</h2>
                     <div className="decorative-divider"><span className="diamond"></span></div>
                 </section>
 
                 {/* SECTION 3 - Featured Communities Grid */}
                 <section style={{ marginBottom: '6rem' }}>
-                    <h3 style={{ fontSize: '2rem', marginBottom: '2rem', textAlign: 'center' }}>Featured Communities</h3>
+                    <h3 style={{ fontSize: '2rem', marginBottom: '2rem', textAlign: 'center' }}>{t('explorer.featuredCommunities', 'Featured Communities')}</h3>
                     <div className="grid-layout">
                         {mockCommunities.map(community => (
                             <div
@@ -316,7 +321,7 @@ export const CulturalExplorer = () => {
                                         navigate(`/community/${community.id}`);
                                     }}
                                 >
-                                    View Full Dossier
+                                    {t('explorer.viewFullDossier', 'View Full Dossier')}
                                 </button>
                             </div>
                         ))}
@@ -325,21 +330,21 @@ export const CulturalExplorer = () => {
 
                 {/* SECTION 4 - Live Approved BIO Knowledge */}
                 <section style={{ marginBottom: '6rem' }}>
-                    <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem', textAlign: 'center' }}>Knowledge Archives</h3>
+                    <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem', textAlign: 'center' }}>{t('explorer.knowledgeArchives', 'Knowledge Archives')}</h3>
                     <p style={{ textAlign: 'center', color: 'var(--color-text-light)', marginBottom: '2rem', fontSize: '0.9rem' }}>
-                        Showing community-approved biological knowledge assets
+                        {t('explorer.knowledgeSubtitle', 'Showing community-approved biological knowledge assets')}
                     </p>
                     {assetsLoading ? (
-                        <p style={{ textAlign: 'center', color: 'var(--color-text-light)' }}>Loading approved archives...</p>
+                        <p style={{ textAlign: 'center', color: 'var(--color-text-light)' }}>{t('explorer.loadingArchives', 'Loading approved archives...')}</p>
                     ) : bioAssets.length === 0 ? (
-                        <p style={{ textAlign: 'center', color: 'var(--color-text-light)' }}>No approved biological assets yet. Submit assets through the community dashboard.</p>
+                        <p style={{ textAlign: 'center', color: 'var(--color-text-light)' }}>{t('explorer.noBioAssets', 'No approved biological assets yet.')}</p>
                     ) : (
                         <div className="grid-layout">
                             {bioAssets.map(asset => (
                                 <div key={asset._id} className="structured-card">
                                     <div className="card-header">
                                         <h4 className="card-title">{asset.title}</h4>
-                                        <span className="card-badge">{asset.riskTier || 'LOW'} RISK</span>
+                                        <span className="card-badge">{t(`common.risk${asset.riskTier ? asset.riskTier.charAt(0).toUpperCase() + asset.riskTier.slice(1).toLowerCase() : 'Low'}`, `${asset.riskTier || 'LOW'} RISK`)}</span>
                                     </div>
                                     <h5 className="card-subtitle">{asset.communityName}</h5>
                                     <p className="card-desc">{asset.description}</p>
@@ -350,17 +355,17 @@ export const CulturalExplorer = () => {
                                                 src={asset.mediaUrl}
                                                 mode="preview"
                                                 previewSeconds={30}
-                                                label="� Voice Recording Preview"
+                                                label={`🎵 ${t('explorer.voicePreview', 'Voice Recording Preview')}`}
                                             />
                                         </div>
                                     ) : (
                                         <div style={{ margin: '1rem 0', padding: '0.75rem', background: 'var(--color-bg-light)', border: '1px dashed var(--color-muted-gold)', borderRadius: '2px', textAlign: 'center', fontSize: '0.82rem', color: 'var(--color-text-light)' }}>
-                                            📄 Text-based knowledge record
+                                            📄 {t('explorer.textRecord', 'Text-based knowledge record')}
                                         </div>
                                     )}
 
                                     <button className="minimal-btn" onClick={() => navigate('/marketplace')} style={{ width: '100%' }}>
-                                        Apply for License
+                                        {t('explorer.applyForLicense', 'Apply for License')}
                                     </button>
                                     <AttributionBlock text={asset.recordeeName || asset.communityName} />
                                 </div>
@@ -369,19 +374,19 @@ export const CulturalExplorer = () => {
                     )}
                     {/* BIO sentinel */}
                     <div ref={bioSentinelRef} style={{ height: '1px' }} aria-hidden="true" />
-                    {isFetchingMore && <p style={{ textAlign: 'center', color: 'var(--color-text-light)', fontSize: '0.85rem' }}>Loading more archives...</p>}
+                    {isFetchingMore && <p style={{ textAlign: 'center', color: 'var(--color-text-light)', fontSize: '0.85rem' }}>{t('explorer.loadingMore', 'Loading more archives...')}</p>}
                 </section>
 
                 {/* SECTION 5 - Live Approved SONIC Assets */}
                 <section style={{ marginBottom: '4rem' }}>
-                    <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem', textAlign: 'center' }}>Sonic Archives</h3>
+                    <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem', textAlign: 'center' }}>{t('explorer.sonicArchives', 'Sonic Archives')}</h3>
                     <p style={{ textAlign: 'center', color: 'var(--color-text-light)', marginBottom: '2rem', fontSize: '0.9rem' }}>
-                        Showing community-approved musical and oral heritage assets
+                        {t('explorer.sonicSubtitle', 'Showing community-approved musical and oral heritage assets')}
                     </p>
                     {assetsLoading ? (
-                        <p style={{ textAlign: 'center', color: 'var(--color-text-light)' }}>Loading approved archives...</p>
+                        <p style={{ textAlign: 'center', color: 'var(--color-text-light)' }}>{t('explorer.loadingArchives', 'Loading approved archives...')}</p>
                     ) : sonicAssets.length === 0 ? (
-                        <p style={{ textAlign: 'center', color: 'var(--color-text-light)' }}>No approved sonic assets yet.</p>
+                        <p style={{ textAlign: 'center', color: 'var(--color-text-light)' }}>{t('explorer.noSonicAssets', 'No approved sonic assets yet.')}</p>
                     ) : (
                         <div className="grid-layout">
                             {sonicAssets.map(asset => (
@@ -399,17 +404,17 @@ export const CulturalExplorer = () => {
                                                 src={asset.mediaUrl}
                                                 mode="preview"
                                                 previewSeconds={30}
-                                                label="🎵 Sonic Preview (30s)"
+                                                label={`🎵 ${t('explorer.sonicPreview', 'Sonic Preview (30s)')}`}
                                             />
                                         </div>
                                     ) : (
                                         <div style={{ margin: '1rem 0', padding: '0.75rem', background: 'var(--color-bg-light)', border: '1px dashed var(--color-muted-gold)', borderRadius: '2px', textAlign: 'center', fontSize: '0.82rem', color: 'var(--color-text-light)' }}>
-                                            🎶 Preview available after licensing
+                                            🎶 {t('explorer.previewAvailable', 'Preview available after licensing')}
                                         </div>
                                     )}
 
                                     <button className="minimal-btn" onClick={() => navigate('/marketplace')} style={{ width: '100%' }}>
-                                        Apply for Media License
+                                        {t('explorer.applyForMediaLicense', 'Apply for Media License')}
                                     </button>
                                     <AttributionBlock text={asset.recordeeName || asset.communityName} />
                                 </div>
@@ -418,7 +423,7 @@ export const CulturalExplorer = () => {
                     )}
                     {/* SONIC sentinel */}
                     <div ref={sonicSentinelRef} style={{ height: '1px' }} aria-hidden="true" />
-                    {isFetchingMore && <p style={{ textAlign: 'center', color: 'var(--color-text-light)', fontSize: '0.85rem' }}>Loading more archives...</p>}
+                    {isFetchingMore && <p style={{ textAlign: 'center', color: 'var(--color-text-light)', fontSize: '0.85rem' }}>{t('explorer.loadingMore', 'Loading more archives...')}</p>}
                 </section>
 
             </main>

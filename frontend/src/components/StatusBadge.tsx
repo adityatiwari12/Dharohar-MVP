@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Status = 'PENDING' | 'APPROVED' | 'REJECTED' | 'MODIFICATION_REQUIRED';
 
@@ -9,7 +10,7 @@ interface StatusBadgeProps {
 
 const STATUS_CONFIG: Record<Status, { label: string; color: string; bg: string; border: string }> = {
     PENDING: {
-        label: 'Pending Review',
+        label: 'Pending',
         color: '#92400e',
         bg: 'rgba(251, 191, 36, 0.12)',
         border: '#f59e0b',
@@ -35,7 +36,11 @@ const STATUS_CONFIG: Record<Status, { label: string; color: string; bg: string; 
 };
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = '' }) => {
+    const { t } = useTranslation();
     const config = STATUS_CONFIG[status] || STATUS_CONFIG['PENDING'];
+
+    const translatedLabel = t(`status.${status.toLowerCase()}`, { defaultValue: config.label });
+
     return (
         <span
             className={`status-badge ${className}`}
@@ -65,7 +70,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
                     flexShrink: 0,
                 }}
             />
-            {config.label}
+            {translatedLabel}
         </span>
     );
 };

@@ -11,6 +11,7 @@ import { MySubmissions } from './MySubmissions';
 import { MyLicenses } from './MyLicenses';
 import { GeneralDashboard } from './GeneralDashboard';
 import { ProtectedRoute } from '../../routes/ProtectedRoute';
+import { useTranslation } from 'react-i18next';
 
 const AnimatedCounter = ({ value, label }: { value: number, label: string }) => {
     const [count, setCount] = useState(0);
@@ -56,6 +57,7 @@ const AnimatedCounter = ({ value, label }: { value: number, label: string }) => 
 const Overview = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     // Redirect governance users to their primary view
     if (user?.roles.includes('community')) {
@@ -74,19 +76,19 @@ const Overview = () => {
     return (
         <div style={{ animation: 'fadeIn var(--transition-slow)' }}>
             <div style={{ marginBottom: '3rem' }}>
-                <h3>Institutional Overview</h3>
-                <p style={{ color: 'var(--color-text-light)' }}>Live governance metrics for the DHAROHAR ecosystem.</p>
+                <h3>{t('dashboard.overviewTitle', 'Institutional Overview')}</h3>
+                <p style={{ color: 'var(--color-text-light)' }}>{t('dashboard.overviewDesc', 'Live governance metrics for the DHAROHAR ecosystem.')}</p>
             </div>
 
             <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', marginBottom: '4rem' }}>
-                <AnimatedCounter value={124} label="Total Submissions" />
-                <AnimatedCounter value={12} label="Pending Reviews" />
-                <AnimatedCounter value={89} label="Approved Licenses" />
+                <AnimatedCounter value={124} label={t('dashboard.totalSubmissions', 'Total Submissions')} />
+                <AnimatedCounter value={12} label={t('dashboard.pendingReviews', 'Pending Reviews')} />
+                <AnimatedCounter value={89} label={t('dashboard.approvedLicenses', 'Approved Licenses')} />
             </div>
 
             <div className="framed-section" style={{ padding: '2rem' }}>
-                <h4>Governance Notice</h4>
-                <p>Welcome back, <strong>{user?.roles[0]}</strong>. Your account is verified for the DHAROHAR governance framework. Please use the sidebar to access role-specific actions.</p>
+                <h4>{t('dashboard.governanceNotice', 'Governance Notice')}</h4>
+                <p>{t('dashboard.welcomeBack', 'Welcome back')}, <strong>{user?.roles[0]}</strong>. {t('dashboard.accountVerified', 'Your account is verified for the DHAROHAR governance framework. Please use the sidebar to access role-specific actions.')}</p>
             </div>
 
             {/* Licensing Guide Widget */}
@@ -101,14 +103,14 @@ const Overview = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
                     <div style={{ flex: 1 }}>
                         <h4 style={{ margin: '0 0 0.75rem', fontSize: '1.1rem', color: 'var(--color-burnt-umber)' }}>
-                            📜 Understanding Licensing
+                            📜 {t('dashboard.understandingLicensing', 'Understanding Licensing')}
                         </h4>
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                             {[
-                                '4 license types: Research, Commercial, Media & Music',
-                                'Fees range from ₹10,000 to ₹50,00,000',
-                                'Communities receive 80% of all license fees and royalties',
-                                'Approval takes 2–5 business days',
+                                t('dashboard.licenseBenefit1', '4 license types: Research, Commercial, Media & Music'),
+                                t('dashboard.licenseBenefit2', 'Fees range from ₹10,000 to ₹50,00,000'),
+                                t('dashboard.licenseBenefit3', 'Communities receive 80% of all license fees and royalties'),
+                                t('dashboard.licenseBenefit4', 'Approval takes 2–5 business days'),
                             ].map(item => (
                                 <li key={item} style={{ fontSize: '0.85rem', color: 'var(--color-text-main)', display: 'flex', gap: '0.5rem' }}>
                                     <span style={{ color: 'var(--color-terracotta)', fontWeight: 700 }}>•</span>
@@ -122,7 +124,7 @@ const Overview = () => {
                         onClick={() => navigate('/licensing-guide')}
                         style={{ whiteSpace: 'nowrap', alignSelf: 'flex-end' }}
                     >
-                        View Full Guide →
+                        {t('dashboard.viewFullGuide', 'View Full Guide →')}
                     </button>
                 </div>
             </div>
@@ -131,26 +133,27 @@ const Overview = () => {
 };
 
 export const DashboardRouter = () => {
+    const { t } = useTranslation();
     return (
         <Routes>
             {/* The root dispatcher (resolves correct workspace based on role) */}
-            <Route path="/" element={<DashboardLayout title="Overview"><Overview /></DashboardLayout>} />
+            <Route path="/" element={<DashboardLayout title={t('nav.dashboard', 'Overview')}><Overview /></DashboardLayout>} />
 
             {/* Community Role */}
             <Route element={<ProtectedRoute allowedRoles={['community']} />}>
-                <Route path="/assets/new" element={<DashboardLayout title="Upload Asset"><UploadAsset /></DashboardLayout>} />
+                <Route path="/assets/new" element={<DashboardLayout title={t('nav.uploadAsset', 'Upload Asset')}><UploadAsset /></DashboardLayout>} />
                 <Route path="/assets/mine" element={<MySubmissions />} />
             </Route>
 
             {/* Review Role */}
             <Route element={<ProtectedRoute allowedRoles={['review']} />}>
-                <Route path="/review-queue" element={<DashboardLayout title="Review Queue"><ReviewDashboard /></DashboardLayout>} />
+                <Route path="/review-queue" element={<DashboardLayout title={t('nav.reviewQueue', 'Review Queue')}><ReviewDashboard /></DashboardLayout>} />
                 <Route path="/review-history" element={<ReviewHistory />} />
             </Route>
 
             {/* Admin Role */}
             <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-                <Route path="/license-requests" element={<DashboardLayout title="License Requests"><AdminDashboard /></DashboardLayout>} />
+                <Route path="/license-requests" element={<DashboardLayout title={t('nav.licenseRequests', 'License Requests')}><AdminDashboard /></DashboardLayout>} />
                 <Route path="/license-history" element={<LicenseHistory />} />
             </Route>
 

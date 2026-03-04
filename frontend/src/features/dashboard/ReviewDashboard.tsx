@@ -6,9 +6,11 @@ import type { Asset } from '../../services/assetService';
 import { RoleMediaPlayer } from '../../components/RoleMediaPlayer';
 import { Loader } from '../../components/Loader/Loader';
 import { useNotificationSound } from '../../hooks/useNotificationSound';
+import { useTranslation } from 'react-i18next';
 import './ReviewDashboard.css';
 
 export const ReviewDashboard = () => {
+    const { t } = useTranslation();
     const [pendingAssets, setPendingAssets] = useState<Asset[]>([]);
     const [reviewComments, setReviewComments] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(true);
@@ -23,7 +25,7 @@ export const ReviewDashboard = () => {
                 const data = await getPendingAssets();
                 setPendingAssets(data);
             } catch (e: any) {
-                setError(e.response?.data?.message || 'Failed to load review queue. Is the server running?');
+                setError(e.response?.data?.message || t('review.loadFailed', 'Failed to load review queue. Is the server running?'));
             } finally {
                 setIsLoading(false);
             }
@@ -41,7 +43,7 @@ export const ReviewDashboard = () => {
             setPendingAssets(prev => prev.filter(a => a._id !== id));
             setActionError(prev => ({ ...prev, [id]: '' }));
         } catch (e: any) {
-            setActionError(prev => ({ ...prev, [id]: e.response?.data?.message || 'Approve failed' }));
+            setActionError(prev => ({ ...prev, [id]: e.response?.data?.message || t('review.approveFailed', 'Approve failed') }));
         } finally {
             setIsActioning(false);
         }
@@ -50,7 +52,7 @@ export const ReviewDashboard = () => {
     const handleReject = async (id: string) => {
         const comment = reviewComments[id] || '';
         if (!comment.trim()) {
-            setActionError(prev => ({ ...prev, [id]: 'A review comment is required to reject a submission.' }));
+            setActionError(prev => ({ ...prev, [id]: t('review.rejectReasonRequired', 'A review comment is required to reject a submission.') }));
             return;
         }
         setIsActioning(true);
@@ -60,7 +62,7 @@ export const ReviewDashboard = () => {
             setPendingAssets(prev => prev.filter(a => a._id !== id));
             setActionError(prev => ({ ...prev, [id]: '' }));
         } catch (e: any) {
-            setActionError(prev => ({ ...prev, [id]: e.response?.data?.message || 'Reject failed' }));
+            setActionError(prev => ({ ...prev, [id]: e.response?.data?.message || t('review.rejectFailed', 'Reject failed') }));
         } finally {
             setIsActioning(false);
         }
@@ -68,15 +70,15 @@ export const ReviewDashboard = () => {
 
     return (
         <div className="review-dashboard">
-            {isActioning && <Loader label="Processing decision..." />}
+            {isActioning && <Loader label={t('review.processingDecision', 'Processing decision...')} />}
             <header className="dashboard-header-inner">
-                <h3>Asset Review Queue</h3>
-                <p>Institutional verification of tribal metadata and cultural integrity. All decisions are final and server-enforced.</p>
+                <h3>{t('review.header', 'Asset Review Queue')}</h3>
+                <p>{t('review.headerDescription', 'Institutional verification of tribal metadata and cultural integrity. All decisions are final and server-enforced.')}</p>
             </header>
 
             {isLoading && (
                 <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-light)' }}>
-                    Loading review queue...
+                    {t('review.loadingQueue', 'Loading review queue...')}
                 </div>
             )}
 
@@ -90,7 +92,7 @@ export const ReviewDashboard = () => {
                 {!isLoading && !error && pendingAssets.length === 0 && (
                     <div className="empty-state">
                         <StatusBadge status="APPROVED" />
-                        <p>No records awaiting verification. The queue is clear.</p>
+                        <p>{t('review.emptyQueue', 'No records awaiting verification. The queue is clear.')}</p>
                     </div>
                 )}
 
@@ -107,11 +109,11 @@ export const ReviewDashboard = () => {
                                     DHAROHAR-{asset.type}
                                 </span>
                                 {asset.riskTier && (
-                                    <span className={`tag status ${asset.riskTier?.toLowerCase()}`}>{asset.riskTier} RISK</span>
+                                    <span className={`tag status ${asset.riskTier?.toLowerCase()}`}>{asset.riskTier ? t(`common.risk${asset.riskTier.charAt(0).toUpperCase() + asset.riskTier.slice(1).toLowerCase()}`) : 'Risk'} ROLE</span>
                                 )}
                             </div>
                             <div style={{ fontSize: '0.8rem', color: 'var(--color-text-light)' }}>
-                                {new Date(asset.createdAt).toLocaleString('en-IN')}
+                                {new Date(asset.createdAt).toLocaleString()}
                             </div>
                         </div>
 
@@ -121,7 +123,7 @@ export const ReviewDashboard = () => {
 
                             {asset.createdBy && (
                                 <p style={{ fontSize: '0.85rem', color: 'var(--color-text-light)', marginTop: '0.25rem' }}>
-                                    Submitted by: <strong>{(asset.createdBy as any).name}</strong> ({(asset.createdBy as any).email})
+                                    {t('review.submittedBy', 'Submitted by:')} <strong>{(asset.createdBy as any).name}</strong> ({(asset.createdBy as any).email})
                                 </p>
                             )}
 
@@ -134,13 +136,13 @@ export const ReviewDashboard = () => {
                                         <RoleMediaPlayer
                                             src={asset.mediaUrl}
                                             mode="full"
-                                            label={asset.type === 'SONIC' ? '🎵 Sonic Archive — Listen before reviewing:' : '🎙 Voice Archive — Listen before reviewing:'}
+                                            label={asset.type === 'SONIC' ? `🎵 ${t('review.listenSonic', 'Sonic Archive — Listen before reviewing:')}` : `🎙 ${t('review.listenVoice', 'Voice Archive — Listen before reviewing:')}`}
                                         />
                                     </div>
                                 ) : (
                                     <div className="media-verification" style={{ display: 'flex', gap: '1rem' }}>
                                         <div className="media-status-pill" style={{ opacity: 0.5 }}>
-                                            <FiMic /> No media file uploaded
+                                            <FiMic /> {t('review.noMediaUpload', 'No media file uploaded')}
                                         </div>
                                     </div>
                                 )}
@@ -164,10 +166,10 @@ export const ReviewDashboard = () => {
                                 }}>
                                     <FiCpu size={14} color="#6366f1" />
                                     <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#6366f1', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                                        AI Governance Insight
+                                        {t('review.aiInsightHeader', 'AI Governance Insight')}
                                     </span>
                                     <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--color-text-light)', fontStyle: 'italic' }}>
-                                        Advisory only — reviewer decision is final
+                                        {t('review.advisoryOnly', 'Advisory only — reviewer decision is final')}
                                     </span>
                                 </div>
 
@@ -176,7 +178,7 @@ export const ReviewDashboard = () => {
 
                                         {/* Domain */}
                                         <div>
-                                            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.2rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Domain</div>
+                                            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.2rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('review.aiDomain', 'Domain')}</div>
                                             <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-ink)' }}>
                                                 {asset.aiMetadata.domainClassification ?? '—'}
                                             </div>
@@ -184,7 +186,7 @@ export const ReviewDashboard = () => {
 
                                         {/* Suggested License Type */}
                                         <div>
-                                            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.2rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Suggested License</div>
+                                            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.2rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('review.aiSuggestedLicense', 'Suggested License')}</div>
                                             <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#6366f1' }}>
                                                 {asset.aiMetadata.suggestedLicenseType ?? '—'}
                                             </div>
@@ -192,7 +194,7 @@ export const ReviewDashboard = () => {
 
                                         {/* Risk Tier Suggestion */}
                                         <div>
-                                            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI Risk Tier Suggestion</div>
+                                            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('review.aiRiskTierSuggestion', 'AI Risk Tier Suggestion')}</div>
                                             {asset.aiMetadata.riskTierSuggestion ? (
                                                 <span style={{
                                                     display: 'inline-block',
@@ -211,27 +213,27 @@ export const ReviewDashboard = () => {
                                                             ? '#d97706'
                                                             : '#16a34a'
                                                 }}>
-                                                    {asset.aiMetadata.riskTierSuggestion} RISK
+                                                    {asset.aiMetadata.riskTierSuggestion ? t(`common.risk${asset.aiMetadata.riskTierSuggestion.charAt(0).toUpperCase() + asset.aiMetadata.riskTierSuggestion.slice(1).toLowerCase()}`) : 'Risk'} ROLE
                                                 </span>
                                             ) : '—'}
                                         </div>
 
                                         {/* Sensitive Content Flag */}
                                         <div>
-                                            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sensitive Content</div>
+                                            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('review.sensitiveContent', 'Sensitive Content')}</div>
                                             {asset.aiMetadata.sensitiveContentFlag ? (
                                                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.82rem', fontWeight: 700, color: '#dc2626' }}>
-                                                    <FiAlertTriangle size={13} /> Yes — Review Carefully
+                                                    <FiAlertTriangle size={13} /> {t('review.sensitiveYes', 'Yes — Review Carefully')}
                                                 </span>
                                             ) : (
-                                                <span style={{ fontSize: '0.82rem', color: '#16a34a', fontWeight: 600 }}>✓ No sensitive content flagged</span>
+                                                <span style={{ fontSize: '0.82rem', color: '#16a34a', fontWeight: 600 }}>✓ {t('review.sensitiveNo', 'No sensitive content flagged')}</span>
                                             )}
                                         </div>
 
                                         {/* AI Summary — full row */}
                                         {asset.aiMetadata.summary && (
                                             <div style={{ gridColumn: '1 / -1' }}>
-                                                <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI Summary</div>
+                                                <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('review.aiSummary', 'AI Summary')}</div>
                                                 <p style={{ fontSize: '0.87rem', color: 'var(--color-ink)', lineHeight: 1.6, margin: 0, fontStyle: 'italic' }}>
                                                     {asset.aiMetadata.summary}
                                                 </p>
@@ -241,7 +243,7 @@ export const ReviewDashboard = () => {
                                         {/* Keywords — full row */}
                                         {asset.aiMetadata.keywords && asset.aiMetadata.keywords.length > 0 && (
                                             <div style={{ gridColumn: '1 / -1' }}>
-                                                <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Keywords</div>
+                                                <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-light)', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('common.keywordsTitle', 'Keywords')}</div>
                                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                                                     {asset.aiMetadata.keywords.map((kw, i) => (
                                                         <span key={i} style={{
@@ -261,7 +263,7 @@ export const ReviewDashboard = () => {
                                     </div>
                                 ) : (
                                     <div style={{ padding: '0.75rem 1rem', fontSize: '0.82rem', color: 'var(--color-text-light)', fontStyle: 'italic' }}>
-                                        AI metadata not generated for this submission.
+                                        {t('review.aiMetadataNotGenerated', 'AI metadata not generated for this submission.')}
                                     </div>
                                 )}
                             </div>
@@ -269,10 +271,10 @@ export const ReviewDashboard = () => {
 
                             <div className="reviewer-input" style={{ marginTop: '1.5rem' }}>
                                 <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>
-                                    Review Comment <span style={{ color: '#ef4444' }}>*Required for Rejection</span>
+                                    {t('review.reviewComment', 'Review Comment')} <span style={{ color: '#ef4444' }}>*{t('review.requiredForRejection', 'Required for Rejection')}</span>
                                 </label>
                                 <textarea
-                                    placeholder="Add comments regarding cultural sensitivity, metadata accuracy, or rejection reason..."
+                                    placeholder={t('review.commentPlaceholder', 'Add comments regarding cultural sensitivity, metadata accuracy, or rejection reason...')}
                                     style={{ width: '100%', padding: '0.75rem', border: '1px solid var(--color-muted-gold)', borderRadius: '2px', minHeight: '80px' }}
                                     value={reviewComments[asset._id] || ''}
                                     onChange={e => setReviewComments(prev => ({ ...prev, [asset._id]: e.target.value }))}
@@ -291,13 +293,13 @@ export const ReviewDashboard = () => {
                                 className="minimal-btn danger-text"
                                 onClick={() => handleReject(asset._id)}
                             >
-                                Reject Submission
+                                {t('review.rejectSubmission', 'Reject Submission')}
                             </button>
                             <button
                                 className="primary-btn"
                                 onClick={() => handleApprove(asset._id)}
                             >
-                                Approve for Archive
+                                {t('review.approveSubmission', 'Approve for Archive')}
                             </button>
                         </div>
                     </div>

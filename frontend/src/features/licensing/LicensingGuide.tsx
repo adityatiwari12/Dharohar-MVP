@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { LicensingInfoSection } from '../marketplace/LicensingInfoSection';
 import { BackButton } from '../../components/Navigation/BackButton';
+import { useTranslation } from 'react-i18next';
 
 export const LicensingGuide = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const handleApply = () => navigate('/marketplace');
@@ -14,10 +16,10 @@ export const LicensingGuide = () => {
 
                 <header style={{ textAlign: 'center', marginBottom: '3rem' }}>
                     <h2 style={{ fontSize: '2.25rem', color: 'var(--color-burnt-umber)' }}>
-                        📜 Licensing Framework Guide
+                        📜 {t('licensingGuide.title', 'Licensing Framework Guide')}
                     </h2>
                     <p style={{ color: 'var(--color-text-light)', maxWidth: '600px', margin: '1rem auto 0', fontSize: '0.95rem' }}>
-                        Understand how cultural knowledge assets are licensed through DHAROHAR's structured governance framework.
+                        {t('licensingGuide.subtitle', 'Understand how cultural knowledge assets are licensed through DHAROHAR\'s structured governance framework.')}
                     </p>
                 </header>
 
@@ -31,10 +33,10 @@ export const LicensingGuide = () => {
                         marginBottom: '1.5rem'
                     }}>
                         <h3 style={{ color: '#388E3C', margin: 0, fontFamily: 'var(--font-serif)' }}>
-                            🌿 Biological Knowledge (BIO) Licenses
+                            {t('licensingGuide.bioTitle', '🌿 Biological Knowledge (BIO) Licenses')}
                         </h3>
                         <p style={{ color: 'var(--color-text-light)', margin: '0.35rem 0 0', fontSize: '0.9rem' }}>
-                            For medicinal plants, agricultural techniques, ecological wisdom, and ritual practices.
+                            {t('licensingGuide.bioDesc', 'For medicinal plants, agricultural techniques, ecological wisdom, and ritual practices.')}
                         </p>
                     </div>
                     <LicensingInfoSection assetType="BIO" onApply={handleApply} />
@@ -50,10 +52,10 @@ export const LicensingGuide = () => {
                         marginBottom: '1.5rem'
                     }}>
                         <h3 style={{ color: '#7B1FA2', margin: 0, fontFamily: 'var(--font-serif)' }}>
-                            🎶 Sonic Heritage (SONIC) Licenses
+                            {t('licensingGuide.sonicTitle', '🎶 Sonic Heritage (SONIC) Licenses')}
                         </h3>
                         <p style={{ color: 'var(--color-text-light)', margin: '0.35rem 0 0', fontSize: '0.9rem' }}>
-                            For folk music, ritual chants, oral histories, and ceremonial performances.
+                            {t('licensingGuide.sonicDesc', 'For folk music, ritual chants, oral histories, and ceremonial performances.')}
                         </p>
                     </div>
                     <LicensingInfoSection assetType="SONIC" onApply={handleApply} />

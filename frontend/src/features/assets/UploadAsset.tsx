@@ -5,12 +5,14 @@ import { submitAsset } from '../../services/assetService';
 import apiClient from '../../services/apiClient';
 import { Loader } from '../../components/Loader/Loader';
 import { HeritageAudioPlayer } from './HeritageAudioPlayer';
+import { useTranslation } from 'react-i18next';
 import './UploadAsset.css';
 
 type SubmissionType = 'BIO' | 'SONIC' | null;
 type RecordingType = 'AUDIO' | 'VIDEO' | null;
 
 export const UploadAsset = () => {
+    const { t } = useTranslation();
     const [step, setStep] = useState(1);
     const [type, setType] = useState<SubmissionType>(null);
     const [formData, setFormData] = useState<any>({
@@ -23,7 +25,7 @@ export const UploadAsset = () => {
         performanceContext: 'FESTIVAL',
         lyrics: '',
         culturalMeaning: '',
-        location: 'Detecting...',
+        location: t('upload.detecting', 'Detecting...'),
         timestamp: new Date().toLocaleString()
     });
 
@@ -47,10 +49,10 @@ export const UploadAsset = () => {
 
     const detectLocation = () => {
         setIsLocating(true);
-        setFormData((prev: any) => ({ ...prev, location: 'Searching for precise coordinates...' }));
+        setFormData((prev: any) => ({ ...prev, location: t('upload.searchingCoords', 'Searching for precise coordinates...') }));
 
         if (!navigator.geolocation) {
-            setFormData((prev: any) => ({ ...prev, location: 'Geolocation not supported' }));
+            setFormData((prev: any) => ({ ...prev, location: t('upload.geoNotSupported', 'Geolocation not supported') }));
             setIsLocating(false);
             return;
         }
@@ -66,7 +68,7 @@ export const UploadAsset = () => {
             },
             (error) => {
                 console.error("Geolocation error:", error);
-                setFormData((prev: any) => ({ ...prev, location: 'Permission denied or timed out' }));
+                setFormData((prev: any) => ({ ...prev, location: t('upload.geoDenied', 'Permission denied or timed out') }));
                 setIsLocating(false);
             },
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
@@ -80,15 +82,14 @@ export const UploadAsset = () => {
         }
     }, [step]);
 
-    // Cleanup object URLs
+    // Cleanup streams on unmount only (do NOT revoke mediaUrl early — it's still in use by the player)
     useEffect(() => {
         return () => {
-            if (mediaUrl) URL.revokeObjectURL(mediaUrl);
             if (streamRef.current) {
                 streamRef.current.getTracks().forEach(track => track.stop());
             }
         };
-    }, [mediaUrl]);
+    }, []);
 
     const handleTypeSelect = (selectedType: SubmissionType) => {
         setType(selectedType);
@@ -105,7 +106,17 @@ export const UploadAsset = () => {
                 videoPreviewRef.current.srcObject = stream;
             }
 
-            const mediaRecorder = new MediaRecorder(stream);
+            // Pick a MIME type the browser actually supports
+            const preferredMime = recType === 'VIDEO'
+                ? (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus') ? 'video/webm;codecs=vp9,opus' :
+                    MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : '')
+                : (MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' :
+                    MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' :
+                        MediaRecorder.isTypeSupported('audio/ogg;codecs=opus') ? 'audio/ogg;codecs=opus' : '');
+
+            const mediaRecorder = preferredMime
+                ? new MediaRecorder(stream, { mimeType: preferredMime })
+                : new MediaRecorder(stream);
             mediaRecorderRef.current = mediaRecorder;
             audioChunksRef.current = [];
 
@@ -116,7 +127,9 @@ export const UploadAsset = () => {
             };
 
             mediaRecorder.onstop = () => {
-                const blob = new Blob(audioChunksRef.current, { type: recType === 'VIDEO' ? 'video/mp4' : 'audio/wav' });
+                // Use the recorder's actual mimeType — never guess 'audio/wav'
+                const actualMime = mediaRecorder.mimeType || (recType === 'VIDEO' ? 'video/webm' : 'audio/webm');
+                const blob = new Blob(audioChunksRef.current, { type: actualMime });
                 const url = URL.createObjectURL(blob);
                 setMediaBlob(blob);
                 setMediaUrl(url);
@@ -172,11 +185,13 @@ export const UploadAsset = () => {
             let mediaFileId: string | undefined;
             if (mediaBlob) {
                 const fd = new FormData();
-                const ext = recordingType === 'VIDEO'
-                    ? 'webm'
-                    : (mediaBlob.type.includes('video') ? 'webm' : 'webm');
-                const mimeType = mediaBlob.type || (recordingType === 'VIDEO' ? 'video/webm' : 'audio/webm');
-                fd.append('file', new File([mediaBlob], `recording.${ext}`, { type: mimeType }));
+                // Derive a proper file extension from the blob's actual MIME type
+                const mime = mediaBlob.type || 'audio/webm';
+                const ext = mime.includes('mp4') ? 'mp4'
+                    : mime.includes('ogg') ? 'ogg'
+                        : mime.includes('video') ? 'webm'
+                            : 'webm';
+                fd.append('file', new File([mediaBlob], `recording.${ext}`, { type: mime }));
                 const uploadRes = await apiClient.post('/storage/upload', fd, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
@@ -201,26 +216,26 @@ export const UploadAsset = () => {
             } as any);
             setSuccess(true);
         } catch (err: any) {
-            setSubmitError(err.response?.data?.message || 'Submission failed. Please check your connection and try again.');
+            setSubmitError(err.response?.data?.message || t('upload.submitFailed', 'Submission failed. Please check your connection and try again.'));
         } finally {
             setLoading(false);
         }
     };
 
     if (loading) {
-        return <Loader label="Archiving submission..." />;
+        return <Loader label={t('upload.archivingLoader', 'Archiving submission...')} />;
     }
 
     if (success) {
         return (
             <div className="alert-success">
-                <h3>Governance Submission Successful</h3>
-                <p>Your archival record has been timestamped and encrypted. It is now pending institutional review.</p>
+                <h3>{t('upload.submitSuccess', 'Governance Submission Successful')}</h3>
+                <p>{t('upload.submitSuccessDesc', 'Your archival record has been timestamped and encrypted. It is now pending institutional review.')}</p>
                 <div className="summary-pills">
-                    <span className="pill"><FiCheckCircle /> Metadata Logged</span>
-                    {mediaUploaded && <span className="pill"><FiCheckCircle /> Media Encrypted</span>}
+                    <span className="pill"><FiCheckCircle /> {t('upload.metadataLogged', 'Metadata Logged')}</span>
+                    {mediaUploaded && <span className="pill"><FiCheckCircle /> {t('upload.mediaEncrypted', 'Media Encrypted')}</span>}
                 </div>
-                <button className="primary-btn" onClick={() => navigate('/dashboard/assets/mine')}>View My Submissions</button>
+                <button className="primary-btn" onClick={() => navigate('/dashboard/assets/mine')}>{t('upload.viewSubmissions', 'View My Submissions')}</button>
             </div>
         );
     }
@@ -229,18 +244,18 @@ export const UploadAsset = () => {
         return (
             <div className="upload-container">
                 <header style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                    <h2 style={{ fontSize: '2.5rem', color: 'var(--color-burnt-umber)' }}>Archival Initiation</h2>
-                    <p>Select the structure of the cultural knowledge you wish to preserve.</p>
+                    <h2 style={{ fontSize: '2.5rem', color: 'var(--color-burnt-umber)' }}>{t('upload.archivalInitiation', 'Archival Initiation')}</h2>
+                    <p>{t('upload.selectStructure', 'Select the structure of the cultural knowledge you wish to preserve.')}</p>
                 </header>
 
                 <div className="selection-grid">
                     <div className="selection-card" onClick={() => handleTypeSelect('BIO')}>
                         <h3>DHAROHAR-BIO</h3>
-                        <p>Biological knowledge, medicinal practices, agricultural techniques, and ecological wisdom.</p>
+                        <p>{t('upload.bioDesc', 'Biological knowledge, medicinal practices, agricultural techniques, and ecological wisdom.')}</p>
                     </div>
                     <div className="selection-card" onClick={() => handleTypeSelect('SONIC')}>
                         <h3>DHAROHAR-SONIC</h3>
-                        <p>Musical archives, ritual chants, oral histories, and performance media.</p>
+                        <p>{t('upload.sonicDesc', 'Musical archives, ritual chants, oral histories, and performance media.')}</p>
                     </div>
                 </div>
             </div>
@@ -250,45 +265,45 @@ export const UploadAsset = () => {
     return (
         <div className="upload-container">
             <button className="back-btn" onClick={() => setStep(1)}>
-                <FiArrowLeft /> Back to Selection
+                <FiArrowLeft /> {t('upload.backToSelection', 'Back to Selection')}
             </button>
 
             <div className="metadata-bar">
                 <div className="metadata-item">
-                    <FiMapPin /> <strong>Location:</strong> {formData.location}
+                    <FiMapPin /> <strong>{t('upload.location', 'Location:')}</strong> {formData.location}
                     <button
                         type="button"
-                        className={`refresh - location - btn ${isLocating ? 'spinning' : ''} `}
+                        className={`refresh-location-btn ${isLocating ? 'spinning' : ''}`}
                         onClick={detectLocation}
-                        title="Re-detect precise location"
+                        title={t('upload.redetectLocation', 'Re-detect precise location')}
                         disabled={isLocating}
                     >
                         <FiClock />
                     </button>
                 </div>
                 <div className="metadata-item">
-                    <FiClock /> <strong>Timestamp:</strong> {formData.timestamp}
+                    <FiClock /> <strong>{t('upload.timestamp', 'Timestamp:')}</strong> {formData.timestamp}
                 </div>
             </div>
 
             <form className="institutional-form" onSubmit={handleSubmit}>
                 <div className="form-row">
                     <div className="form-group half">
-                        <label>Asset Title</label>
+                        <label>{t('upload.assetTitle', 'Asset Title')}</label>
                         <input
                             required
                             type="text"
-                            placeholder="e.g. Monsoon Chants"
+                            placeholder={t('upload.assetTitlePlaceholder', 'e.g. Monsoon Chants')}
                             value={formData.title}
                             onChange={e => setFormData({ ...formData, title: e.target.value })}
                         />
                     </div>
                     <div className="form-group half">
-                        <label>Submitting Member Name</label>
+                        <label>{t('upload.submittingMember', 'Submitting Member Name')}</label>
                         <input
                             required
                             type="text"
-                            placeholder="Full Name of Tribal Member"
+                            placeholder={t('upload.tribalMemberPlaceholder', 'Full Name of Tribal Member')}
                             value={formData.tribalMember}
                             onChange={e => setFormData({ ...formData, tribalMember: e.target.value })}
                         />
@@ -296,11 +311,11 @@ export const UploadAsset = () => {
                 </div>
 
                 <div className="form-group">
-                    <label>Community Origin</label>
+                    <label>{t('upload.communityOrigin', 'Community Origin')}</label>
                     <input
                         required
                         type="text"
-                        placeholder="e.g. Warli Tribe"
+                        placeholder={t('upload.communityPlaceholder', 'e.g. Warli Tribe')}
                         value={formData.community}
                         onChange={e => setFormData({ ...formData, community: e.target.value })}
                     />
@@ -309,16 +324,16 @@ export const UploadAsset = () => {
                 {type === 'BIO' ? (
                     <>
                         <div className="form-group">
-                            <label>Knowledge Category</label>
+                            <label>{t('upload.knowledgeCategory', 'Knowledge Category')}</label>
                             <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}>
-                                <option value="MEDICINAL">Medicinal Practice</option>
-                                <option value="AGRICULTURAL">Agricultural Technique</option>
-                                <option value="ECOLOGICAL">Ecological Wisdom</option>
-                                <option value="RITUAL">Ritual Practice</option>
+                                <option value="MEDICINAL">{t('upload.catMedicinal', 'Medicinal Practice')}</option>
+                                <option value="AGRICULTURAL">{t('upload.catAgricultural', 'Agricultural Technique')}</option>
+                                <option value="ECOLOGICAL">{t('upload.catEcological', 'Ecological Wisdom')}</option>
+                                <option value="RITUAL">{t('upload.catRitual', 'Ritual Practice')}</option>
                             </select>
                         </div>
                         <div className="form-group">
-                            <label>Voice Archive / Oral Description</label>
+                            <label>{t('upload.voiceArchive', 'Voice Archive / Oral Description')}</label>
                             {!mediaUploaded ? (
                                 <div className="media-actions">
                                     <button
@@ -327,10 +342,10 @@ export const UploadAsset = () => {
                                         onClick={isRecording ? stopRecording : () => startRecording('AUDIO')}
                                     >
                                         <FiMic />
-                                        {isRecording ? 'Stop Recording' : 'Start Voice Recording'}
+                                        {isRecording ? t('upload.stopRecording', 'Stop Recording') : t('upload.startVoice', 'Start Voice Recording')}
                                     </button>
                                     <label className="media-btn">
-                                        <FiUpload /> Upload Voice File
+                                        <FiUpload /> {t('upload.uploadVoice', 'Upload Voice File')}
                                         <input
                                             type="file"
                                             accept="audio/*"
@@ -341,8 +356,8 @@ export const UploadAsset = () => {
                                 </div>
                             ) : (
                                 <div className="media-preview-container-custom">
-                                    <HeritageAudioPlayer src={mediaUrl!} title="Voice Archive Preview" />
-                                    <button type="button" className="remove-media-btn" onClick={resetMedia} title="Remove Media">
+                                    <HeritageAudioPlayer src={mediaUrl!} title={t('upload.voicePreview', 'Voice Archive Preview')} />
+                                    <button type="button" className="remove-media-btn" onClick={resetMedia} title={t('upload.removeMedia', 'Remove Media')}>
                                         <FiX />
                                     </button>
                                 </div>
@@ -352,16 +367,16 @@ export const UploadAsset = () => {
                 ) : (
                     <>
                         <div className="form-group">
-                            <label>Performance Context</label>
+                            <label>{t('upload.performanceContext', 'Performance Context')}</label>
                             <select value={formData.performanceContext} onChange={e => setFormData({ ...formData, performanceContext: e.target.value })}>
-                                <option value="FESTIVAL">Festival / Celebration</option>
-                                <option value="RITUAL">Sacred Ritual</option>
-                                <option value="AGRICULTURAL">Seed/Harvest Time</option>
-                                <option value="CELEBRATION">Community Gathering</option>
+                                <option value="FESTIVAL">{t('upload.contextFestival', 'Festival / Celebration')}</option>
+                                <option value="RITUAL">{t('upload.contextRitual', 'Sacred Ritual')}</option>
+                                <option value="AGRICULTURAL">{t('upload.contextAgricultural', 'Seed/Harvest Time')}</option>
+                                <option value="CELEBRATION">{t('upload.contextGathering', 'Community Gathering')}</option>
                             </select>
                         </div>
                         <div className="form-group">
-                            <label>Sonic & Visual Media</label>
+                            <label>{t('upload.sonicVisualMedia', 'Sonic & Visual Media')}</label>
 
                             {!mediaUploaded && isRecording && recordingType === 'VIDEO' && (
                                 <div className="live-camera-preview">
@@ -381,7 +396,7 @@ export const UploadAsset = () => {
                                         disabled={isRecording && recordingType === 'VIDEO'}
                                     >
                                         <FiMic />
-                                        {isRecording && recordingType === 'AUDIO' ? 'Stop Audio' : 'Record Audio'}
+                                        {isRecording && recordingType === 'AUDIO' ? t('upload.stopAudio', 'Stop Audio') : t('upload.recordAudio', 'Record Audio')}
                                     </button>
                                     <button
                                         type="button"
@@ -390,10 +405,10 @@ export const UploadAsset = () => {
                                         disabled={isRecording && recordingType === 'AUDIO'}
                                     >
                                         <FiVideo />
-                                        {isRecording && recordingType === 'VIDEO' ? 'Stop Video' : 'Record Video'}
+                                        {isRecording && recordingType === 'VIDEO' ? t('upload.stopVideo', 'Stop Video') : t('upload.recordVideo', 'Record Video')}
                                     </button>
                                     <label className="media-btn">
-                                        <FiUpload /> Upload Media
+                                        <FiUpload /> {t('upload.uploadMedia', 'Upload Media')}
                                         <input
                                             type="file"
                                             accept="audio/*,video/*"
@@ -407,9 +422,9 @@ export const UploadAsset = () => {
                                     {mediaBlob?.type.startsWith('video') ? (
                                         <video src={mediaUrl!} controls className="video-preview-player" />
                                     ) : (
-                                        <HeritageAudioPlayer src={mediaUrl!} title="Sonic Archive Preview" />
+                                        <HeritageAudioPlayer src={mediaUrl!} title={t('upload.sonicPreview', 'Sonic Archive Preview')} />
                                     )}
-                                    <button type="button" className="remove-media-btn" onClick={resetMedia} title="Remove Media">
+                                    <button type="button" className="remove-media-btn" onClick={resetMedia} title={t('upload.removeMedia', 'Remove Media')}>
                                         <FiX />
                                     </button>
                                 </div>
@@ -419,11 +434,11 @@ export const UploadAsset = () => {
                 )}
 
                 <div className="form-group">
-                    <label>Detailed Description & Cultural Meaning</label>
+                    <label>{t('upload.detailedDescription', 'Detailed Description & Cultural Meaning')}</label>
                     <textarea
                         required
                         rows={4}
-                        placeholder="Detailed historical context and significance..."
+                        placeholder={t('upload.descriptionPlaceholder', 'Detailed historical context and significance...')}
                         value={formData.description}
                         onChange={e => setFormData({ ...formData, description: e.target.value })}
                     />
@@ -431,11 +446,11 @@ export const UploadAsset = () => {
 
                 <div className="form-row">
                     <div className="form-group half">
-                        <label>Sensitivity Risk Tier</label>
+                        <label>{t('upload.riskTier', 'Sensitivity Risk Tier')}</label>
                         <select value={formData.riskTier} onChange={e => setFormData({ ...formData, riskTier: e.target.value })}>
-                            <option value="LOW">Low Risk</option>
-                            <option value="MEDIUM">Moderate Risk</option>
-                            <option value="HIGH">High Risk</option>
+                            <option value="LOW">{t('common.riskLow', 'Low Risk')}</option>
+                            <option value="MEDIUM">{t('common.riskMedium', 'Moderate Risk')}</option>
+                            <option value="HIGH">{t('common.riskHigh', 'High Risk')}</option>
                         </select>
                     </div>
                 </div>
@@ -447,7 +462,7 @@ export const UploadAsset = () => {
                         </div>
                     )}
                     <button type="submit" className="primary-btn" disabled={loading || isRecording}>
-                        {loading ? 'Archiving...' : 'Finalize Governance Submission'}
+                        {loading ? t('upload.archiving', 'Archiving...') : t('upload.finalizeSubmission', 'Finalize Governance Submission')}
                     </button>
                 </div>
             </form>

@@ -6,6 +6,8 @@ import type { ApplicationData } from '../dashboard/LicenseApplicationDoc';
 import { useAuth } from '../auth/AuthContext';
 import apiClient from '../../services/apiClient';
 import { useNotificationSound } from '../../hooks/useNotificationSound';
+import { useTranslation } from 'react-i18next';
+import { t } from 'i18next'; // We import 't' directly for the standalone validateCommon function
 
 type LicenseType = 'RESEARCH' | 'COMMERCIAL' | 'MEDIA';
 
@@ -40,25 +42,25 @@ interface CommonErrors {
 const validateCommon = (fields: CommonFields, file: File | null): CommonErrors => {
     const errors: CommonErrors = {};
     if (!fields.fullName || fields.fullName.trim().length < 3)
-        errors.fullName = 'Full name must be at least 3 characters.';
+        errors.fullName = t('applyLicense.errFullName', 'Full name must be at least 3 characters.');
     if (!fields.email || !EMAIL_RE.test(fields.email))
-        errors.email = 'Enter a valid email address.';
+        errors.email = t('applyLicense.errEmail', 'Enter a valid email address.');
     if (!fields.phone || !PHONE_RE.test(fields.phone))
-        errors.phone = 'Phone number must be exactly 10 digits.';
+        errors.phone = t('applyLicense.errPhone', 'Phone number must be exactly 10 digits.');
     if (!fields.organizationName || fields.organizationName.trim().length < 2)
-        errors.organizationName = 'Organization name is required.';
+        errors.organizationName = t('applyLicense.errOrg', 'Organization name is required.');
     if (!fields.gstNumber || !GST_RE.test(fields.gstNumber.toUpperCase()))
-        errors.gstNumber = 'GST number must be exactly 15 alphanumeric characters (uppercase).';
+        errors.gstNumber = t('applyLicense.errGst', 'GST number must be exactly 15 alphanumeric characters (uppercase).');
     const words = countWords(fields.intendedUse);
     if (words < 30)
-        errors.intendedUse = `Minimum 30 words required. Currently: ${words}.`;
+        errors.intendedUse = t('applyLicense.errWordsMin', 'Minimum 30 words required. Currently: {{words}}.', { words });
     else if (words > 300)
-        errors.intendedUse = `Maximum 300 words allowed. Currently: ${words}.`;
+        errors.intendedUse = t('applyLicense.errWordsMax', 'Maximum 300 words allowed. Currently: {{words}}.', { words });
     if (file) {
         if (file.type !== 'application/pdf')
-            errors.docFile = 'Only PDF files are accepted.';
+            errors.docFile = t('applyLicense.errPdf', 'Only PDF files are accepted.');
         else if (file.size > 5 * 1024 * 1024)
-            errors.docFile = 'File size must not exceed 5 MB.';
+            errors.docFile = t('applyLicense.errSize', 'File size must not exceed 5 MB.');
     }
     return errors;
 };
@@ -162,26 +164,26 @@ const CommonApplicantFields = ({
                 color: 'var(--color-burnt-umber)',
                 letterSpacing: '0.02em',
             }}>
-                👤 Applicant Identity &amp; Contact
+                👤 {t('applyLicense.applicantIdentity', 'Applicant Identity & Contact')}
             </div>
 
             {/* Row: Full Name + Email */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <Field label="Full Name" required error={touched.has('fullName') ? errors.fullName : undefined}>
+                <Field label={t('applyLicense.fullName', 'Full Name')} required error={touched.has('fullName') ? errors.fullName : undefined}>
                     <input
                         style={touched.has('fullName') && errors.fullName ? errorInput : baseInput}
                         value={fields.fullName}
-                        placeholder="e.g. Arjun Sharma"
+                        placeholder={t('applyLicense.fullNamePlaceholder', 'e.g. Arjun Sharma')}
                         onChange={e => onFieldChange('fullName', e.target.value)}
                         onBlur={() => onBlur('fullName')}
                     />
                 </Field>
-                <Field label="Email Address" required error={touched.has('email') ? errors.email : undefined}>
+                <Field label={t('applyLicense.email', 'Email Address')} required error={touched.has('email') ? errors.email : undefined}>
                     <input
                         type="email"
                         style={touched.has('email') && errors.email ? errorInput : baseInput}
                         value={fields.email}
-                        placeholder="you@institution.ac.in"
+                        placeholder={t('applyLicense.emailPlaceholder', 'you@institution.ac.in')}
                         onChange={e => onFieldChange('email', e.target.value)}
                         onBlur={() => onBlur('email')}
                     />
@@ -191,25 +193,25 @@ const CommonApplicantFields = ({
             {/* Row: Phone + Organization */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <Field
-                    label="Phone Number"
+                    label={t('applyLicense.phone', 'Phone Number')}
                     required
                     error={touched.has('phone') ? errors.phone : undefined}
-                    hint="10-digit mobile number"
+                    hint={t('applyLicense.phoneHint', '10-digit mobile number')}
                 >
                     <input
                         style={touched.has('phone') && errors.phone ? errorInput : baseInput}
                         value={fields.phone}
-                        placeholder="9876543210"
+                        placeholder={t('applyLicense.phonePlaceholder', '9876543210')}
                         maxLength={10}
                         onChange={e => onFieldChange('phone', e.target.value.replace(/\D/g, ''))}
                         onBlur={() => onBlur('phone')}
                     />
                 </Field>
-                <Field label="Organization / Institution Name" required error={touched.has('organizationName') ? errors.organizationName : undefined}>
+                <Field label={t('applyLicense.organization', 'Organization / Institution Name')} required error={touched.has('organizationName') ? errors.organizationName : undefined}>
                     <input
                         style={touched.has('organizationName') && errors.organizationName ? errorInput : baseInput}
                         value={fields.organizationName}
-                        placeholder="IIT Bombay, Acme Ltd., etc."
+                        placeholder={t('applyLicense.orgPlaceholder', 'IIT Bombay, Acme Ltd., etc.')}
                         onChange={e => onFieldChange('organizationName', e.target.value)}
                         onBlur={() => onBlur('organizationName')}
                     />
@@ -218,15 +220,15 @@ const CommonApplicantFields = ({
 
             {/* GST Number */}
             <Field
-                label="GST Number"
+                label={t('applyLicense.gstNumber', 'GST Number')}
                 required
                 error={touched.has('gstNumber') ? errors.gstNumber : undefined}
-                hint="15-character alphanumeric (e.g. 27ABCDE1234F1Z5)"
+                hint={t('applyLicense.gstHint', '15-character alphanumeric (e.g. 27ABCDE1234F1Z5)')}
             >
                 <input
                     style={touched.has('gstNumber') && errors.gstNumber ? errorInput : baseInput}
                     value={fields.gstNumber}
-                    placeholder="27ABCDE1234F1Z5"
+                    placeholder={t('applyLicense.gstPlaceholder', '27ABCDE1234F1Z5')}
                     maxLength={15}
                     onChange={e => onFieldChange('gstNumber', e.target.value.toUpperCase())}
                     onBlur={() => onBlur('gstNumber')}
@@ -235,7 +237,7 @@ const CommonApplicantFields = ({
 
             {/* Intended Use Description */}
             <Field
-                label="Intended Use Description"
+                label={t('applyLicense.intendedUse', 'Intended Use Description')}
                 required
                 error={touched.has('intendedUse') ? errors.intendedUse : undefined}
             >
@@ -248,7 +250,7 @@ const CommonApplicantFields = ({
                             paddingBottom: '2rem',
                         }}
                         value={fields.intendedUse}
-                        placeholder="Describe in detail how you intend to use this cultural asset. Include your objective, methodology, and expected outcomes... (minimum 30 words, maximum 300 words)"
+                        placeholder={t('applyLicense.intendedUsePlaceholder', 'Describe in detail how you intend to use this cultural asset. Include your objective, methodology, and expected outcomes... (minimum 30 words, maximum 300 words)')}
                         onChange={e => onFieldChange('intendedUse', e.target.value)}
                         onBlur={() => onBlur('intendedUse')}
                     />
@@ -266,17 +268,17 @@ const CommonApplicantFields = ({
                         border: `1px solid ${wordCountColor}`,
                         pointerEvents: 'none',
                     }}>
-                        {wordCount} / 300 words
-                        {wordCount < 30 && <span style={{ marginLeft: '4px' }}>(min 30)</span>}
+                        {t('applyLicense.wordsCount', '{{count}} / 300 words', { count: wordCount })}
+                        {wordCount < 30 && <span style={{ marginLeft: '4px' }}>{t('applyLicense.wordsCountMin', '(min 30)')}</span>}
                     </div>
                 </div>
             </Field>
 
             {/* Supporting Document Upload */}
             <Field
-                label="Supporting Document"
+                label={t('applyLicense.supportingDoc', 'Supporting Document')}
                 error={touched.has('docFile') ? errors.docFile : undefined}
-                hint="Upload a PDF (max 5 MB) — ethics approval, company registration, press credentials, etc."
+                hint={t('applyLicense.supportingDocHint', 'Upload a PDF (max 5 MB) — ethics approval, company registration, press credentials, etc.')}
             >
                 <div
                     onClick={() => fileRef.current?.click()}
@@ -305,7 +307,7 @@ const CommonApplicantFields = ({
                             </>
                         ) : (
                             <div style={{ fontSize: '0.85rem', color: 'var(--color-text-light)' }}>
-                                Click to select a PDF file <span style={{ fontSize: '0.78rem' }}>(optional but recommended)</span>
+                                {t('applyLicense.clickToSelectPdf', 'Click to select a PDF file')} <span style={{ fontSize: '0.78rem' }}>{t('applyLicense.optional', '(optional but recommended)')}</span>
                             </div>
                         )}
                     </div>
@@ -342,105 +344,115 @@ const CommonApplicantFields = ({
 const ResearchForm = ({ data, onChange }: {
     data: any;
     onChange: (k: string, v: string) => void;
-}) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        <div style={{ padding: '0.75rem 1rem', background: 'rgba(59,130,246,0.06)', border: '1px solid #3b82f6', borderRadius: '4px', fontSize: '0.85rem' }}>
-            🔬 <strong>Research License</strong> — For academic/scientific use. Requires institutional affiliation and IRB/ethics approval.
+}) => {
+    const { t } = useTranslation();
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div style={{ padding: '0.75rem 1rem', background: 'rgba(59,130,246,0.06)', border: '1px solid #3b82f6', borderRadius: '4px', fontSize: '0.85rem' }}>
+                🔬 <strong>{t('applyLicense.researchLicense', 'Research License')}</strong> — {t('applyLicense.researchLicenseDesc', 'For academic/scientific use. Requires institutional affiliation and IRB/ethics approval.')}
+            </div>
+            <Field label={t('applyLicense.leadResearcher', 'Lead Researcher Full Name')} required>
+                <input style={baseInput} value={data.leadResearcher || ''} onChange={e => onChange('leadResearcher', e.target.value)} placeholder={t('applyLicense.leadResearcherPlaceholder', 'Dr. Priya Sharma')} />
+            </Field>
+            <Field label={t('applyLicense.researchTitle', 'Research Project Title')} required>
+                <input style={baseInput} value={data.researchTitle || ''} onChange={e => onChange('researchTitle', e.target.value)} placeholder={t('applyLicense.researchTitlePlaceholder', 'Study on Warli Ethnobotanical Practices')} />
+            </Field>
+            <Field label={t('applyLicense.researchObjective', 'Research Objective')} required>
+                <textarea style={{ ...baseInput, minHeight: '80px' }} value={data.researchObjective || ''} onChange={e => onChange('researchObjective', e.target.value)} placeholder={t('applyLicense.researchObjectivePlaceholder', 'Describe the academic objective and intended contribution...')} />
+            </Field>
+            <Field label={t('applyLicense.detailedPurpose', 'Detailed Purpose of Use')} required>
+                <textarea style={{ ...baseInput, minHeight: '80px' }} value={data.purpose || ''} onChange={e => onChange('purpose', e.target.value)} placeholder={t('applyLicense.researchPurposePlaceholder', 'How specifically will you use this cultural asset in your research?')} />
+            </Field>
+            <Field label={t('applyLicense.irbReference', 'IRB / Ethics Board Reference')}>
+                <input style={baseInput} value={data.irb_ethics_approval || ''} onChange={e => onChange('irb_ethics_approval', e.target.value)} placeholder={t('applyLicense.irbReferencePlaceholder', 'IRB-2024-xxxxx or document URL')} />
+            </Field>
+            <Field label={t('applyLicense.expectedDuration', 'Expected Research Duration')}>
+                <input style={baseInput} value={data.expectedDuration || ''} onChange={e => onChange('expectedDuration', e.target.value)} placeholder={t('applyLicense.expectedDurationPlaceholder', 'e.g. 12 months (Jan 2025 – Dec 2025)')} />
+            </Field>
+            <Field label={t('applyLicense.publicationPlan', 'Publication / Dissemination Plan')}>
+                <textarea style={{ ...baseInput, minHeight: '60px' }} value={data.publicationPlan || ''} onChange={e => onChange('publicationPlan', e.target.value)} placeholder={t('applyLicense.publicationPlanPlaceholder', 'Peer-reviewed journal, conference presentation, open access, etc.')} />
+            </Field>
         </div>
-        <Field label="Lead Researcher Full Name" required>
-            <input style={baseInput} value={data.leadResearcher || ''} onChange={e => onChange('leadResearcher', e.target.value)} placeholder="Dr. Priya Sharma" />
-        </Field>
-        <Field label="Research Project Title" required>
-            <input style={baseInput} value={data.researchTitle || ''} onChange={e => onChange('researchTitle', e.target.value)} placeholder="Study on Warli Ethnobotanical Practices" />
-        </Field>
-        <Field label="Research Objective" required>
-            <textarea style={{ ...baseInput, minHeight: '80px' }} value={data.researchObjective || ''} onChange={e => onChange('researchObjective', e.target.value)} placeholder="Describe the academic objective and intended contribution..." />
-        </Field>
-        <Field label="Detailed Purpose of Use" required>
-            <textarea style={{ ...baseInput, minHeight: '80px' }} value={data.purpose || ''} onChange={e => onChange('purpose', e.target.value)} placeholder="How specifically will you use this cultural asset in your research?" />
-        </Field>
-        <Field label="IRB / Ethics Board Reference">
-            <input style={baseInput} value={data.irb_ethics_approval || ''} onChange={e => onChange('irb_ethics_approval', e.target.value)} placeholder="IRB-2024-xxxxx or document URL" />
-        </Field>
-        <Field label="Expected Research Duration">
-            <input style={baseInput} value={data.expectedDuration || ''} onChange={e => onChange('expectedDuration', e.target.value)} placeholder="e.g. 12 months (Jan 2025 – Dec 2025)" />
-        </Field>
-        <Field label="Publication / Dissemination Plan">
-            <textarea style={{ ...baseInput, minHeight: '60px' }} value={data.publicationPlan || ''} onChange={e => onChange('publicationPlan', e.target.value)} placeholder="Peer-reviewed journal, conference presentation, open access, etc." />
-        </Field>
-    </div>
-);
+    );
+};
 
-const CommercialForm = ({ data, onChange }: { data: any; onChange: (k: string, v: string) => void }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        <div style={{ padding: '0.75rem 1rem', background: 'rgba(251,146,60,0.08)', border: '1px solid #fb923c', borderRadius: '4px', fontSize: '0.85rem' }}>
-            🏢 <strong>Commercial License</strong> — For product development, branding, or commercial exploitation. Revenue sharing with the originating community may apply.
+const CommercialForm = ({ data, onChange }: { data: any; onChange: (k: string, v: string) => void }) => {
+    const { t } = useTranslation();
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div style={{ padding: '0.75rem 1rem', background: 'rgba(251,146,60,0.08)', border: '1px solid #fb923c', borderRadius: '4px', fontSize: '0.85rem' }}>
+                🏢 <strong>{t('applyLicense.commercialLicense', 'Commercial License')}</strong> — {t('applyLicense.commercialLicenseDesc', 'For product development, branding, or commercial exploitation. Revenue sharing with the originating community may apply.')}
+            </div>
+            <Field label={t('applyLicense.companyName', 'Company / Organization Name')} required>
+                <input style={baseInput} value={data.companyName || ''} onChange={e => onChange('companyName', e.target.value)} placeholder={t('applyLicense.companyNamePlaceholder', 'Acme Naturals Pvt. Ltd.')} />
+            </Field>
+            <Field label={t('applyLicense.companyRegistration', 'Company Registration Number')}>
+                <input style={baseInput} value={data.companyRegistration || ''} onChange={e => onChange('companyRegistration', e.target.value)} placeholder={t('applyLicense.companyRegistrationPlaceholder', 'CIN No.')} />
+            </Field>
+            <Field label={t('applyLicense.productName', 'Product / Service Name')} required>
+                <input style={baseInput} value={data.productName || ''} onChange={e => onChange('productName', e.target.value)} placeholder={t('applyLicense.productNamePlaceholder', 'Product name using this cultural knowledge')} />
+            </Field>
+            <Field label={t('applyLicense.commercialUseDescription', 'Detailed Description of Commercial Use')} required>
+                <textarea style={{ ...baseInput, minHeight: '90px' }} value={data.commercialUseDescription || ''} onChange={e => onChange('commercialUseDescription', e.target.value)} placeholder={t('applyLicense.commercialUsePlaceholder', 'Describe exactly how this asset will be used in your product/service...')} />
+            </Field>
+            <Field label={t('applyLicense.detailedPurpose', 'Detailed Purpose')} required>
+                <textarea style={{ ...baseInput, minHeight: '70px' }} value={data.purpose || ''} onChange={e => onChange('purpose', e.target.value)} placeholder={t('applyLicense.commercialPurposePlaceholder', 'What business need does this fulfill?')} />
+            </Field>
+            <Field label={t('applyLicense.expectedRevenue', 'Expected Annual Revenue from this use')}>
+                <input style={baseInput} value={data.expectedRevenue || ''} onChange={e => onChange('expectedRevenue', e.target.value)} placeholder={t('applyLicense.expectedRevenuePlaceholder', 'e.g. ₹50 Lakhs – ₹1 Crore')} />
+            </Field>
+            <Field label={t('applyLicense.proposedRoyaltyRate', 'Proposed Royalty / Revenue Share with Community')}>
+                <input style={baseInput} value={data.proposedRoyaltyRate || ''} onChange={e => onChange('proposedRoyaltyRate', e.target.value)} placeholder={t('applyLicense.proposedRoyaltyRatePlaceholder', 'e.g. 5% of net revenue')} />
+            </Field>
+            <Field label={t('applyLicense.communityBenefitPlan', 'Community Benefit Plan')}>
+                <textarea style={{ ...baseInput, minHeight: '70px' }} value={data.communityBenefitPlan || ''} onChange={e => onChange('communityBenefitPlan', e.target.value)} placeholder={t('applyLicense.communityBenefitPlanPlaceholder', 'How will the originating community directly benefit?')} />
+            </Field>
         </div>
-        <Field label="Company / Organization Name" required>
-            <input style={baseInput} value={data.companyName || ''} onChange={e => onChange('companyName', e.target.value)} placeholder="Acme Naturals Pvt. Ltd." />
-        </Field>
-        <Field label="Company Registration Number">
-            <input style={baseInput} value={data.companyRegistration || ''} onChange={e => onChange('companyRegistration', e.target.value)} placeholder="CIN No." />
-        </Field>
-        <Field label="Product / Service Name" required>
-            <input style={baseInput} value={data.productName || ''} onChange={e => onChange('productName', e.target.value)} placeholder="Product name using this cultural knowledge" />
-        </Field>
-        <Field label="Detailed Description of Commercial Use" required>
-            <textarea style={{ ...baseInput, minHeight: '90px' }} value={data.commercialUseDescription || ''} onChange={e => onChange('commercialUseDescription', e.target.value)} placeholder="Describe exactly how this asset will be used in your product/service..." />
-        </Field>
-        <Field label="Detailed Purpose" required>
-            <textarea style={{ ...baseInput, minHeight: '70px' }} value={data.purpose || ''} onChange={e => onChange('purpose', e.target.value)} placeholder="What business need does this fulfill?" />
-        </Field>
-        <Field label="Expected Annual Revenue from this use">
-            <input style={baseInput} value={data.expectedRevenue || ''} onChange={e => onChange('expectedRevenue', e.target.value)} placeholder="e.g. ₹50 Lakhs – ₹1 Crore" />
-        </Field>
-        <Field label="Proposed Royalty / Revenue Share with Community">
-            <input style={baseInput} value={data.proposedRoyaltyRate || ''} onChange={e => onChange('proposedRoyaltyRate', e.target.value)} placeholder="e.g. 5% of net revenue" />
-        </Field>
-        <Field label="Community Benefit Plan">
-            <textarea style={{ ...baseInput, minHeight: '70px' }} value={data.communityBenefitPlan || ''} onChange={e => onChange('communityBenefitPlan', e.target.value)} placeholder="How will the originating community directly benefit?" />
-        </Field>
-    </div>
-);
+    );
+};
 
-const MediaForm = ({ data, onChange }: { data: any; onChange: (k: string, v: string) => void }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        <div style={{ padding: '0.75rem 1rem', background: 'rgba(168,85,247,0.06)', border: '1px solid #a855f7', borderRadius: '4px', fontSize: '0.85rem' }}>
-            🎬 <strong>Media License</strong> — For films, documentaries, podcasts, journalism, or digital media featuring this sonic cultural asset.
+const MediaForm = ({ data, onChange }: { data: any; onChange: (k: string, v: string) => void }) => {
+    const { t } = useTranslation();
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div style={{ padding: '0.75rem 1rem', background: 'rgba(168,85,247,0.06)', border: '1px solid #a855f7', borderRadius: '4px', fontSize: '0.85rem' }}>
+                🎬 <strong>{t('applyLicense.mediaLicense', 'Media License')}</strong> — {t('applyLicense.mediaLicenseDesc', 'For films, documentaries, podcasts, journalism, or digital media featuring this sonic cultural asset.')}
+            </div>
+            <Field label={t('applyLicense.projectTitle', 'Project Title')} required>
+                <input style={baseInput} value={data.projectTitle || ''} onChange={e => onChange('projectTitle', e.target.value)} placeholder={t('applyLicense.projectTitlePlaceholder', "e.g. 'Echoes of the Forest' — Documentary Film")} />
+            </Field>
+            <Field label={t('applyLicense.mediaType', 'Media Type')} required>
+                <select style={baseInput} value={data.mediaType || ''} onChange={e => onChange('mediaType', e.target.value)}>
+                    <option value="">{t('applyLicense.selectMediaType', 'Select media type...')}</option>
+                    <option>{t('applyLicense.featureFilm', 'Feature Film')}</option><option>{t('applyLicense.documentary', 'Documentary')}</option><option>{t('applyLicense.shortFilm', 'Short Film')}</option>
+                    <option>{t('applyLicense.podcast', 'Podcast / Audio Series')}</option><option>{t('applyLicense.musicAlbum', 'Music Album')}</option>
+                    <option>{t('applyLicense.advertisement', 'Advertisement')}</option><option>{t('applyLicense.digitalContent', 'Digital Content / YouTube')}</option>
+                    <option>{t('applyLicense.newsJournalism', 'News / Journalism')}</option><option>{t('applyLicense.other', 'Other')}</option>
+                </select>
+            </Field>
+            <Field label={t('applyLicense.distributionPlatform', 'Distribution Platform')} required>
+                <input style={baseInput} value={data.distributionPlatform || ''} onChange={e => onChange('distributionPlatform', e.target.value)} placeholder={t('applyLicense.distributionPlatformPlaceholder', 'Netflix, YouTube, Spotify, Cinema, etc.')} />
+            </Field>
+            <Field label={t('applyLicense.detailedPurpose', 'Detailed Purpose of Use')} required>
+                <textarea style={{ ...baseInput, minHeight: '80px' }} value={data.purpose || ''} onChange={e => onChange('purpose', e.target.value)} placeholder={t('applyLicense.mediaPurposePlaceholder', 'How will this asset appear / be used in the project?')} />
+            </Field>
+            <Field label={t('applyLicense.estimatedAudience', 'Estimated Audience Reach')}>
+                <input style={baseInput} value={data.estimatedAudience || ''} onChange={e => onChange('estimatedAudience', e.target.value)} placeholder={t('applyLicense.estimatedAudiencePlaceholder', 'e.g. 500,000 viewers, global release')} />
+            </Field>
+            <Field label={t('applyLicense.creditingPlan', 'Attribution / Crediting Plan')} required>
+                <textarea style={{ ...baseInput, minHeight: '60px' }} value={data.creditingPlan || ''} onChange={e => onChange('creditingPlan', e.target.value)} placeholder={t('applyLicense.creditingPlanPlaceholder', 'How will the originating community and artists be credited?')} />
+            </Field>
         </div>
-        <Field label="Project Title" required>
-            <input style={baseInput} value={data.projectTitle || ''} onChange={e => onChange('projectTitle', e.target.value)} placeholder="e.g. 'Echoes of the Forest' — Documentary Film" />
-        </Field>
-        <Field label="Media Type" required>
-            <select style={baseInput} value={data.mediaType || ''} onChange={e => onChange('mediaType', e.target.value)}>
-                <option value="">Select media type...</option>
-                <option>Feature Film</option><option>Documentary</option><option>Short Film</option>
-                <option>Podcast / Audio Series</option><option>Music Album</option>
-                <option>Advertisement</option><option>Digital Content / YouTube</option>
-                <option>News / Journalism</option><option>Other</option>
-            </select>
-        </Field>
-        <Field label="Distribution Platform" required>
-            <input style={baseInput} value={data.distributionPlatform || ''} onChange={e => onChange('distributionPlatform', e.target.value)} placeholder="Netflix, YouTube, Spotify, Cinema, etc." />
-        </Field>
-        <Field label="Detailed Purpose of Use" required>
-            <textarea style={{ ...baseInput, minHeight: '80px' }} value={data.purpose || ''} onChange={e => onChange('purpose', e.target.value)} placeholder="How will this asset appear / be used in the project?" />
-        </Field>
-        <Field label="Estimated Audience Reach">
-            <input style={baseInput} value={data.estimatedAudience || ''} onChange={e => onChange('estimatedAudience', e.target.value)} placeholder="e.g. 500,000 viewers, global release" />
-        </Field>
-        <Field label="Attribution / Crediting Plan" required>
-            <textarea style={{ ...baseInput, minHeight: '60px' }} value={data.creditingPlan || ''} onChange={e => onChange('creditingPlan', e.target.value)} placeholder="How will the originating community and artists be credited?" />
-        </Field>
-    </div>
-);
+    );
+};
 
 // ── Main component ─────────────────────────────────────────────────────────────
 export const ApplyForLicense = () => {
+    const { t } = useTranslation();
     const { assetId } = useParams<{ assetId: string }>();
     const [searchParams] = useSearchParams();
     const { user } = useAuth();
-    const assetTitle = searchParams.get('title') || 'Cultural Asset';
+    const assetTitle = searchParams.get('title') || t('common.culturalAsset', 'Cultural Asset');
     const assetType = searchParams.get('assetType') || 'BIO';
     const communityName = searchParams.get('community') || '';
     const navigate = useNavigate();
@@ -514,12 +526,12 @@ export const ApplyForLicense = () => {
 
         const errs = validateCommon(common, docFile);
         if (Object.keys(errs).length > 0) {
-            setError('Please fix the highlighted errors before submitting.');
+            setError(t('applyLicense.fixErrors', 'Please fix the highlighted errors before submitting.'));
             return;
         }
 
         if (!formData.purpose?.trim() && licenseType !== 'COMMERCIAL') {
-            setError('Please fill in the "Purpose of Use" field in the license section.');
+            setError(t('applyLicense.purposeRequired', 'Please fill in the "Purpose of Use" field in the license section.'));
             return;
         }
 
@@ -561,36 +573,35 @@ export const ApplyForLicense = () => {
             playSound();
             setSuccess(true);
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Submission failed. Please try again.');
+            setError(err.response?.data?.message || t('applyLicense.submissionFailed', 'Submission failed. Please try again.'));
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    // ── Success screen ──────────────────────────────────────────────────────────
     if (success) {
         return (
             <div style={{ minHeight: '100vh', background: 'var(--color-parchment)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
                 <div className="framed-section" style={{ maxWidth: 520, textAlign: 'center', padding: '2.5rem' }}>
                     <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✅</div>
-                    <h3>License Application Submitted</h3>
+                    <h3>{t('applyLicense.successTitle', 'License Application Submitted')}</h3>
                     <p style={{ color: 'var(--color-text-light)' }}>
-                        Your <strong>{licenseType}</strong> license application for <em>{assetTitle}</em> has been received and is now under admin review.
+                        {t('applyLicense.successMsg1', 'Your')} <strong>{licenseType === 'RESEARCH' ? t('applyLicense.researchLicense', 'Research License') : licenseType === 'COMMERCIAL' ? t('applyLicense.commercialLicense', 'Commercial License') : t('applyLicense.mediaLicense', 'Media License')}</strong> {t('applyLicense.successMsg2', 'license application for')} <em>{assetTitle}</em> {t('applyLicense.successMsg3', 'has been received and is now under admin review.')}
                     </p>
                     <p style={{ fontSize: '0.85rem', color: 'var(--color-text-light)', marginTop: '0.5rem' }}>
-                        Track your application status in your dashboard.
+                        {t('applyLicense.trackStatus', 'Track your application status in your dashboard.')}
                     </p>
                     <div style={{ margin: '1.5rem 0', padding: '1rem 1.25rem', background: 'rgba(176,141,87,0.08)', border: '1px solid var(--color-muted-gold)', borderRadius: '6px', textAlign: 'left' }}>
                         <p style={{ fontSize: '0.85rem', color: 'var(--color-text-main)', margin: '0 0 0.75rem', fontWeight: 600 }}>
-                            📄 Download a copy of your application?
+                            📄 {t('applyLicense.downloadCopy', 'Download a copy of your application?')}
                         </p>
                         <button type="button" className="minimal-btn" style={{ fontSize: '0.85rem' }} onClick={() => setPreviewDoc(buildDocData())}>
-                            ⬇ Preview &amp; Download Application Document
+                            ⬇ {t('applyLicense.previewDownload', 'Preview & Download Application Document')}
                         </button>
                     </div>
                     <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                        <button className="primary-btn" onClick={() => navigate('/dashboard/licenses/mine')}>View My Applications</button>
-                        <button className="minimal-btn" onClick={() => navigate('/marketplace')}>Back to Marketplace</button>
+                        <button className="primary-btn" onClick={() => navigate('/dashboard/licenses/mine')}>{t('applyLicense.viewMyApplications', 'View My Applications')}</button>
+                        <button className="minimal-btn" onClick={() => navigate('/marketplace')}>{t('applyLicense.backToMarketplace', 'Back to Marketplace')}</button>
                     </div>
                 </div>
                 {previewDoc && <LicenseApplicationDoc data={previewDoc} onClose={() => setPreviewDoc(null)} />}
@@ -603,13 +614,13 @@ export const ApplyForLicense = () => {
         <div style={{ minHeight: '100vh', background: 'var(--color-parchment)', padding: '3rem 2rem' }}>
             <div style={{ maxWidth: 760, margin: '0 auto' }}>
                 <button className="minimal-btn" style={{ marginBottom: '1.5rem', fontSize: '0.85rem' }} onClick={() => navigate(-1)}>
-                    ← Back
+                    ← {t('common.back', 'Back')}
                 </button>
 
                 <div className="framed-section" style={{ padding: '2rem' }}>
-                    <h2 style={{ marginTop: 0 }}>License Application</h2>
+                    <h2 style={{ marginTop: 0 }}>{t('applyLicense.title', 'License Application')}</h2>
                     <p style={{ color: 'var(--color-text-light)', marginBottom: '1.5rem' }}>
-                        Applying for: <strong>{assetTitle}</strong>
+                        {t('applyLicense.applyingFor', 'Applying for:')} <strong>{assetTitle}</strong>
                         {communityName && <span> — <em>{communityName}</em></span>}
                     </p>
 
@@ -618,15 +629,15 @@ export const ApplyForLicense = () => {
                         {assetType === 'BIO' && (
                             <>
                                 <button type="button" className={licenseType === 'RESEARCH' ? 'primary-btn' : 'minimal-btn'} onClick={() => setLicenseType('RESEARCH')}>
-                                    🔬 Research License
+                                    🔬 {t('applyLicense.researchLicense', 'Research License')}
                                 </button>
                                 <button type="button" className={licenseType === 'COMMERCIAL' ? 'primary-btn' : 'minimal-btn'} onClick={() => setLicenseType('COMMERCIAL')}>
-                                    🏢 Commercial License
+                                    🏢 {t('applyLicense.commercialLicense', 'Commercial License')}
                                 </button>
                             </>
                         )}
                         {assetType === 'SONIC' && (
-                            <button type="button" className="primary-btn">🎬 Media License</button>
+                            <button type="button" className="primary-btn">🎬 {t('applyLicense.mediaLicense', 'Media License')}</button>
                         )}
                     </div>
 
@@ -657,7 +668,7 @@ export const ApplyForLicense = () => {
                                 fontSize: '0.82rem',
                                 color: '#991b1b',
                             }}>
-                                ⚠ Please complete all required fields correctly before submitting.
+                                ⚠ {t('applyLicense.completeFieldsError', 'Please complete all required fields correctly before submitting.')}
                             </div>
                         )}
 
@@ -671,11 +682,11 @@ export const ApplyForLicense = () => {
                         <div style={{ paddingTop: '1.5rem', borderTop: '1px solid var(--color-muted-gold)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                             <div style={{ padding: '0.9rem 1.1rem', background: 'rgba(176,141,87,0.06)', border: '1px solid var(--color-muted-gold)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
                                 <div>
-                                    <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-burnt-umber)' }}>📄 Generate Application Document</p>
-                                    <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: 'var(--color-text-light)' }}>Preview and download a DHAROHAR-branded PDF before submitting.</p>
+                                    <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-burnt-umber)' }}>📄 {t('applyLicense.generateDoc', 'Generate Application Document')}</p>
+                                    <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: 'var(--color-text-light)' }}>{t('applyLicense.generateDocDesc', 'Preview and download a DHAROHAR-branded PDF before submitting.')}</p>
                                 </div>
                                 <button type="button" className="minimal-btn" style={{ fontSize: '0.82rem', flexShrink: 0 }} onClick={() => setPreviewDoc(buildDocData())}>
-                                    Preview Document →
+                                    {t('applyLicense.previewDocBtn', 'Preview Document →')}
                                 </button>
                             </div>
 
@@ -690,14 +701,14 @@ export const ApplyForLicense = () => {
                                     cursor: (!isFormValid && touched.size > 0) ? 'not-allowed' : 'pointer',
                                     transition: 'opacity 200ms',
                                 }}
-                                title={!isFormValid && touched.size > 0 ? 'Complete all required fields to submit' : ''}
+                                title={!isFormValid && touched.size > 0 ? t('applyLicense.completeToSubmit', 'Complete all required fields to submit') : ''}
                             >
-                                {isSubmitting ? 'Submitting Application...' : 'Submit License Application'}
+                                {isSubmitting ? t('applyLicense.submitting', 'Submitting Application...') : t('applyLicense.submitBtn', 'Submit License Application')}
                             </button>
 
                             {!isFormValid && touched.size > 0 && (
                                 <p style={{ textAlign: 'center', fontSize: '0.78rem', color: '#dc2626', margin: 0 }}>
-                                    {Object.keys(commonErrors).length} field{Object.keys(commonErrors).length > 1 ? 's' : ''} need attention above ↑
+                                    {t('applyLicense.fieldsNeedAttention', '{{count}} field(s) need attention above ↑', { count: Object.keys(commonErrors).length })}
                                 </p>
                             )}
                         </div>

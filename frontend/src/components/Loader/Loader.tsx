@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import ceremonialSymbol from '../../assets/image copy 2.png';
 import './Loader.css';
 
@@ -20,6 +21,7 @@ interface LoaderProps {
  */
 export const Loader = ({ label, exiting }: LoaderProps) => {
     const [show, setShow] = useState(false);
+    const { t } = useTranslation();
 
     // Defer mounting by one frame so the fade-in animation actually plays
     useEffect(() => {
@@ -29,8 +31,10 @@ export const Loader = ({ label, exiting }: LoaderProps) => {
 
     if (!show) return null;
 
+    const displayLabel = label || t('common.loading', 'Loading...');
+
     return (
-        <div className={`dharohar-loader-overlay ${exiting ? 'exiting' : ''}`} role="status" aria-label={label || 'Loading'}>
+        <div className={`dharohar-loader-overlay ${exiting ? 'exiting' : ''}`} role="status" aria-label={displayLabel}>
             <div className="dharohar-loader-symbol-wrap">
                 <div className="dharohar-loader-ring" aria-hidden="true" />
                 <img
@@ -40,8 +44,8 @@ export const Loader = ({ label, exiting }: LoaderProps) => {
                     draggable={false}
                 />
             </div>
-            {label && (
-                <p className="dharohar-loader-label">{label}</p>
+            {displayLabel && (
+                <p className="dharohar-loader-label">{displayLabel}</p>
             )}
         </div>
     );

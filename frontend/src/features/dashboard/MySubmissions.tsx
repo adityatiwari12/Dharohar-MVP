@@ -5,8 +5,10 @@ import { getMyAssets } from '../../services/assetService';
 import type { Asset } from '../../services/assetService';
 import { RoleMediaPlayer } from '../../components/RoleMediaPlayer';
 import { FiX, FiInfo, FiFileText, FiClock, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 
 export const MySubmissions = () => {
+    const { t } = useTranslation();
     const [assets, setAssets] = useState<Asset[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -19,7 +21,7 @@ export const MySubmissions = () => {
                 const data = await getMyAssets();
                 setAssets(data);
             } catch (e: any) {
-                setError(e.response?.data?.message || 'Failed to load submissions. Is the server running?');
+                setError(e.response?.data?.message || t('submissions.loadFailed', 'Failed to load submissions. Is the server running?'));
             } finally {
                 setIsLoading(false);
             }
@@ -28,15 +30,15 @@ export const MySubmissions = () => {
     }, []);
 
     return (
-        <DashboardLayout title="My Submissions">
+        <DashboardLayout title={t('nav.mySubmissions', 'My Submissions')}>
             <div style={{ animation: 'fadeIn var(--transition-base)' }}>
                 <p style={{ color: 'var(--color-text-light)', marginBottom: '2rem' }}>
-                    Track the status of your community's archival submissions. Rejected submissions include reviewer feedback.
+                    {t('submissions.trackStatus', "Track the status of your community's archival submissions. Rejected submissions include reviewer feedback.")}
                 </p>
 
                 {isLoading && (
                     <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-light)' }}>
-                        Loading submissions...
+                        {t('submissions.loading', 'Loading submissions...')}
                     </div>
                 )}
 
@@ -47,7 +49,7 @@ export const MySubmissions = () => {
                 )}
 
                 {!isLoading && !error && assets.length === 0 && (
-                    <div className="no-data">No submissions found. Upload your first cultural asset!</div>
+                    <div className="no-data">{t('submissions.noSubmissions', 'No submissions found. Upload your first cultural asset!')}</div>
                 )}
 
                 <div className="audio-list">
@@ -59,7 +61,7 @@ export const MySubmissions = () => {
                                     <h4 style={{ margin: 0, marginBottom: '0.25rem' }}>{asset.title}</h4>
                                     <span style={{ fontSize: '0.85rem', color: 'var(--color-text-light)' }}>
                                         {asset.communityName} • {asset.type} •{' '}
-                                        Submitted: {new Date(asset.createdAt).toLocaleDateString('en-IN')}
+                                        {t('submissions.submitted', 'Submitted')}: {new Date(asset.createdAt).toLocaleDateString()}
                                     </span>
 
                                     {asset.approvalStatus === 'REJECTED' && asset.reviewComment && (
@@ -72,7 +74,7 @@ export const MySubmissions = () => {
                                             fontSize: '0.875rem',
                                             color: '#7f1d1d'
                                         }}>
-                                            <strong>Reviewer Feedback:</strong> {asset.reviewComment}
+                                            <strong>{t('submissions.reviewerFeedback', 'Reviewer Feedback')}:</strong> {asset.reviewComment}
                                         </div>
                                     )}
                                 </div>
@@ -83,10 +85,10 @@ export const MySubmissions = () => {
                                             className="minimal-btn"
                                             style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
                                             onClick={() => setExpandedMediaId(prev => prev === asset._id ? null : asset._id)}
-                                            title={expandedMediaId === asset._id ? 'Hide media' : 'Play media'}
+                                            title={expandedMediaId === asset._id ? t('submissions.hideMedia', 'Hide media') : t('submissions.playMedia', 'Play media')}
                                         >
                                             {expandedMediaId === asset._id ? <FiChevronUp size={14} /> : <FiChevronDown size={14} />}
-                                            {expandedMediaId === asset._id ? 'Hide' : 'Play'}
+                                            {expandedMediaId === asset._id ? t('submissions.hide', 'Hide') : t('submissions.play', 'Play')}
                                         </button>
                                     )}
                                     <button
@@ -94,7 +96,7 @@ export const MySubmissions = () => {
                                         style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
                                         onClick={() => setSelectedAsset(asset)}
                                     >
-                                        Details
+                                        {t('submissions.details', 'Details')}
                                     </button>
                                     <StatusBadge status={asset.approvalStatus} />
                                 </div>
@@ -106,7 +108,7 @@ export const MySubmissions = () => {
                                     <RoleMediaPlayer
                                         src={asset.mediaUrl}
                                         mode="full"
-                                        label={asset.type === 'SONIC' ? '🎵 Your Sonic Archive' : '🎙 Your Voice Recording'}
+                                        label={asset.type === 'SONIC' ? `🎵 ${t('submissions.sonicArchive', 'Your Sonic Archive')}` : `🎙 ${t('submissions.voiceRecording', 'Your Voice Recording')}`}
                                     />
                                 </div>
                             )}
@@ -166,15 +168,15 @@ export const MySubmissions = () => {
 
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
                                 <div className="detail-section">
-                                    <h5 style={{ margin: '0 0 0.5rem', borderBottom: '1px solid var(--color-muted-gold)', paddingBottom: '0.25rem' }}>Submission Info</h5>
-                                    <p style={{ margin: '0.25rem 0', fontSize: '0.9rem' }}><FiClock style={{ marginRight: '0.4rem' }} /> {new Date(selectedAsset.createdAt).toLocaleString('en-IN')}</p>
-                                    <p style={{ margin: '0.25rem 0', fontSize: '0.9rem' }}><FiInfo style={{ marginRight: '0.4rem' }} /> Risk: {selectedAsset.riskTier || 'Standard'}</p>
-                                    <p style={{ margin: '0.25rem 0', fontSize: '0.9rem' }}><FiFileText style={{ marginRight: '0.4rem' }} /> Recordee: {selectedAsset.recordeeName}</p>
+                                    <h5 style={{ margin: '0 0 0.5rem', borderBottom: '1px solid var(--color-muted-gold)', paddingBottom: '0.25rem' }}>{t('submissions.submissionInfo', 'Submission Info')}</h5>
+                                    <p style={{ margin: '0.25rem 0', fontSize: '0.9rem' }}><FiClock style={{ marginRight: '0.4rem' }} /> {new Date(selectedAsset.createdAt).toLocaleString()}</p>
+                                    <p style={{ margin: '0.25rem 0', fontSize: '0.9rem' }}><FiInfo style={{ marginRight: '0.4rem' }} /> {t('submissions.risk', 'Risk:')} {selectedAsset.riskTier ? t(`common.risk${selectedAsset.riskTier.charAt(0).toUpperCase() + selectedAsset.riskTier.slice(1).toLowerCase()}`) : 'Standard'}</p>
+                                    <p style={{ margin: '0.25rem 0', fontSize: '0.9rem' }}><FiFileText style={{ marginRight: '0.4rem' }} /> {t('submissions.recordee', 'Recordee:')} {selectedAsset.recordeeName}</p>
                                 </div>
 
                                 {selectedAsset.metadata && (
                                     <div className="detail-section">
-                                        <h5 style={{ margin: '0 0 0.5rem', borderBottom: '1px solid var(--color-muted-gold)', paddingBottom: '0.25rem' }}>Metadata</h5>
+                                        <h5 style={{ margin: '0 0 0.5rem', borderBottom: '1px solid var(--color-muted-gold)', paddingBottom: '0.25rem' }}>{t('submissions.metadata', 'Metadata')}</h5>
                                         {Object.entries(selectedAsset.metadata).map(([key, value]) => (
                                             <p key={key} style={{ margin: '0.25rem 0', fontSize: '0.9rem' }}>
                                                 <strong>{key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}:</strong> {String(value)}
@@ -185,13 +187,13 @@ export const MySubmissions = () => {
                             </div>
 
                             <div style={{ marginBottom: '2rem' }}>
-                                <h5 style={{ margin: '0 0 0.5rem', borderBottom: '1px solid var(--color-muted-gold)', paddingBottom: '0.25rem' }}>Description</h5>
+                                <h5 style={{ margin: '0 0 0.5rem', borderBottom: '1px solid var(--color-muted-gold)', paddingBottom: '0.25rem' }}>{t('submissions.description', 'Description')}</h5>
                                 <p style={{ fontSize: '0.95rem', lineHeight: 1.6, fontStyle: 'italic' }}>"{selectedAsset.description}"</p>
                             </div>
 
                             {selectedAsset.transcript && (
                                 <div style={{ marginBottom: '2rem' }}>
-                                    <h5 style={{ margin: '0 0 0.5rem', borderBottom: '1px solid var(--color-muted-gold)', paddingBottom: '0.25rem' }}>Oral History Transcript</h5>
+                                    <h5 style={{ margin: '0 0 0.5rem', borderBottom: '1px solid var(--color-muted-gold)', paddingBottom: '0.25rem' }}>{t('submissions.transcript', 'Oral History Transcript')}</h5>
                                     <div style={{
                                         padding: '1rem',
                                         background: 'rgba(0,0,0,0.02)',
@@ -208,12 +210,12 @@ export const MySubmissions = () => {
 
                             {selectedAsset.mediaUrl && (
                                 <div style={{ marginBottom: '2rem' }}>
-                                    <h5 style={{ margin: '0 0 0.5rem', borderBottom: '1px solid var(--color-muted-gold)', paddingBottom: '0.25rem' }}>Media Asset</h5>
+                                    <h5 style={{ margin: '0 0 0.5rem', borderBottom: '1px solid var(--color-muted-gold)', paddingBottom: '0.25rem' }}>{t('submissions.mediaAsset', 'Media Asset')}</h5>
                                     <div style={{ padding: '0.75rem', background: 'rgba(0,0,0,0.02)', border: '1px solid var(--color-muted-gold)' }}>
                                         <RoleMediaPlayer
                                             src={selectedAsset.mediaUrl}
                                             mode="full"
-                                            label={selectedAsset.type === 'SONIC' ? '🎵 Your Sonic Archive' : '🎙 Your Voice Recording'}
+                                            label={selectedAsset.type === 'SONIC' ? `🎵 ${t('submissions.sonicArchive', 'Your Sonic Archive')}` : `🎙 ${t('submissions.voiceRecording', 'Your Voice Recording')}`}
                                         />
                                     </div>
                                 </div>
@@ -227,7 +229,7 @@ export const MySubmissions = () => {
                                     border: '1px solid #ef4444',
                                     borderRadius: '4px'
                                 }}>
-                                    <h5 style={{ margin: '0 0 0.5rem', color: '#7f1d1d' }}>Reviewer Feedback</h5>
+                                    <h5 style={{ margin: '0 0 0.5rem', color: '#7f1d1d' }}>{t('submissions.reviewerFeedbackHeader', 'Reviewer Feedback')}</h5>
                                     <p style={{ margin: 0, fontSize: '0.95rem' }}>{selectedAsset.reviewComment}</p>
                                 </div>
                             )}

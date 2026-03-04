@@ -3,11 +3,14 @@ import { useAuth } from './AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import apiClient from '../../services/apiClient';
 import { useNotificationSound } from '../../hooks/useNotificationSound';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../../components/Navigation/LanguageSwitcher';
 
 export const Login = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
     const playSound = useNotificationSound();
+    const { t } = useTranslation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -55,23 +58,27 @@ export const Login = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '2rem'
+            padding: '2rem',
+            position: 'relative'
         }}>
+            <div style={{ position: 'absolute', top: '2rem', right: '2rem' }}>
+                <LanguageSwitcher />
+            </div>
             <div className="framed-section" style={{ width: '100%', maxWidth: 420, padding: '2.5rem' }}>
                 <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                     <Link to="/">
                         <img src="/logo.png" alt="Dharohar Logo" style={{ maxWidth: '100px', marginBottom: '1rem' }} />
                     </Link>
-                    <h2 style={{ margin: 0 }}>Sign In to DHAROHAR</h2>
+                    <h2 style={{ margin: 0 }}>{t('auth.signInToApp', 'Sign In to DHAROHAR')}</h2>
                     <p style={{ color: 'var(--color-text-light)', marginTop: '0.25rem' }}>
-                        Access your governance dashboard
+                        {t('auth.accessDashboard', 'Access your governance dashboard')}
                     </p>
                 </div>
 
                 {/* Quick-fill test buttons */}
                 <div style={{ marginBottom: '1.5rem' }}>
                     <p style={{ fontSize: '0.75rem', color: 'var(--color-text-light)', textAlign: 'center', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        Quick Test Login
+                        {t('auth.quickTestLogin', 'Quick Test Login')}
                     </p>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                         {['community', 'review', 'admin', 'general'].map(role => (
@@ -91,13 +98,13 @@ export const Login = () => {
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <div>
                         <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.4rem' }}>
-                            Email
+                            {t('auth.email', 'Email')}
                         </label>
                         <input
                             type="email"
                             value={email}
                             onChange={e => setEmail(e.target.value)}
-                            placeholder="Enter your email"
+                            placeholder={t('auth.enterEmail', 'Enter your email')}
                             required
                             style={{
                                 width: '100%',
@@ -113,13 +120,13 @@ export const Login = () => {
 
                     <div>
                         <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.4rem' }}>
-                            Password
+                            {t('auth.password', 'Password')}
                         </label>
                         <input
                             type="password"
                             value={password}
                             onChange={e => setPassword(e.target.value)}
-                            placeholder="Enter your password"
+                            placeholder={t('auth.enterPassword', 'Enter your password')}
                             required
                             style={{
                                 width: '100%',
@@ -152,7 +159,7 @@ export const Login = () => {
                         disabled={isLoading}
                         style={{ marginTop: '0.5rem', padding: '0.85rem' }}
                     >
-                        {isLoading ? 'Signing in...' : 'Sign In'}
+                        {isLoading ? t('auth.signingIn', 'Signing in...') : t('auth.signIn', 'Sign In')}
                     </button>
                 </form>
             </div>
@@ -161,6 +168,7 @@ export const Login = () => {
 };
 
 export const Register = () => {
+    const { t } = useTranslation();
     return (
         <div style={{
             minHeight: '100vh',
@@ -168,18 +176,22 @@ export const Register = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '2rem'
+            padding: '2rem',
+            position: 'relative'
         }}>
+            <div style={{ position: 'absolute', top: '2rem', right: '2rem' }}>
+                <LanguageSwitcher />
+            </div>
             <div className="framed-section" style={{ maxWidth: 420, width: '100%', padding: '2.5rem', textAlign: 'center' }}>
                 <Link to="/">
                     <img src="/logo.png" alt="Dharohar Logo" style={{ maxWidth: '100px', marginBottom: '1rem' }} />
                 </Link>
-                <h2>Join DHAROHAR</h2>
+                <h2>{t('auth.joinApp', 'Join DHAROHAR')}</h2>
                 <p style={{ color: 'var(--color-text-light)' }}>
-                    Contact your community administrator to receive access credentials.
+                    {t('auth.registerMessage', 'Contact your community administrator to receive access credentials.')}
                 </p>
                 <Link to="/login" style={{ marginTop: '1.5rem', display: 'inline-block' }} className="primary-btn">
-                    Back to Login
+                    {t('auth.backToLogin', 'Back to Login')}
                 </Link>
             </div>
         </div>

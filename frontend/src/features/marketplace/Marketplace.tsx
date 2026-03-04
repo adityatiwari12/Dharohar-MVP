@@ -6,18 +6,21 @@ import { SkeletonCard } from '../../components/SkeletonLoader';
 import { BackButton } from '../../components/Navigation/BackButton';
 import { useAuth } from '../../features/auth/AuthContext';
 import { LicensingInfoSection } from './LicensingInfoSection';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../../components/Navigation/LanguageSwitcher';
 import './Marketplace.css';
 
 const PAGE_SIZE = 12;
 
 const AttributionBlock = ({ text }: { text: string }) => {
+    const { t } = useTranslation();
     const parts = (text || '').split('\n');
     return (
         <div className="attribution-block">
             {parts.map((part, index) => (
                 <span key={index}>{part}</span>
             ))}
-            <strong>License Required for: Commercial / Research / Media Use</strong>
+            <strong>{t('marketplace.licenseRequired', 'License Required for: Commercial / Research / Media Use')}</strong>
         </div>
     );
 };
@@ -25,6 +28,7 @@ const AttributionBlock = ({ text }: { text: string }) => {
 export const Marketplace = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { t } = useTranslation();
 
     // True for logged-out users OR users with no governance role
     const isGeneralUser = !user || !(['community', 'review', 'admin'] as const).some(r => user.roles?.includes(r));
@@ -65,12 +69,12 @@ export const Marketplace = () => {
             setAssets(prev => pageNum === 1 ? result.assets : [...prev, ...result.assets]);
             setHasMore(result.hasMore);
         } catch (e: any) {
-            setError(e.response?.data?.message || 'Failed to load marketplace.');
+            setError(e.response?.data?.message || t('marketplace.loadError', 'Failed to load marketplace.'));
         } finally {
             setIsLoading(false);
             setIsFetchingMore(false);
         }
-    }, []);
+    }, [t]);
 
     // Initial load
     useEffect(() => { fetchPage(1); }, [fetchPage]);
@@ -105,12 +109,15 @@ export const Marketplace = () => {
         });
 
     return (
-        <div style={{ backgroundColor: 'var(--color-parchment)', minHeight: '100vh', padding: '4rem 2rem' }}>
+        <div style={{ backgroundColor: 'var(--color-parchment)', minHeight: '100vh', padding: '4rem 2rem', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: '1.5rem', right: '2rem', zIndex: 10 }}>
+                <LanguageSwitcher />
+            </div>
             <div className="marketplace-container">
                 <BackButton />
                 <header className="marketplace-header section-banner">
-                    <h2>Cultural Asset Marketplace</h2>
-                    <p>Structured licensing for verified indigenous knowledge and media. Only community-approved assets are listed here.</p>
+                    <h2>{t('marketplace.title', 'Cultural Asset Marketplace')}</h2>
+                    <p>{t('marketplace.subtitle', 'Structured licensing for verified indigenous knowledge and media. Only community-approved assets are listed here.')}</p>
                 </header>
 
                 {error && (
@@ -121,36 +128,36 @@ export const Marketplace = () => {
 
                 <div className="marketplace-layout">
                     <aside className="filters-sidebar framed-section">
-                        <h3>Filter Knowledge</h3>
+                        <h3>{t('marketplace.filterKnowledge', 'Filter Knowledge')}</h3>
                         <div className="filter-group">
-                            <label>Asset Type</label>
+                            <label>{t('marketplace.assetType', 'Asset Type')}</label>
                             <select value={filterType} onChange={e => { setFilterType(e.target.value); }}>
-                                <option value="ALL">All Types</option>
-                                <option value="BIO">Biological Knowledge</option>
-                                <option value="SONIC">Sonic / Musical</option>
+                                <option value="ALL">{t('marketplace.allTypes', 'All Types')}</option>
+                                <option value="BIO">{t('marketplace.bioType', 'Biological Knowledge')}</option>
+                                <option value="SONIC">{t('marketplace.sonicType', 'Sonic / Musical')}</option>
                             </select>
                         </div>
                         <div className="filter-group">
-                            <label>Risk Tier</label>
+                            <label>{t('marketplace.riskTier', 'Risk Tier')}</label>
                             <select value={filterRisk} onChange={e => setFilterRisk(e.target.value)}>
-                                <option value="ALL">All Risk Tiers</option>
-                                <option value="LOW">Low Risk</option>
-                                <option value="MEDIUM">Medium Risk</option>
-                                <option value="HIGH">High Risk</option>
+                                <option value="ALL">{t('marketplace.allRiskTiers', 'All Risk Tiers')}</option>
+                                <option value="LOW">{t('marketplace.lowRisk', 'Low Risk')}</option>
+                                <option value="MEDIUM">{t('marketplace.mediumRisk', 'Medium Risk')}</option>
+                                <option value="HIGH">{t('marketplace.highRisk', 'High Risk')}</option>
                             </select>
                         </div>
                         <div className="filter-group">
-                            <label>Sort By</label>
+                            <label>{t('marketplace.sortBy', 'Sort By')}</label>
                             <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
-                                <option value="COMMUNITY">Community Name</option>
-                                <option value="RISK">Risk Tier</option>
+                                <option value="COMMUNITY">{t('marketplace.sortCommunity', 'Community Name')}</option>
+                                <option value="RISK">{t('marketplace.riskTier', 'Risk Tier')}</option>
                             </select>
                         </div>
                     </aside>
 
                     <main className="marketplace-main">
                         <div className="marketplace-summary">
-                            <span>Showing {displayedAssets.length} governed assets</span>
+                            <span>{t('marketplace.showingAssets', { count: displayedAssets.length, defaultValue: `Showing ${displayedAssets.length} governed assets` })}</span>
                         </div>
 
                         <div className="grid-layout" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
@@ -159,8 +166,8 @@ export const Marketplace = () => {
                             ) : displayedAssets.length === 0 ? (
                                 <div className="no-data" style={{ gridColumn: '1 / -1' }}>
                                     {assets.length === 0
-                                        ? 'No approved assets in the marketplace yet. Assets appear here after community review approval.'
-                                        : 'No assets match the current filters.'}
+                                        ? t('marketplace.noApprovedAssets', 'No approved assets in the marketplace yet. Assets appear here after community review approval.')
+                                        : t('marketplace.noMatchAssets', 'No assets match the current filters.')}
                                 </div>
                             ) : (
                                 displayedAssets.map(asset => {
@@ -175,7 +182,7 @@ export const Marketplace = () => {
 
                                             <div className="badges-row">
                                                 {asset.riskTier && (
-                                                    <span className={`status tag ${asset.riskTier.toLowerCase()}`}>{asset.riskTier} RISK</span>
+                                                    <span className={`status tag ${asset.riskTier.toLowerCase()}`}>{t(`common.risk${asset.riskTier ? asset.riskTier.charAt(0).toUpperCase() + asset.riskTier.slice(1).toLowerCase() : 'Low'}`, `${asset.riskTier} RISK`)}</span>
                                                 )}
                                             </div>
 
@@ -184,7 +191,7 @@ export const Marketplace = () => {
                                             {asset.mediaUrl && (
                                                 <div style={{ margin: '1rem 0', padding: '0.75rem', background: 'rgba(0,0,0,0.03)', border: '1px solid var(--color-muted-gold)', borderRadius: '2px' }}>
                                                     <p style={{ fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--color-text-light)' }}>
-                                                        {asset.type === 'SONIC' ? '🎵 30s Preview' : '🎙 Voice Sample'}
+                                                        {asset.type === 'SONIC' ? `🎵 ${t('marketplace.sonicPreview', '30s Preview')}` : `🎙 ${t('marketplace.voiceSample', 'Voice Sample')}`}
                                                     </p>
                                                     {asset.mediaUrl.match(/\.(mp4|webm|mov)$/i) ? (
                                                         <video controls preload="metadata" style={{ width: '100%', borderRadius: '2px', maxHeight: '180px' }} src={asset.mediaUrl} />
@@ -196,16 +203,14 @@ export const Marketplace = () => {
                                                     {isGeneralUser && (
                                                         <div className="public-restriction-notice">
                                                             <p className="restriction-text">
-                                                                ⚠️ This cultural archive is protected under indigenous heritage law.
-                                                                You may not commercially use, reproduce, or publish this material under your name.
-                                                                Please review licensing details for authorised usage.
+                                                                ⚠️ {t('marketplace.restrictionNotice', 'This cultural archive is protected under indigenous heritage law. You may not commercially use, reproduce, or publish this material under your name. Please review licensing details for authorised usage.')}
                                                             </p>
                                                             <button
                                                                 type="button"
                                                                 className="restriction-license-btn"
                                                                 onClick={() => toggleLicensingSection(asset._id)}
                                                             >
-                                                                {expandedAssetId === asset._id ? '▲ Hide Licensing Terms' : '📋 View Licensing Terms'}
+                                                                {expandedAssetId === asset._id ? `▲ ${t('marketplace.hideTerms', 'Hide Licensing Terms')}` : `📋 ${t('marketplace.viewTerms', 'View Licensing Terms')}`}
                                                             </button>
                                                         </div>
                                                     )}
@@ -216,16 +221,16 @@ export const Marketplace = () => {
                                             <div className="marketplace-action">
                                                 {asset.type === 'BIO' ? (
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
-                                                        <button className="minimal-btn" style={{ width: '100%' }} onClick={() => handleApply(asset, 'RESEARCH')}>Apply for Research License</button>
-                                                        <button className="primary-btn" style={{ width: '100%' }} onClick={() => handleApply(asset, 'COMMERCIAL')}>Apply for Commercial License</button>
+                                                        <button className="minimal-btn" style={{ width: '100%' }} onClick={() => handleApply(asset, 'RESEARCH')}>{t('marketplace.applyResearch', 'Apply for Research License')}</button>
+                                                        <button className="primary-btn" style={{ width: '100%' }} onClick={() => handleApply(asset, 'COMMERCIAL')}>{t('marketplace.applyCommercial', 'Apply for Commercial License')}</button>
                                                     </div>
                                                 ) : (
                                                     <div style={{ width: '100%' }}>
                                                         <div className="fee-structure" style={{ marginBottom: '0.5rem' }}>
-                                                            <span>Licensing Fee</span>
-                                                            <strong>Tiered Governance</strong>
+                                                            <span>{t('marketplace.licensingFee', 'Licensing Fee')}</span>
+                                                            <strong>{t('marketplace.tieredGovernance', 'Tiered Governance')}</strong>
                                                         </div>
-                                                        <button className="primary-btn" style={{ width: '100%' }} onClick={() => handleApply(asset, 'MEDIA')}>Apply for Media License</button>
+                                                        <button className="primary-btn" style={{ width: '100%' }} onClick={() => handleApply(asset, 'MEDIA')}>{t('marketplace.applyMedia', 'Apply for Media License')}</button>
                                                     </div>
                                                 )}
                                             </div>
@@ -238,7 +243,7 @@ export const Marketplace = () => {
                                                     onClick={() => toggleLicensingSection(asset._id)}
                                                     aria-expanded={isLicensingOpen}
                                                 >
-                                                    {isLicensingOpen ? '▲ Hide Licensing Details' : '▼ View Licensing Options & Fees'}
+                                                    {isLicensingOpen ? `▲ ${t('marketplace.hideDetails', 'Hide Licensing Details')}` : `▼ ${t('marketplace.viewDetails', 'View Licensing Options & Fees')}`}
                                                 </button>
                                             </div>
 
@@ -269,7 +274,7 @@ export const Marketplace = () => {
                         {/* ── End of list message ── */}
                         {!hasMore && assets.length > 0 && (
                             <p style={{ textAlign: 'center', color: 'var(--color-text-light)', fontSize: '0.85rem', marginTop: '1.5rem', fontStyle: 'italic' }}>
-                                All {assets.length} assets loaded.
+                                {t('marketplace.allAssetsLoaded', { count: assets.length, defaultValue: `All ${assets.length} assets loaded.` })}
                             </p>
                         )}
                     </main>
@@ -280,18 +285,18 @@ export const Marketplace = () => {
                     <div style={{ marginTop: '4rem' }}>
                         <hr style={{ borderColor: 'var(--color-muted-gold)', marginBottom: '3rem' }} />
                         <h3 style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-burnt-umber)', fontSize: '1.75rem', marginBottom: '0.5rem', textAlign: 'center' }}>
-                            Understanding Our Licensing Framework
+                            {t('marketplace.understandingFramework', 'Understanding Our Licensing Framework')}
                         </h3>
                         <p style={{ textAlign: 'center', color: 'var(--color-text-light)', marginBottom: '2.5rem' }}>
-                            Browse the license types available on this platform before assets are approved.
+                            {t('marketplace.browseLicenseTypes', 'Browse the license types available on this platform before assets are approved.')}
                         </p>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                             <div>
-                                <h4 style={{ color: 'var(--color-burnt-umber)', marginBottom: '1rem' }}>🌿 Biological Knowledge (BIO)</h4>
+                                <h4 style={{ color: 'var(--color-burnt-umber)', marginBottom: '1rem' }}>{t('marketplace.bioHeader', '🌿 Biological Knowledge (BIO)')}</h4>
                                 <LicensingInfoSection assetType="BIO" onApply={() => navigate('/login')} />
                             </div>
                             <div>
-                                <h4 style={{ color: 'var(--color-burnt-umber)', marginBottom: '1rem' }}>🎶 Sonic Heritage (SONIC)</h4>
+                                <h4 style={{ color: 'var(--color-burnt-umber)', marginBottom: '1rem' }}>{t('marketplace.sonicHeader', '🎶 Sonic Heritage (SONIC)')}</h4>
                                 <LicensingInfoSection assetType="SONIC" onApply={() => navigate('/login')} />
                             </div>
                         </div>
