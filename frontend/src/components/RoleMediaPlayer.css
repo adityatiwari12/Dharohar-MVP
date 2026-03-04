@@ -1,0 +1,86 @@
+/* ── RoleMediaPlayer ── */
+.rmp-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.rmp-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-text-light, #888);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0 0 0.4rem;
+}
+
+.rmp-player-area {
+    position: relative;
+}
+
+.rmp-audio {
+    width: 100%;
+    display: block;
+    accent-color: var(--color-terracotta, #A14B3B);
+    height: 44px;
+    /* explicit touch-target height; overrides global height:auto for audio */
+}
+
+.rmp-video {
+    width: 100%;
+    max-height: 220px;
+    background: #000;
+    border-radius: 2px;
+    display: block;
+}
+
+/* Preview badge — shown before user plays */
+.rmp-preview-badge {
+    margin-top: 4px;
+    font-size: 0.72rem;
+    color: var(--color-text-light, #888);
+    font-style: italic;
+    padding: 2px 0;
+}
+
+/* Banner shown after preview ends */
+.rmp-preview-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 8px 12px;
+    background: rgba(161, 75, 59, 0.07);
+    border: 1px solid var(--color-terracotta, #A14B3B);
+    border-radius: 4px;
+    font-size: 0.78rem;
+    color: var(--color-terracotta, #A14B3B);
+    font-weight: 600;
+}
+
+.rmp-preview-hint {
+    font-weight: 400;
+    color: var(--color-text-light, #888);
+    font-style: italic;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MOBILE: max 767px
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 767px) {
+    .rmp-video {
+        max-height: 180px;
+    }
+
+    .rmp-label {
+        font-size: 0.72rem;
+    }
+
+    .rmp-preview-banner {
+        flex-direction: column;
+        gap: 4px;
+        font-size: 0.75rem;
+    }
+}
