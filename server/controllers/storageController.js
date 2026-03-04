@@ -1,4 +1,5 @@
-const { getGFS } = require('../config/db');
+const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
@@ -6,32 +7,33 @@ const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { v4: uuidv4 } = require('uuid');
 
-// Point fluent-ffmpeg at the bundled binary
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+
+const s3 = new S3Client({ region: process.env.AWS_REGION || 'ap-south-1' });
+const BUCKET_NAME = process.env.MEDIA_BUCKET || 'dharohar-media'; // Set in .env
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Classify an uploaded file's intended output format by MIME type / extension */
 function getTranscodeTarget(mimetype, originalname) {
     const ext = path.extname(originalname).toLowerCase();
     const videoTypes = ['video/', '.webm', '.mkv', '.avi', '.mov', '.mp4'];
     const audioTypes = ['audio/', '.wav', '.ogg', '.flac', '.aac', '.webm'];
 
     if (videoTypes.some(t => mimetype.startsWith(t) || ext === t)) {
-        // But if extension is clearly audio (e.g. audio/webm for a mic recording) keep as audio
         if (mimetype.startsWith('audio/')) return 'audio';
         return 'video';
     }
     if (audioTypes.some(t => mimetype.startsWith(t) || ext === t)) {
         return 'audio';
     }
-    return null; // don't transcode unknown types
+    return null;
 }
 
 /**
- * Upload an asset directly from the local tmp storage to GridFS.
- * Will transcode audio/video on the fly.
+ * Upload an asset directly to S3.
+ * Will transcode audio/video on the fly locally before uploading.
  */
 exports.uploadFile = async (req, res, next) => {
     if (!req.file) {
@@ -39,21 +41,21 @@ exports.uploadFile = async (req, res, next) => {
     }
 
     try {
-        const gfs = getGFS();
         const originalFile = req.file;
         const target = getTranscodeTarget(originalFile.mimetype, originalFile.originalname);
 
         let fileToUploadPath = originalFile.path;
         let outMime = originalFile.mimetype;
-        let outFilename = originalFile.filename;
-        let requiresCleanup = [originalFile.path]; // array of local temp files to delete
+        const newId = uuidv4();
+        let outFilename = `${newId}-${originalFile.originalname}`;
+        let requiresCleanup = [originalFile.path];
 
         // 1. Transcode if needed
         if (target) {
             const outExt = target === 'video' ? '.mp4' : '.mp3';
             outMime = target === 'video' ? 'video/mp4' : 'audio/mpeg';
-            outFilename = path.parse(originalFile.filename).name + outExt;
-            fileToUploadPath = path.join(os.tmpdir(), `dh-out-${path.parse(originalFile.filename).name}${outExt}`);
+            outFilename = `${newId}${outExt}`;
+            fileToUploadPath = path.join(os.tmpdir(), `dh-out-${newId}${outExt}`);
             requiresCleanup.push(fileToUploadPath);
 
             logger.info(`Transcoding ${target} from ${originalFile.mimetype} to ${outMime}...`);
@@ -79,18 +81,15 @@ exports.uploadFile = async (req, res, next) => {
             logger.info('Transcoding completed successfully.');
         }
 
-        // 2. Upload the final local file directly into GridFS
-        const newId = new mongoose.Types.ObjectId();
-        await new Promise((resolve, reject) => {
-            const uploadStream = gfs.openUploadStreamWithId(newId, outFilename, {
-                contentType: outMime
-            });
-            const readStream = fs.createReadStream(fileToUploadPath);
-            readStream.pipe(uploadStream);
-            uploadStream.on('finish', resolve);
-            uploadStream.on('error', reject);
-            readStream.on('error', reject);
-        });
+        // 2. Upload the final file to S3
+        const fileStream = fs.createReadStream(fileToUploadPath);
+
+        await s3.send(new PutObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: outFilename,
+            Body: fileStream,
+            ContentType: outMime
+        }));
 
         // 3. Cleanup local temp files
         requiresCleanup.forEach(f => {
@@ -98,117 +97,60 @@ exports.uploadFile = async (req, res, next) => {
         });
 
         // 4. Respond
+        // We return newId as fileId. The db saves it as a string instead of ObjectId now.
         res.status(201).json({
             message: 'File uploaded and processed successfully',
-            fileId: newId,
+            fileId: outFilename,
             filename: outFilename,
             contentType: outMime
         });
 
     } catch (error) {
-        logger.error(`Upload/Transcode error: ${error.message}`);
+        logger.error(`Upload/Transcode/S3 error: ${error.message}`);
+        if (req.file && fs.existsSync(req.file.path)) fs.unlink(req.file.path, () => { });
 
-        // Attempt cleanup on failure
-        if (req.file && fs.existsSync(req.file.path)) {
-            fs.unlink(req.file.path, () => { });
-        }
-
-        const err = new Error('File upload and processing failed');
+        const err = new Error('File upload to S3 failed');
         err.statusCode = 500;
         next(err);
     }
 };
 
-/** Stream a file from GridFS with full HTTP Range support (required for audio/video seeking) */
+/** Get a pre-signed URL to view the file or proxy it */
 exports.getFile = async (req, res, next) => {
     try {
-        const gfs = getGFS();
         const fileId = req.params.id;
 
-        if (!mongoose.Types.ObjectId.isValid(fileId)) {
-            const error = new Error('Invalid file ID');
-            error.statusCode = 400;
-            throw error;
-        }
+        // Mobile / Frontend expects to GET /storage/:id and receive the file.
+        // Option 1: Generate a pre-signed URL and redirect.
+        // Option 2: Proxy the S3 stream.
+        // Redirecting to pre-signed URL is much more efficient and allows S3 to handle range requests directly!
 
-        const files = await gfs.find({ _id: new mongoose.Types.ObjectId(fileId) }).toArray();
-        if (!files || files.length === 0) {
-            const error = new Error('File not found');
-            error.statusCode = 404;
-            throw error;
-        }
+        const command = new GetObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: fileId
+        });
 
-        const file = files[0];
-        const fileSize = file.length;
-        const contentType = file.contentType || 'application/octet-stream';
-        const rangeHeader = req.headers.range;
+        const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
 
-        if (rangeHeader) {
-            // ── Partial content (206) — required by browsers for audio/video seeking ──
-            const [startStr, endStr] = rangeHeader.replace(/bytes=/, '').split('-');
-            const start = parseInt(startStr, 10);
-            const end = endStr && endStr.trim() !== ''
-                ? Math.min(parseInt(endStr, 10), fileSize - 1)
-                : fileSize - 1;
-
-            if (start > end || start < 0 || end >= fileSize) {
-                res.status(416).set('Content-Range', `bytes */${fileSize}`).end();
-                return;
-            }
-
-            const chunkSize = end - start + 1;
-
-            res.status(206).set({
-                'Content-Type': contentType,
-                'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-                'Accept-Ranges': 'bytes',
-                'Content-Length': chunkSize,
-            });
-
-            // GridFS range: end is exclusive in openDownloadStream options
-            const readStream = gfs.openDownloadStream(file._id, { start, end: end + 1 });
-            readStream.pipe(res);
-            readStream.on('error', (err) => {
-                logger.error(`Range stream error: ${err.message}`);
-                if (!res.headersSent) res.status(500).end();
-            });
-
-        } else {
-            // ── Full file (200) ──
-            res.status(200).set({
-                'Content-Type': contentType,
-                'Accept-Ranges': 'bytes',
-                'Content-Length': fileSize,
-            });
-
-            const readStream = gfs.openDownloadStream(file._id);
-            readStream.pipe(res);
-            readStream.on('error', (err) => {
-                logger.error(`Stream error: ${err.message}`);
-                if (!res.headersSent) res.status(500).json({ message: 'Error streaming file' });
-            });
-        }
+        // 302 Redirect to the S3 URL where Range headers are fully supported natively
+        return res.redirect(302, signedUrl);
 
     } catch (error) {
         next(error);
     }
 };
 
-
-/** Delete a file from GridFS (admin only) */
+/** Delete a file from S3 (admin only) */
 exports.deleteFile = async (req, res, next) => {
     try {
-        const gfs = getGFS();
         const fileId = req.params.id;
 
-        if (!mongoose.Types.ObjectId.isValid(fileId)) {
-            const error = new Error('Invalid file ID');
-            error.statusCode = 400;
-            throw error;
-        }
+        await s3.send(new DeleteObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: fileId
+        }));
 
-        await gfs.delete(new mongoose.Types.ObjectId(fileId));
-        res.status(200).json({ message: 'File deleted successfully' });
+        res.status(200).json({ message: 'File deleted from S3 successfully' });
     } catch (error) {
         next(error);
     }

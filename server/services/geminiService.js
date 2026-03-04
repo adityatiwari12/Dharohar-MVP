@@ -6,29 +6,22 @@ const MAX_INLINE_BYTES = 10 * 1024 * 1024; // 10 MB cap for inline media
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
-// ── Fetch a GridFS file as a base64 buffer ──────────────────────────────────
-const fetchMediaFromGridFS = async (mediaFileId) => {
+// ── Fetch an S3 file as a base64 buffer ──────────────────────────────────
+const fetchMediaFromS3 = async (mediaFileId) => {
     try {
-        const { getGFS } = require('../config/db');
-        const gfs = getGFS();
+        const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3');
+        const s3 = new S3Client({ region: process.env.AWS_REGION || 'ap-south-1' });
+        const BUCKET_NAME = process.env.MEDIA_BUCKET || 'dharohar-media';
 
-        const fileId = new mongoose.Types.ObjectId(mediaFileId);
-        const files = await gfs.find({ _id: fileId }).toArray();
-        if (!files || files.length === 0) {
-            logger.warn(`[GeminiService] Media file not found in GridFS: ${mediaFileId}`);
-            return null;
-        }
+        const response = await s3.send(new GetObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: mediaFileId
+        }));
 
-        const file = files[0];
         const chunks = [];
-
-        await new Promise((resolve, reject) => {
-            const stream = gfs.openDownloadStream(fileId);
-            stream.on('data', chunk => chunks.push(chunk));
-            stream.on('end', resolve);
-            stream.on('error', reject);
-        });
-
+        for await (const chunk of response.Body) {
+            chunks.push(chunk);
+        }
         const buffer = Buffer.concat(chunks);
 
         if (buffer.length > MAX_INLINE_BYTES) {
@@ -38,11 +31,11 @@ const fetchMediaFromGridFS = async (mediaFileId) => {
 
         return {
             base64: buffer.toString('base64'),
-            mimeType: file.contentType || 'audio/mpeg',
+            mimeType: response.ContentType || 'audio/mpeg',
             sizeKB: Math.round(buffer.length / 1024)
         };
     } catch (err) {
-        logger.error(`[GeminiService] GridFS fetch failed: ${err.message}`);
+        logger.error(`[GeminiService] S3 fetch failed: ${err.message}`);
         return null;
     }
 };
@@ -118,8 +111,8 @@ const generateAssetMetadata = async (assetData) => {
         // 1. Try to fetch media for inline analysis
         let mediaPart = null;
         if (assetData.mediaFileId) {
-            logger.info(`[GeminiService] Fetching media file ${assetData.mediaFileId} from GridFS...`);
-            const media = await fetchMediaFromGridFS(assetData.mediaFileId);
+            logger.info(`[GeminiService] Fetching media file ${assetData.mediaFileId} from S3...`);
+            const media = await fetchMediaFromS3(assetData.mediaFileId);
             if (media) {
                 mediaPart = { inlineData: { data: media.base64, mimeType: media.mimeType } };
                 logger.info(`[GeminiService] Media attached for analysis (${media.sizeKB}KB, ${media.mimeType})`);

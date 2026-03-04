@@ -1,7 +1,16 @@
-const jwt = require('jsonwebtoken');
+const { CognitoJwtVerifier } = require('aws-jwt-verify');
+const User = require('../models/User');
 const roleGuard = require('./roleGuard');
 
-const protect = (req, res, next) => {
+// Setup Cognito JWT Verifier
+// It automatically handles JWKS downloading and caching.
+const verifier = CognitoJwtVerifier.create({
+    userPoolId: process.env.COGNITO_USER_POOL_ID || 'ap-south-1_xxxxxxxxx', // Set in .env
+    tokenUse: "id", // Or "access", depending on frontend usage. Cognito's IdToken has email.
+    clientId: process.env.COGNITO_CLIENT_ID || 'xxxxxxxxxxxxxxxxxxxxxxxxxx', // Set in .env
+});
+
+const protect = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -10,14 +19,38 @@ const protect = (req, res, next) => {
 
         const token = authHeader.split(' ')[1];
 
-        // Verify token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret_key');
+        // 1. Verify token with Cognito
+        let payload;
+        try {
+            payload = await verifier.verify(token);
+        } catch (verifyErr) {
+            return res.status(401).json({ error: 'Token verification failed or expired: ' + verifyErr.message });
+        }
 
-        // Attach user to request payload
-        req.user = decoded;
+        // 2. Find user in MongoDB using the email from Cognito's token
+        const email = payload.email || payload.username;
+        if (!email) {
+            return res.status(401).json({ error: 'Invalid token payload: missing email' });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json({ error: 'User profile not found in database' });
+        }
+
+        // 3. Attach DB user directly to request so roles and _id work
+        // Express routes expect req.user.id and req.user.role
+        req.user = {
+            id: user._id.toString(),
+            role: user.role,
+            communityName: user.communityName,
+            email: user.email,
+            name: user.name
+        };
+
         next();
     } catch (error) {
-        return res.status(401).json({ error: 'Token verification failed or expired' });
+        return res.status(500).json({ error: 'Internal auth processing error' });
     }
 };
 

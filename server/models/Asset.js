@@ -36,7 +36,7 @@ const AssetSchema = new mongoose.Schema({
         type: String   // Legacy support / External links
     },
     mediaFileId: {
-        type: mongoose.Schema.Types.ObjectId, // GridFS File ID
+        type: String, // S3 Object Key
         index: true
     },
     metadata: {
