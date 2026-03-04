@@ -1,82 +1,97 @@
-import React, { useEffect, useState } from 'react';
-import { Tabs, useRouter } from 'expo-router';
-import { Platform } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Tabs } from 'expo-router';
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '../../src/theme/colors';
 
-// Simple polyfill component to avoid heavy icons for now
-const TabIcon = ({ name, color, size = 24 }: { name: string; color: string; size?: number }) => {
-  return null;
-};
+// Tab icon — emoji + label, no wrapping
+const TabIcon = ({ focused, label, icon }: { focused: boolean; label: string; icon: string }) => (
+  <View style={styles.tabIcon}>
+    <Text style={[styles.tabEmoji, focused && styles.emojiActive]}>{icon}</Text>
+    <Text style={[styles.tabLabel, focused && styles.tabLabelActive]} numberOfLines={1}>
+      {label}
+    </Text>
+  </View>
+);
 
 export default function TabLayout() {
-  const [role, setRole] = useState('general');
-  const router = useRouter();
-
-  useEffect(() => {
-    checkRole();
-  }, []);
-
-  const checkRole = async () => {
-    try {
-      const userRole = await AsyncStorage.getItem('userRole');
-      if (userRole) setRole(userRole);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.terracotta,
-        tabBarInactiveTintColor: colors.textLight,
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: colors.bgLight,
-          borderTopColor: colors.mutedGold,
-          borderTopWidth: 1,
-          height: Platform.OS === 'ios' ? 88 : 60,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
-          paddingTop: 8,
-        },
-        tabBarLabelStyle: {
-          fontFamily: Platform.OS === 'ios' ? 'San Francisco' : 'sans-serif',
-          fontWeight: '500',
-        }
-      }}>
-
-      {/* Dynamic Dashboard based on User Role */}
+        tabBarStyle: styles.tabBar,
+        tabBarShowLabel: false, // we render our own label inside TabIcon
+      }}
+    >
+      {/* My Submissions */}
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Dashboard',
+          title: 'Submissions',
+          tabBarIcon: ({ focused }) => <TabIcon focused={focused} label="Submissions" icon="📋" />,
         }}
       />
 
-      {/* Global Explorer */}
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-        }}
-      />
-
-      {/* Asset Upload - Hidden for General roles maybe? (Visible for all for now) */}
+      {/* Upload Asset */}
       <Tabs.Screen
         name="upload"
         options={{
-          title: 'Upload Asset',
+          title: 'Upload',
+          tabBarIcon: ({ focused }) => <TabIcon focused={focused} label="Upload" icon="☁️" />,
         }}
       />
 
-      {/* Profile/Settings */}
+      {/* Profile */}
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
+          tabBarIcon: ({ focused }) => <TabIcon focused={focused} label="Profile" icon="👤" />,
         }}
       />
+
+      {/* Hidden screens */}
+      <Tabs.Screen name="explore" options={{ href: null }} />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(183,144,61,0.35)',
+    height: 64,         // fixed height — prevents squishing
+    paddingBottom: 4,
+    paddingTop: 0,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+  },
+  tabIcon: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 4,
+    width: 80,           // fixed width prevents label overflow
+    gap: 2,
+  },
+  tabEmoji: {
+    fontSize: 22,
+    opacity: 0.45,
+  },
+  emojiActive: {
+    opacity: 1,
+  },
+  tabLabel: {
+    fontSize: 10,
+    color: colors.textLight,
+    letterSpacing: 0.2,
+    textAlign: 'center',
+    width: '100%',       // fills the fixed width container
+  },
+  tabLabelActive: {
+    color: colors.terracotta,
+    fontWeight: '700',
+  },
+});

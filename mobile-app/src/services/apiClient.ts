@@ -2,25 +2,45 @@ import axios from 'axios';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// In Expo, localhost points to the device itself.
-// To connect to your local PC dev server from an Android emulator, use 10.0.2.2
-// For iOS Simulator, localhost or 127.0.0.1 works.
-// For physical devices, you must use your computer's local network IP (e.g., 192.168.x.x)
-const getBaseUrl = () => {
+/**
+ * API BASE URL GUIDE:
+ *
+ * ┌─────────────────────────────────────────────────────────────────┐
+ * │ iOS Simulator     → localhost:5000 works fine                   │
+ * │ Android Emulator  → 10.0.2.2:5000 (emulator's alias for host)  │
+ * │ Physical Device   → Your PC's LAN IP, e.g. 192.168.1.5:5000    │
+ * │                     Set EXPO_PUBLIC_API_URL in mobile-app/.env  │
+ * └─────────────────────────────────────────────────────────────────┘
+ *
+ * To find your LAN IP on Windows, run: ipconfig
+ * Look for "IPv4 Address" under your Wi-Fi adapter.
+ * Then set in mobile-app/.env:
+ *   EXPO_PUBLIC_API_URL=http://192.168.X.X:5000
+ */
+
+const getBaseUrl = (): string => {
+    // Highest priority: explicit env var (works for physical devices)
+    if (process.env.EXPO_PUBLIC_API_URL) {
+        return process.env.EXPO_PUBLIC_API_URL;
+    }
+
     if (__DEV__) {
+        // Android emulator: 10.0.2.2 is the host machine loopback
         if (Platform.OS === 'android') return 'http://10.0.2.2:5000';
+        // iOS simulator: localhost works
         return 'http://localhost:5000';
     }
-    // Production URL would go here
+
     return 'https://dharohar-api.example.com';
 };
 
 export const API_BASE_URL = getBaseUrl();
+console.log('[apiClient] Connecting to:', API_BASE_URL);
 
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
     headers: { 'Content-Type': 'application/json' },
-    timeout: 10000,
+    timeout: 15000,
 });
 
 // Automatically attach auth token to every request
@@ -41,12 +61,7 @@ apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
         if (error.response?.status === 401) {
-            await AsyncStorage.removeItem('userToken');
-            await AsyncStorage.removeItem('userRole');
-            await AsyncStorage.removeItem('userData');
-            // We don't have window.location in React Native, 
-            // The routing state will naturally detect the missing token on next mount
-            // or the component catching the error should redirect.
+            await AsyncStorage.multiRemove(['userToken', 'userRole', 'userData']);
         }
         return Promise.reject(error);
     }
