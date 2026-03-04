@@ -1,6 +1,9 @@
 import * as cdk from 'aws-cdk-lib';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as nodejs from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as path from 'path';
 import { Construct } from 'constructs';
 
 export class DharoharMvpStack extends cdk.Stack {
@@ -8,7 +11,7 @@ export class DharoharMvpStack extends cdk.Stack {
     super(scope, id, props);
 
     // ─────────────────────────────────────────────────
-    // S3 BUCKETS (already done ✅ — keeping them)
+    // S3 BUCKETS ✅
     // ─────────────────────────────────────────────────
     const mediaBucket = new s3.Bucket(this, 'MediaBucket', {
       bucketName: `dharohar-media-${this.account}`,
@@ -37,92 +40,81 @@ export class DharoharMvpStack extends cdk.Stack {
     });
 
     // ─────────────────────────────────────────────────
-    // DYNAMODB TABLE 1 — Assets Table
-    // One row for every heritage recording
+    // DYNAMODB TABLES ✅
     // ─────────────────────────────────────────────────
     const assetsTable = new dynamodb.Table(this, 'AssetsTable', {
       tableName: 'dharohar-assets',
-
-      // Primary key — every asset has a unique ID
       partitionKey: {
         name: 'assetId',
         type: dynamodb.AttributeType.STRING,
       },
-
-      // PAY_PER_REQUEST = only pay when you actually use it
-      // Free tier: 25 GB storage + 200M requests/month
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-
-      // Delete table when stack is destroyed (dev mode)
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-
-      // Stream = sends events when data changes
-      // We'll use this later to trigger AI processing
       stream: dynamodb.StreamViewType.NEW_AND_OLD_IMAGES,
     });
-
-    // ── GSI 1: Query assets by userId ──────────────────
-    // "Show me all recordings by creator X"
     assetsTable.addGlobalSecondaryIndex({
       indexName: 'userId-createdAt-index',
-      partitionKey: {
-        name: 'userId',
-        type: dynamodb.AttributeType.STRING,
-      },
-      sortKey: {
-        name: 'createdAt',
-        type: dynamodb.AttributeType.STRING,
-      },
+      partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
+      sortKey:      { name: 'createdAt', type: dynamodb.AttributeType.STRING },
     });
-
-    // ── GSI 2: Query assets by status ──────────────────
-    // "Show me all recordings that are PENDING processing"
     assetsTable.addGlobalSecondaryIndex({
       indexName: 'status-index',
-      partitionKey: {
-        name: 'status',
-        type: dynamodb.AttributeType.STRING,
-      },
+      partitionKey: { name: 'status', type: dynamodb.AttributeType.STRING },
     });
 
-    // ─────────────────────────────────────────────────
-    // DYNAMODB TABLE 2 — Creators Table
-    // One row for every registered creator
-    // ─────────────────────────────────────────────────
     const creatorsTable = new dynamodb.Table(this, 'CreatorsTable', {
       tableName: 'dharohar-creators',
-
-      // Primary key — creator's unique ID (from Cognito later)
       partitionKey: {
         name: 'creatorId',
         type: dynamodb.AttributeType.STRING,
       },
-
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     // ─────────────────────────────────────────────────
-    // OUTPUTS — printed after cdk deploy
+    // LAMBDA FUNCTION — Bio Processor (NEW ✨)
+    // Handles voice upload requests from mobile app
+    // ─────────────────────────────────────────────────
+    const bioProcessorFn = new nodejs.NodejsFunction(this, 'BioProcessor', {
+      functionName: 'dharohar-bio-processor',
+      runtime:      lambda.Runtime.NODEJS_20_X,
+      entry:        path.join(__dirname, '../backend/lambdas/bio-processor/index.ts'),
+      handler:      'handler',
+      timeout:      cdk.Duration.seconds(30),
+      memorySize:   256,
+      environment: {
+        MEDIA_BUCKET:    mediaBucket.bucketName,
+        DOSSIERS_BUCKET: dossiersBucket.bucketName,
+        ASSETS_TABLE:    assetsTable.tableName,
+      },
+    });
+
+    // Give Lambda permission to read/write S3
+    mediaBucket.grantReadWrite(bioProcessorFn);
+    dossiersBucket.grantReadWrite(bioProcessorFn);
+
+    // Give Lambda permission to read/write DynamoDB
+    assetsTable.grantReadWriteData(bioProcessorFn);
+
+    // ─────────────────────────────────────────────────
+    // OUTPUTS
     // ─────────────────────────────────────────────────
     new cdk.CfnOutput(this, 'MediaBucketName', {
       value: mediaBucket.bucketName,
-      description: 'S3 bucket for voice recordings and QR codes',
     });
-
     new cdk.CfnOutput(this, 'DossiersBucketName', {
       value: dossiersBucket.bucketName,
-      description: 'S3 bucket for PDFs and legal documents',
     });
-
     new cdk.CfnOutput(this, 'AssetsTableName', {
       value: assetsTable.tableName,
-      description: 'DynamoDB table for heritage assets',
     });
-
     new cdk.CfnOutput(this, 'CreatorsTableName', {
       value: creatorsTable.tableName,
-      description: 'DynamoDB table for creator profiles',
+    });
+    new cdk.CfnOutput(this, 'BioProcessorFunctionName', {
+      value: bioProcessorFn.functionName,
+      description: 'Lambda that handles voice uploads',
     });
   }
 }
