@@ -3,6 +3,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as nodejs from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as path from 'path';
 import { Construct } from 'constructs';
 
@@ -73,8 +74,7 @@ export class DharoharMvpStack extends cdk.Stack {
     });
 
     // ─────────────────────────────────────────────────
-    // LAMBDA FUNCTION — Bio Processor (NEW ✨)
-    // Handles voice upload requests from mobile app
+    // LAMBDA FUNCTION ✅
     // ─────────────────────────────────────────────────
     const bioProcessorFn = new nodejs.NodejsFunction(this, 'BioProcessor', {
       functionName: 'dharohar-bio-processor',
@@ -90,12 +90,76 @@ export class DharoharMvpStack extends cdk.Stack {
       },
     });
 
-    // Give Lambda permission to read/write S3
     mediaBucket.grantReadWrite(bioProcessorFn);
     dossiersBucket.grantReadWrite(bioProcessorFn);
-
-    // Give Lambda permission to read/write DynamoDB
     assetsTable.grantReadWriteData(bioProcessorFn);
+
+    // ─────────────────────────────────────────────────
+    // API GATEWAY (NEW ✨)
+    // Gives Lambda a real HTTPS URL
+    // ─────────────────────────────────────────────────
+    const api = new apigateway.RestApi(this, 'DharoharApi', {
+      restApiName: 'dharohar-api',
+
+      // Allow mobile app to call this API
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: ['Content-Type', 'Authorization'],
+      },
+
+      // Stage = version of your API
+      deployOptions: {
+        stageName: 'v1',
+      },
+    });
+
+    // ── Route 1: POST /bio/upload ─────────────────────
+    // Mobile calls this to get S3 upload URL
+    const bioResource = api.root.addResource('bio');
+    const uploadResource = bioResource.addResource('upload');
+
+    uploadResource.addMethod(
+      'POST',
+      new apigateway.LambdaIntegration(bioProcessorFn, {
+        requestTemplates: {
+          'application/json': '{ "statusCode": "200" }',
+        },
+      })
+    );
+
+    // ── Route 2: GET /bio/status/{assetId} ───────────
+    // Mobile calls this to check processing status
+    const statusResource = bioResource
+      .addResource('status')
+      .addResource('{assetId}');
+
+    statusResource.addMethod(
+      'GET',
+      new apigateway.LambdaIntegration(bioProcessorFn)
+    );
+
+    // ── Route 3: GET /health ──────────────────────────
+    // Simple health check — confirms API is running
+    const healthResource = api.root.addResource('health');
+    healthResource.addMethod(
+      'GET',
+      new apigateway.MockIntegration({
+        integrationResponses: [{
+          statusCode: '200',
+          responseTemplates: {
+            'application/json': '{"status": "healthy", "service": "dharohar-api"}',
+          },
+        }],
+        passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
+        requestTemplates: {
+          'application/json': '{"statusCode": 200}',
+        },
+      }),
+      {
+        methodResponses: [{ statusCode: '200' }],
+      }
+    );
 
     // ─────────────────────────────────────────────────
     // OUTPUTS
@@ -114,7 +178,12 @@ export class DharoharMvpStack extends cdk.Stack {
     });
     new cdk.CfnOutput(this, 'BioProcessorFunctionName', {
       value: bioProcessorFn.functionName,
-      description: 'Lambda that handles voice uploads',
+    });
+
+    // Most important output — this is your API URL
+    new cdk.CfnOutput(this, 'ApiUrl', {
+      value: api.url,
+      description: 'Base URL for all API calls — save this!',
     });
   }
 }
