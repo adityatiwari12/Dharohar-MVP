@@ -38,13 +38,13 @@ export const Login = () => {
         }
     };
 
-    // Quick-fill helpers for test credentials
+    // Quick-fill helpers for valid AWS Cognito/DynamoDB test credentials
     const fillCreds = (role: string) => {
         const emailMap: Record<string, string> = {
-            community: 'community@dharohar.dev',
-            review: 'reviewer@dharohar.dev',
-            admin: 'admin@dharohar.dev',
-            general: 'general@dharohar.dev',
+            community: 'anvesh@dharohar.com',
+            review: 'aryan@dharohar.com',
+            admin: 'akshay@dharohar.com',
+            general: 'aditya@dharohar.com',
         };
         setEmail(emailMap[role] || '');
         setPassword('Test@1234');

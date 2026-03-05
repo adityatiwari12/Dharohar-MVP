@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import { Construct } from 'constructs';
 
 export class DharoharMvpStack extends cdk.Stack {
@@ -114,6 +115,55 @@ export class DharoharMvpStack extends cdk.Stack {
     });
 
     // ─────────────────────────────────────────────────
+    // DYNAMODB TABLES
+    // ─────────────────────────────────────────────────
+
+    // Users Table — primary store for registered users
+    const usersTable = new dynamodb.Table(this, 'UsersTable', {
+      tableName: 'UsersTable',
+      partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.RETAIN, // protect live data
+    });
+
+    // GSI: look up user by email (for login)
+    usersTable.addGlobalSecondaryIndex({
+      indexName: 'email-index',
+      partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
+    // Assets Table — heritage asset metadata
+    const assetsTable = new dynamodb.Table(this, 'AssetsTable', {
+      tableName: 'AssetsTable',
+      partitionKey: { name: 'assetId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+
+    // GSI: list all assets by a specific creator
+    assetsTable.addGlobalSecondaryIndex({
+      indexName: 'creatorId-index',
+      partitionKey: { name: 'creatorId', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
+    // Licenses Table — licensing & royalty records
+    const licensesTable = new dynamodb.Table(this, 'LicensesTable', {
+      tableName: 'LicensesTable',
+      partitionKey: { name: 'licenseId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+
+    // GSI: list all licenses for a specific asset
+    licensesTable.addGlobalSecondaryIndex({
+      indexName: 'assetId-index',
+      partitionKey: { name: 'assetId', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
+    // ─────────────────────────────────────────────────
     // OUTPUTS
     // ─────────────────────────────────────────────────
     new cdk.CfnOutput(this, 'MediaBucketName', {
@@ -135,6 +185,19 @@ export class DharoharMvpStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'CognitoRegion', {
       value: this.region,
       description: 'AWS Region for Cognito',
+    });
+
+    new cdk.CfnOutput(this, 'UsersTableName', {
+      value: usersTable.tableName,
+      description: 'DynamoDB Users Table',
+    });
+    new cdk.CfnOutput(this, 'AssetsTableName', {
+      value: assetsTable.tableName,
+      description: 'DynamoDB Assets Table',
+    });
+    new cdk.CfnOutput(this, 'LicensesTableName', {
+      value: licensesTable.tableName,
+      description: 'DynamoDB Licenses Table',
     });
   }
 }

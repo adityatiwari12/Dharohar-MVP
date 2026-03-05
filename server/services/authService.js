@@ -16,6 +16,13 @@ const cognito = new CognitoIdentityProviderClient({
 });
 
 const register = async (userData) => {
+    // Guard: ensure body was parsed correctly
+    if (!userData || !userData.email || !userData.password || !userData.name) {
+        const error = new Error('name, email and password are required');
+        error.statusCode = 400;
+        throw error;
+    }
+
     // 1. Check if user already has a profile in DynamoDB
     const existingUser = await userDynamoService.findByEmail(userData.email);
     if (existingUser) {
