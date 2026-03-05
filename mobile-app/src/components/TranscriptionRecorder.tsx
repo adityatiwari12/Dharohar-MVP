@@ -30,7 +30,7 @@ export const TranscriptionRecorder: React.FC<TranscriptionRecorderProps> = ({
 
     // Timer Effect
     useEffect(() => {
-        let interval: NodeJS.Timeout;
+        let interval: ReturnType<typeof setInterval>;
         if (isRecording) {
             interval = setInterval(() => {
                 setDuration(prev => prev + 1);
@@ -105,10 +105,10 @@ export const TranscriptionRecorder: React.FC<TranscriptionRecorderProps> = ({
                     try {
                         // Note: Mobile SDKs for gemini cannot stream audio cleanly in real-time chunking natively 
                         // without complex WebRTC bridges, so we process immediately post-recording as a "live" batch
-                        // gemini-2.0-flash is the current stable model name (v1 API)
+                        // Switched to gemini-1.5-flash to bypass 2.0-flash quota exhaustion
                         const model = genAI.getGenerativeModel(
-                            { model: "gemini-2.0-flash" },
-                            { apiVersion: "v1" }
+                            { model: "gemini-1.5-flash" },
+                            { apiVersion: "v1beta" } // fallback to v1beta for 1.5-flash
                         );
 
                         const prompt = "Please transcribe the following audio file verbatim. Note: It may contain indigenous or non-english words, transcribe them phonetically if unsure.";
@@ -127,9 +127,17 @@ export const TranscriptionRecorder: React.FC<TranscriptionRecorderProps> = ({
                         setTranscript(textResponse);
                         onTranscriptChange(textResponse);
 
-                    } catch (geminiError) {
+                    } catch (geminiError: any) {
                         console.error('Gemini Transcription Error:', geminiError);
-                        setTranscript('Notice: AI transcription failed or took too long. You may manually type the transcript below.');
+
+                        // Handle 429 Quota Exceeded prominently
+                        if (geminiError.message && geminiError.message.includes('429')) {
+                            const errorMsg = 'Notice: AI transcription quota exceeded. Please manually type the transcript below.';
+                            setTranscript(errorMsg);
+                        } else {
+                            const errorMsg = 'Notice: AI transcription failed or took too long. You may manually type the transcript below.';
+                            setTranscript(errorMsg);
+                        }
                     } finally {
                         setIsProcessing(false);
                     }
