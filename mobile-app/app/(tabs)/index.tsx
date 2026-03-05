@@ -144,45 +144,36 @@ export default function MySubmissionsScreen() {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-        {/* Outer framed card — ERROR and content are BOTH inside this */}
-        <FramedCard style={styles.outerFrame}>
-
-          {/* Error message — inside the framed card, not above it */}
-          {!!error && (
-            <View style={styles.errorBox}>
-              <Text style={styles.errorText}>{error}</Text>
-            </View>
-          )}
-
-          {/* Loading */}
-          {loading && (
+      <FlatList
+        data={assets}
+        keyExtractor={item => item._id}
+        renderItem={renderAsset}
+        contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: spacing.md }}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          <>
+            {!!error && (
+              <View style={[styles.errorBox, { marginTop: spacing.md }]}>
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            )}
+            {!error && (
+              <Text style={[styles.trackDesc, { marginTop: spacing.md, marginHorizontal: spacing.sm }]}>
+                Track the status of your community's archival submissions. Rejected submissions include reviewer feedback.
+              </Text>
+            )}
+          </>
+        }
+        ListEmptyComponent={
+          loading ? (
             <View style={styles.center}>
               <ActivityIndicator color={colors.terracotta} size="large" />
             </View>
-          )}
-
-          {/* Description — only show when no error */}
-          {!error && (
-            <Text style={styles.trackDesc}>
-              Track the status of your community's archival submissions. Rejected submissions include reviewer feedback.
-            </Text>
-          )}
-
-          {/* Empty state */}
-          {!loading && !error && assets.length === 0 && (
+          ) : !error ? (
             <Text style={styles.noData}>No submissions found. Upload your first cultural asset!</Text>
-          )}
-
-          {/* Asset list */}
-          {assets.map(item => (
-            <View key={item._id}>
-              {renderAsset({ item })}
-            </View>
-          ))}
-
-        </FramedCard>
-      </ScrollView>
+          ) : null
+        }
+      />
 
       {/* Details Modal */}
       <Modal visible={!!selectedAsset} transparent animationType="fade" onRequestClose={() => setSelectedAsset(null)}>
