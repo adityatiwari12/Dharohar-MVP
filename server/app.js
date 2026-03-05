@@ -8,12 +8,16 @@ const authRoutes = require('./routes/authRoutes');
 const assetRoutes = require('./routes/assetRoutes');
 const licenseRoutes = require('./routes/licenseRoutes');
 const storageRoutes = require('./routes/storageRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 const app = express();
 
 // Middleware
 const allowedOrigins = [
     'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5175',
+    'http://localhost:5176',
     'https://dharohar-mvp.netlify.app'
 ];
 
@@ -39,6 +43,7 @@ app.use('/auth', authRoutes);
 app.use('/assets', assetRoutes);
 app.use('/licenses', licenseRoutes);
 app.use('/storage', storageRoutes);
+app.use('/dashboard', dashboardRoutes);
 
 // 404 Handler
 app.use((req, res, next) => {

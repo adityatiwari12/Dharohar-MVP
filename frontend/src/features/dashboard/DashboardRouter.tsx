@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../components/Layout/DashboardLayout';
 import { useAuth } from '../auth/AuthContext';
 import { UploadAsset } from '../assets/UploadAsset.tsx';
@@ -11,7 +11,8 @@ import { MySubmissions } from './MySubmissions';
 import { MyLicenses } from './MyLicenses';
 import { GeneralDashboard } from './GeneralDashboard';
 import { ProtectedRoute } from '../../routes/ProtectedRoute';
-import { useTranslation } from 'react-i18next';
+import apiClient from '../../services/apiClient';
+import { Loader } from '../../components/Loader/Loader';
 
 const AnimatedCounter = ({ value, label }: { value: number, label: string }) => {
     const [count, setCount] = useState(0);
@@ -57,33 +58,40 @@ const AnimatedCounter = ({ value, label }: { value: number, label: string }) => 
 const Overview = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
-    const { t } = useTranslation();
+    const [stats, setStats] = useState({ totalSubmissions: 0, pendingReviews: 0, approvedLicenses: 0 });
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Redirect governance users to their primary view
-    if (user?.roles.includes('community')) {
-        return <Navigate to="/dashboard/assets/mine" replace />;
-    }
-    if (user?.roles.includes('general')) {
-        return <Navigate to="/dashboard/home" replace />;
-    }
-    if (user?.roles.includes('review')) {
-        return <Navigate to="/dashboard/review-queue" replace />;
-    }
-    if (user?.roles.includes('admin')) {
-        return <Navigate to="/dashboard/license-requests" replace />;
-    }
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const { data } = await apiClient.get('/dashboard/stats');
+                setStats(data);
+            } catch (err) {
+                console.error('Failed to fetch dashboard stats', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchStats();
+    }, []);
+
+    // Removed automatic redirects to allow metrics visibility
+
+
+    if (isLoading) return <Loader label="Loading governance metrics..." />;
 
     return (
         <div style={{ animation: 'fadeIn var(--transition-slow)' }}>
+
             <div style={{ marginBottom: '3rem' }}>
                 <h3>{t('dashboard.overviewTitle', 'Institutional Overview')}</h3>
                 <p style={{ color: 'var(--color-text-light)' }}>{t('dashboard.overviewDesc', 'Live governance metrics for the DHAROHAR ecosystem.')}</p>
             </div>
 
             <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', marginBottom: '4rem' }}>
-                <AnimatedCounter value={124} label={t('dashboard.totalSubmissions', 'Total Submissions')} />
-                <AnimatedCounter value={12} label={t('dashboard.pendingReviews', 'Pending Reviews')} />
-                <AnimatedCounter value={89} label={t('dashboard.approvedLicenses', 'Approved Licenses')} />
+                <AnimatedCounter value={stats.totalSubmissions} label="Total Submissions" />
+                <AnimatedCounter value={stats.pendingReviews} label="Pending Reviews" />
+                <AnimatedCounter value={stats.approvedLicenses} label="Approved Licenses" />
             </div>
 
             <div className="framed-section" style={{ padding: '2rem' }}>

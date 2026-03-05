@@ -90,6 +90,13 @@ const LicenseSchema = new mongoose.Schema({
     },
     agreementText: {
         type: String
+    },
+
+    // ── Blockchain Verification ──────────────────────────
+    blockchainMetadata: {
+        txHash: { type: String },
+        onChainId: { type: String },
+        issuedAt: { type: Date }
     }
 }, { timestamps: true });
 

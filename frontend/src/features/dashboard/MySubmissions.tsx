@@ -4,8 +4,8 @@ import { StatusBadge } from '../../components/StatusBadge';
 import { getMyAssets } from '../../services/assetService';
 import type { Asset } from '../../services/assetService';
 import { RoleMediaPlayer } from '../../components/RoleMediaPlayer';
-import { FiX, FiInfo, FiFileText, FiClock, FiChevronDown, FiChevronUp } from 'react-icons/fi';
-import { useTranslation } from 'react-i18next';
+import { FiX, FiInfo, FiFileText, FiClock, FiChevronDown, FiChevronUp, FiShield } from 'react-icons/fi';
+import { SovereigntyPassport } from '../../components/SovereigntyPassport';
 
 export const MySubmissions = () => {
     const { t } = useTranslation();
@@ -14,6 +14,21 @@ export const MySubmissions = () => {
     const [error, setError] = useState<string | null>(null);
     const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
     const [expandedMediaId, setExpandedMediaId] = useState<string | null>(null);
+    const [passportData, setPassportData] = useState<{
+        isOpen: boolean;
+        title: string;
+        community: string;
+        id: string;
+        txHash: string;
+        verifiedAt: string;
+    }>({
+        isOpen: false,
+        title: '',
+        community: '',
+        id: '',
+        txHash: '',
+        verifiedAt: ''
+    });
 
     useEffect(() => {
         const load = async () => {
@@ -63,6 +78,49 @@ export const MySubmissions = () => {
                                         {asset.communityName} • {asset.type} •{' '}
                                         {t('submissions.submitted', 'Submitted')}: {new Date(asset.createdAt).toLocaleDateString()}
                                     </span>
+
+                                    {asset.blockchainMetadata?.txHash && (
+                                        <div style={{
+                                            marginTop: '0.75rem',
+                                            padding: '0.4rem 0.6rem',
+                                            background: 'rgba(16,185,129,0.05)',
+                                            border: '1px solid rgba(16,185,129,0.3)',
+                                            borderRadius: '4px',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '0.4rem',
+                                            fontSize: '0.75rem',
+                                            color: '#065f46'
+                                        }}>
+                                            <FiShield size={12} />
+                                            <strong>Sovereignty Vault Verified</strong>
+                                            <span style={{ opacity: 0.6 }}>•</span>
+                                            {asset.blockchainMetadata.txHash.startsWith('0x_mock') ? (
+                                                <span
+                                                    style={{ color: 'var(--color-terracotta)', cursor: 'pointer', textDecoration: 'underline' }}
+                                                    onClick={() => setPassportData({
+                                                        isOpen: true,
+                                                        title: asset.title,
+                                                        community: asset.communityName,
+                                                        id: asset.blockchainMetadata?.onChainId || asset._id,
+                                                        txHash: asset.blockchainMetadata?.txHash || '',
+                                                        verifiedAt: asset.blockchainMetadata?.registeredAt || asset.updatedAt
+                                                    })}
+                                                >
+                                                    (Mock Ledger)
+                                                </span>
+                                            ) : (
+                                                <a
+                                                    href={`https://amoy.polygonscan.com/tx/${asset.blockchainMetadata.txHash}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{ color: 'var(--color-terracotta)', textDecoration: 'none' }}
+                                                >
+                                                    View Proof
+                                                </a>
+                                            )}
+                                        </div>
+                                    )}
 
                                     {asset.approvalStatus === 'REJECTED' && asset.reviewComment && (
                                         <div style={{
@@ -236,6 +294,18 @@ export const MySubmissions = () => {
                         </div>
                     </div>
                 )}
+
+                {/* Digital Passport Modal */}
+                <SovereigntyPassport
+                    isOpen={passportData.isOpen}
+                    onClose={() => setPassportData(prev => ({ ...prev, isOpen: false }))}
+                    title={passportData.title}
+                    community={passportData.community}
+                    id={passportData.id}
+                    txHash={passportData.txHash}
+                    verifiedAt={passportData.verifiedAt}
+                    type="ASSET"
+                />
             </div>
         </DashboardLayout>
     );

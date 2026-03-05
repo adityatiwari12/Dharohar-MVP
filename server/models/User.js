@@ -36,6 +36,11 @@ const UserSchema = new mongoose.Schema({
   communityId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Community'
+  },
+  walletAddress: {
+    type: String,
+    trim: true,
+    match: [/^0x[a-fA-F0-9]{40}$/, 'Please provide a valid Ethereum wallet address']
   }
 }, { timestamps: true });
 

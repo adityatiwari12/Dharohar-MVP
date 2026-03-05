@@ -3,6 +3,8 @@ const AuditLog = require('../models/AuditLog');
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 const { generateAssetMetadata } = require('./geminiService');
+const blockchainService = require('./blockchainService');
+const { ethers } = require('ethers');
 
 // Helper: attach computed mediaUrl to an asset plain object
 const withMediaUrl = (asset) => {
@@ -107,6 +109,21 @@ const approveAsset = async (assetId, reviewerId) => {
 
         asset.approvalStatus = 'APPROVED';
         asset.reviewComment = null;
+
+        // ── Blockchain Sovereignty Vault Registration ──
+        // This provides immutable proof of origin.
+        const blockchainResult = await blockchainService.registerAsset(
+            asset._id.toString(),
+            asset.mediaFileId ? asset.mediaFileId.toString() : 'no-media',
+            ethers.ZeroAddress // Placeholder until community wallet is verified
+        );
+
+        asset.blockchainMetadata = {
+            txHash: blockchainResult.txHash,
+            onChainId: blockchainResult.onChainId,
+            registeredAt: new Date()
+        };
+
         const savedAsset = await asset.save({ session });
 
         await AuditLog.create([{

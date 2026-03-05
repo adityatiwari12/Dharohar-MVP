@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../../components/Layout/DashboardLayout';
 import { StatusBadge } from '../../components/StatusBadge';
 import { RoleMediaPlayer } from '../../components/RoleMediaPlayer';
+import { FiShield } from 'react-icons/fi';
 import { getMyLicenses, resubmitLicense } from '../../services/licenseService';
 import type { License, ResubmitPayload } from '../../services/licenseService';
-import { useTranslation } from 'react-i18next';
+import { SovereigntyPassport } from '../../components/SovereigntyPassport';
 
 export const MyLicenses = () => {
     const { t } = useTranslation();
@@ -14,6 +15,15 @@ export const MyLicenses = () => {
     const [resubmitData, setResubmitData] = useState<Record<string, ResubmitPayload>>({});
     const [submitError, setSubmitError] = useState<Record<string, string>>({});
     const [submitSuccess, setSubmitSuccess] = useState<Record<string, string>>({});
+    const [passportData, setPassportData] = ({
+        isOpen: false,
+        title: '',
+        community: '',
+        id: '',
+        txHash: '',
+        verifiedAt: ''
+    } as any); // Simple type for state
+    const [showPassport, setShowPassport] = useState(false);
 
     const load = async () => {
         setIsLoading(true);
@@ -151,6 +161,52 @@ export const MyLicenses = () => {
                                     <div style={{ marginTop: '1rem', padding: '0.75rem 1rem', background: 'rgba(34,197,94,0.06)', border: '1px solid #22c55e', borderRadius: '4px' }}>
                                         <strong style={{ fontSize: '0.85rem', color: '#14532d' }}>📜 {t('myLicenses.licenseAgreementIssued', 'License Agreement Issued:')}</strong>
                                         <p style={{ margin: '0.5rem 0 0', fontSize: '0.85rem', whiteSpace: 'pre-wrap' }}>{license.agreementText}</p>
+
+                                        {license.blockchainMetadata?.txHash && (
+                                            <div style={{
+                                                marginTop: '0.75rem',
+                                                padding: '0.4rem 0.6rem',
+                                                background: 'rgba(59,130,246,0.05)',
+                                                border: '1px solid rgba(59,130,246,0.2)',
+                                                borderRadius: '4px',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '0.4rem',
+                                                fontSize: '0.72rem',
+                                                color: '#1e3a8a'
+                                            }}>
+                                                <FiShield size={12} />
+                                                <strong>Decentralized Legal Proof</strong>
+                                                <span style={{ opacity: 0.6 }}>•</span>
+                                                {license.blockchainMetadata.txHash.startsWith('0x_mock') ? (
+                                                    <span
+                                                        style={{ color: 'var(--color-terracotta)', cursor: 'pointer', textDecoration: 'underline' }}
+                                                        onClick={() => {
+                                                            setPassportData({
+                                                                isOpen: true, // Set isOpen to true here
+                                                                title: asset?.title || 'Cultural Asset',
+                                                                community: asset?.communityName || '',
+                                                                id: license.blockchainMetadata?.onChainId || license._id,
+                                                                txHash: license.blockchainMetadata?.txHash || '',
+                                                                verifiedAt: license.blockchainMetadata?.issuedAt || license.updatedAt
+                                                            });
+                                                            setShowPassport(true);
+                                                        }}
+                                                    >
+                                                        (Mock Ledger)
+                                                    </span>
+                                                ) : (
+                                                    <a
+                                                        href={`https://amoy.polygonscan.com/tx/${license.blockchainMetadata.txHash}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        style={{ color: 'var(--color-terracotta)', textDecoration: 'none' }}
+                                                    >
+                                                        Verify on Chain
+                                                    </a>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
@@ -207,6 +263,18 @@ export const MyLicenses = () => {
                         );
                     })}
                 </div>
+
+                {/* Digital Passport Modal */}
+                <SovereigntyPassport
+                    isOpen={showPassport}
+                    onClose={() => setShowPassport(false)}
+                    title={passportData.title}
+                    community={passportData.community}
+                    id={passportData.id}
+                    txHash={passportData.txHash}
+                    verifiedAt={passportData.verifiedAt}
+                    type="LICENSE"
+                />
             </div>
         </DashboardLayout>
     );

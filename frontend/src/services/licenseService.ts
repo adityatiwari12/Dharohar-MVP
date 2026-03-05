@@ -15,6 +15,11 @@ export interface License {
     agreementText?: string;
     createdAt: string;
     updatedAt: string;
+    blockchainMetadata?: {
+        txHash?: string;
+        onChainId?: string;
+        issuedAt?: string;
+    };
 }
 
 export interface ApplyLicensePayload {

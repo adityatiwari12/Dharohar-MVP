@@ -28,6 +28,11 @@ export interface Asset {
     updatedAt: string;
     aiMetadata?: AiMetadata;
     aiProcessed?: boolean;
+    blockchainMetadata?: {
+        txHash?: string;
+        onChainId?: string;
+        registeredAt?: string;
+    };
 }
 
 

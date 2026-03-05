@@ -2,6 +2,8 @@ const License = require('../models/License');
 const Asset = require('../models/Asset');
 const AuditLog = require('../models/AuditLog');
 const mongoose = require('mongoose');
+const blockchainService = require('./blockchainService');
+const User = require('../models/User'); // Import User for wallet access
 
 const applyForLicense = async (licenseData, userId) => {
     const session = await mongoose.startSession();
@@ -110,6 +112,25 @@ const approveLicense = async (licenseId, adminId) => {
         license.status = 'APPROVED';
         license.adminComment = null;
         license.agreementText = `This agreement is between the Community and the Applicant for the use of ${license.assetId.title}. [Standard Agreement Terms Apply]`;
+
+        // ── Blockchain On-Chain License Issuance ──
+        // Only attempt if the applicant has a wallet address, otherwise it stays off-chain only (or use ZeroAddress for mock)
+        const applicant = await User.findById(license.applicantId).session(session);
+        const walletAddress = applicant?.walletAddress || '0x0000000000000000000000000000000000000000';
+
+        const blockchainResult = await blockchainService.issueLicense(
+            license.assetId._id.toString(),
+            walletAddress,
+            60 * 60 * 24 * 365, // Default 1 year duration
+            license.licenseType
+        );
+
+        license.blockchainMetadata = {
+            txHash: blockchainResult.txHash,
+            onChainId: blockchainResult.onChainId,
+            issuedAt: new Date()
+        };
+
         const savedLicense = await license.save({ session });
 
         await AuditLog.create([{

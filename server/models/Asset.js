@@ -78,6 +78,13 @@ const AssetSchema = new mongoose.Schema({
     aiProcessed: {
         type: Boolean,
         default: false
+    },
+
+    // ── Blockchain Sovereignty Vault ──────────────────────────
+    blockchainMetadata: {
+        txHash: { type: String },
+        onChainId: { type: String },
+        registeredAt: { type: Date }
     }
 }, { timestamps: true });
 
