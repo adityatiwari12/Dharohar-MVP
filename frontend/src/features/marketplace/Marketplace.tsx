@@ -53,7 +53,7 @@ export const Marketplace = () => {
 
     const handleApply = (asset: Asset, licenseType?: string) => {
         if (!user) { navigate('/login'); return; }
-        navigate(`/apply/${asset._id}?assetType=${asset.type}&title=${encodeURIComponent(asset.title)}&lt=${licenseType || ''}`);
+        navigate(`/apply/${asset.id}?assetType=${asset.type}&title=${encodeURIComponent(asset.title)}&lt=${licenseType || ''}`);
     };
 
     const toggleLicensingSection = (assetId: string) => {
@@ -171,9 +171,9 @@ export const Marketplace = () => {
                                 </div>
                             ) : (
                                 displayedAssets.map(asset => {
-                                    const isLicensingOpen = expandedAssetId === asset._id;
+                                    const isLicensingOpen = expandedAssetId === asset.id;
                                     return (
-                                        <div key={asset._id} className="structured-card" style={{ animation: 'fadeIn var(--transition-base)' }}>
+                                        <div key={asset.id} className="structured-card" style={{ animation: 'fadeIn var(--transition-base)' }}>
                                             <div className="card-header">
                                                 <h4 className="card-title">{asset.title}</h4>
                                                 <span className="card-badge">{asset.type}</span>
@@ -208,9 +208,9 @@ export const Marketplace = () => {
                                                             <button
                                                                 type="button"
                                                                 className="restriction-license-btn"
-                                                                onClick={() => toggleLicensingSection(asset._id)}
+                                                                onClick={() => toggleLicensingSection(asset.id)}
                                                             >
-                                                                {expandedAssetId === asset._id ? `▲ ${t('marketplace.hideTerms', 'Hide Licensing Terms')}` : `📋 ${t('marketplace.viewTerms', 'View Licensing Terms')}`}
+                                                                {expandedAssetId === asset.id ? `▲ ${t('marketplace.hideTerms', 'Hide Licensing Terms')}` : `📋 ${t('marketplace.viewTerms', 'View Licensing Terms')}`}
                                                             </button>
                                                         </div>
                                                     )}
@@ -240,7 +240,7 @@ export const Marketplace = () => {
                                                 <button
                                                     type="button"
                                                     className="lis-toggle-btn"
-                                                    onClick={() => toggleLicensingSection(asset._id)}
+                                                    onClick={() => toggleLicensingSection(asset.id)}
                                                     aria-expanded={isLicensingOpen}
                                                 >
                                                     {isLicensingOpen ? `▲ ${t('marketplace.hideDetails', 'Hide Licensing Details')}` : `▼ ${t('marketplace.viewDetails', 'View Licensing Options & Fees')}`}

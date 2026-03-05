@@ -103,7 +103,7 @@ export const LicenseHistory = () => {
                         const applicant = typeof license.applicantId === 'object' ? license.applicantId : null;
 
                         return (
-                            <div key={license._id} className="framed-section" style={{ padding: '1.5rem' }}>
+                            <div key={license.id} className="framed-section" style={{ padding: '1.5rem' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
                                     <div>
                                         <h4 style={{ margin: 0, marginBottom: '0.2rem' }}>{asset?.title || t('common.culturalAsset', 'Cultural Asset')}</h4>

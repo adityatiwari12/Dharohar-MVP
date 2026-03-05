@@ -93,7 +93,7 @@ export const ReviewHistory = () => {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {displayed.map(asset => (
-                        <div key={asset._id} className="framed-section" style={{ padding: '1.5rem' }}>
+                        <div key={asset.id} className="framed-section" style={{ padding: '1.5rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
                                 <div>
                                     <h4 style={{ margin: 0, marginBottom: '0.2rem' }}>{asset.title}</h4>

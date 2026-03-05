@@ -341,7 +341,7 @@ export const CulturalExplorer = () => {
                     ) : (
                         <div className="grid-layout">
                             {bioAssets.map(asset => (
-                                <div key={asset._id} className="structured-card">
+                                <div key={asset.id} className="structured-card">
                                     <div className="card-header">
                                         <h4 className="card-title">{asset.title}</h4>
                                         <span className="card-badge">{t(`common.risk${asset.riskTier ? asset.riskTier.charAt(0).toUpperCase() + asset.riskTier.slice(1).toLowerCase() : 'Low'}`, `${asset.riskTier || 'LOW'} RISK`)}</span>
@@ -390,7 +390,7 @@ export const CulturalExplorer = () => {
                     ) : (
                         <div className="grid-layout">
                             {sonicAssets.map(asset => (
-                                <div key={asset._id} className="structured-card">
+                                <div key={asset.id} className="structured-card">
                                     <div className="card-header">
                                         <h4 className="card-title">{asset.title}</h4>
                                         <span className="card-badge">SONIC</span>

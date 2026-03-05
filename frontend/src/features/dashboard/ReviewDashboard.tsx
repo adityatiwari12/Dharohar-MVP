@@ -40,7 +40,7 @@ export const ReviewDashboard = () => {
             // Play sound on approval
             playSound();
             // Remove from queue
-            setPendingAssets(prev => prev.filter(a => a._id !== id));
+            setPendingAssets(prev => prev.filter(a => a.id !== id));
             setActionError(prev => ({ ...prev, [id]: '' }));
         } catch (e: any) {
             setActionError(prev => ({ ...prev, [id]: e.response?.data?.message || t('review.approveFailed', 'Approve failed') }));
@@ -59,7 +59,7 @@ export const ReviewDashboard = () => {
         try {
             await rejectAsset(id, comment);
             playSound();
-            setPendingAssets(prev => prev.filter(a => a._id !== id));
+            setPendingAssets(prev => prev.filter(a => a.id !== id));
             setActionError(prev => ({ ...prev, [id]: '' }));
         } catch (e: any) {
             setActionError(prev => ({ ...prev, [id]: e.response?.data?.message || t('review.rejectFailed', 'Reject failed') }));
@@ -97,7 +97,7 @@ export const ReviewDashboard = () => {
                 )}
 
                 {pendingAssets.map(asset => (
-                    <div key={asset._id} className="review-card framed-section" style={{ padding: '2rem' }}>
+                    <div key={asset.id} className="review-card framed-section" style={{ padding: '2rem' }}>
                         <div className="review-card-header">
                             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                 <StatusBadge status={asset.approvalStatus} />
@@ -276,14 +276,14 @@ export const ReviewDashboard = () => {
                                 <textarea
                                     placeholder={t('review.commentPlaceholder', 'Add comments regarding cultural sensitivity, metadata accuracy, or rejection reason...')}
                                     style={{ width: '100%', padding: '0.75rem', border: '1px solid var(--color-muted-gold)', borderRadius: '2px', minHeight: '80px' }}
-                                    value={reviewComments[asset._id] || ''}
-                                    onChange={e => setReviewComments(prev => ({ ...prev, [asset._id]: e.target.value }))}
+                                    value={reviewComments[asset.id] || ''}
+                                    onChange={e => setReviewComments(prev => ({ ...prev, [asset.id]: e.target.value }))}
                                 />
                             </div>
 
-                            {actionError[asset._id] && (
+                            {actionError[asset.id] && (
                                 <p style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '0.5rem' }}>
-                                    ⚠ {actionError[asset._id]}
+                                    ⚠ {actionError[asset.id]}
                                 </p>
                             )}
                         </div>
@@ -291,13 +291,13 @@ export const ReviewDashboard = () => {
                         <div className="review-actions" style={{ marginTop: '2rem', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                             <button
                                 className="minimal-btn danger-text"
-                                onClick={() => handleReject(asset._id)}
+                                onClick={() => handleReject(asset.id)}
                             >
                                 {t('review.rejectSubmission', 'Reject Submission')}
                             </button>
                             <button
                                 className="primary-btn"
-                                onClick={() => handleApprove(asset._id)}
+                                onClick={() => handleApprove(asset.id)}
                             >
                                 {t('review.approveSubmission', 'Approve for Archive')}
                             </button>

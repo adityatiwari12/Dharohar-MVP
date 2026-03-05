@@ -10,7 +10,7 @@ export interface AiMetadata {
 }
 
 export interface Asset {
-    _id: string;
+    id: string;
     type: 'BIO' | 'SONIC';
     title: string;
     description: string;

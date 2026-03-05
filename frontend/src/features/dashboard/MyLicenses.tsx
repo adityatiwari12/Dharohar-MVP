@@ -37,7 +37,7 @@ export const MyLicenses = () => {
         }
         try {
             const updated = await resubmitLicense(id, payload);
-            setLicenses(prev => prev.map(l => l._id === id ? { ...l, ...updated } : l));
+            setLicenses(prev => prev.map(l => l.id === id ? { ...l, ...updated } : l));
             setSubmitSuccess(prev => ({ ...prev, [id]: t('myLicenses.resubmitSuccess', 'Application resubmitted successfully. It is now pending admin review.') }));
             setSubmitError(prev => ({ ...prev, [id]: '' }));
         } catch (e: any) {
@@ -83,7 +83,7 @@ export const MyLicenses = () => {
                         const isModRequired = license.status === 'MODIFICATION_REQUIRED';
 
                         return (
-                            <div key={license._id} className="framed-section" style={{ padding: '1.75rem', marginBottom: '1.5rem' }}>
+                            <div key={license.id} className="framed-section" style={{ padding: '1.75rem', marginBottom: '1.5rem' }}>
                                 {/* Header */}
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
                                     <div>
@@ -180,7 +180,7 @@ export const MyLicenses = () => {
                                                 placeholder={t('myLicenses.updatedPurposePlaceholder', 'Describe the updated purpose of your license application...')}
                                                 style={{ width: '100%', padding: '0.75rem', border: '1px solid #3b82f6', borderRadius: '2px', marginBottom: '0.75rem', minHeight: '80px' }}
                                                 defaultValue={license.purpose}
-                                                onChange={e => setResubmitData(prev => ({ ...prev, [license._id]: { ...prev[license._id], purpose: e.target.value } }))}
+                                                onChange={e => setResubmitData(prev => ({ ...prev, [license.id]: { ...prev[license.id], purpose: e.target.value } }))}
                                             />
                                             <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.4rem' }}>
                                                 {t('myLicenses.updatedDocumentation', 'Updated Documentation')}
@@ -189,15 +189,15 @@ export const MyLicenses = () => {
                                                 placeholder={t('myLicenses.updatedDocumentationPlaceholder', 'Link or description of supporting documentation...')}
                                                 style={{ width: '100%', padding: '0.75rem', border: '1px solid var(--color-muted-gold)', borderRadius: '2px', marginBottom: '1rem', minHeight: '60px' }}
                                                 defaultValue={license.documentation || ''}
-                                                onChange={e => setResubmitData(prev => ({ ...prev, [license._id]: { ...prev[license._id], documentation: e.target.value } }))}
+                                                onChange={e => setResubmitData(prev => ({ ...prev, [license.id]: { ...prev[license.id], documentation: e.target.value } }))}
                                             />
-                                            {submitError[license._id] && (
-                                                <p style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: '0.5rem' }}>⚠ {submitError[license._id]}</p>
+                                            {submitError[license.id] && (
+                                                <p style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: '0.5rem' }}>⚠ {submitError[license.id]}</p>
                                             )}
-                                            {submitSuccess[license._id] && (
-                                                <p style={{ color: '#14532d', fontSize: '0.85rem', marginBottom: '0.5rem' }}>✅ {submitSuccess[license._id]}</p>
+                                            {submitSuccess[license.id] && (
+                                                <p style={{ color: '#14532d', fontSize: '0.85rem', marginBottom: '0.5rem' }}>✅ {submitSuccess[license.id]}</p>
                                             )}
-                                            <button className="primary-btn" onClick={() => handleResubmit(license._id)}>
+                                            <button className="primary-btn" onClick={() => handleResubmit(license.id)}>
                                                 {t('myLicenses.resubmitBtn', 'Resubmit Application')}
                                             </button>
                                         </div>
