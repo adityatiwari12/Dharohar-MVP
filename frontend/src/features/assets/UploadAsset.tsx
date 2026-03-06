@@ -181,24 +181,55 @@ export const UploadAsset = () => {
         setLoading(true);
         setSubmitError('');
         try {
-            // ── Step 1: upload media blob to GridFS (if any) ──────────────
             let mediaFileId: string | undefined;
             if (mediaBlob) {
-                const fd = new FormData();
-                // Derive a proper file extension from the blob's actual MIME type
                 const mime = mediaBlob.type || 'audio/webm';
                 const ext = mime.includes('mp4') ? 'mp4'
                     : mime.includes('ogg') ? 'ogg'
                         : mime.includes('video') ? 'webm'
                             : 'webm';
-                fd.append('file', new File([mediaBlob], `recording.${ext}`, { type: mime }));
-                const uploadRes = await apiClient.post('/storage/upload', fd, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-                mediaFileId = uploadRes.data.fileId;
+
+                if (type === 'SONIC') {
+                    // ── SONIC Flow: Upload directly to S3 Bucket ─────────────
+                    // Forcing .mp3 extension to align with the SONIC backend's preview bucket expectations
+                    const sonicExt = 'mp3';
+
+                    const payload = {
+                        filename: `recording.${sonicExt}`,
+                        contentType: mime
+                    };
+                    const uploadUrlRes = await apiClient.post('/sonic/upload-url', payload);
+                    const { assetId, uploadUrl } = uploadUrlRes.data;
+
+                    await fetch(uploadUrl, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': mime },
+                        body: mediaBlob
+                    });
+
+                    await apiClient.post('/sonic/metadata', {
+                        assetId,
+                        community: formData.community,
+                        musicType: formData.category || 'unknown',
+                        language: 'unknown',
+                        licensable: true,
+                        licenseTypes: ['RESEARCH', 'MEDIA'],
+                        lyrics: formData.description
+                    });
+
+                    mediaFileId = assetId;
+                } else {
+                    // ── BIO Flow: upload media blob to GridFS ──────────────
+                    const fd = new FormData();
+                    fd.append('file', new File([mediaBlob], `recording.${ext}`, { type: mime }));
+                    const uploadRes = await apiClient.post('/storage/upload', fd, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+                    mediaFileId = uploadRes.data.fileId;
+                }
             }
 
-            // ── Step 2: submit asset with optional mediaFileId ─────────────
+            // ── Step 2: submit asset to Dharohar DB ─────────────
             await submitAsset({
                 type: type!,
                 title: formData.title,

@@ -136,6 +136,8 @@ export const ReviewDashboard = () => {
                                         <RoleMediaPlayer
                                             src={asset.mediaUrl}
                                             mode="full"
+                                            assetId={asset.type === 'SONIC' ? asset.mediaFileId : asset.id}
+                                            assetType={asset.type}
                                             label={asset.type === 'SONIC' ? `🎵 ${t('review.listenSonic', 'Sonic Archive — Listen before reviewing:')}` : `🎙 ${t('review.listenVoice', 'Voice Archive — Listen before reviewing:')}`}
                                         />
                                     </div>

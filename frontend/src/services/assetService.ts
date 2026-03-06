@@ -89,3 +89,9 @@ export const rejectAsset = async (id: string, reviewComment: string): Promise<As
     const resp = await apiClient.patch<Asset>(`/assets/${id}/reject`, { reviewComment });
     return resp.data;
 };
+
+// Play SONIC asset
+export const getSonicPlayUrl = async (assetId: string): Promise<string> => {
+    const resp = await apiClient.get<{ assetId: string, previewUrl: string }>(`/sonic/${assetId}/play`);
+    return resp.data.previewUrl;
+};

@@ -370,6 +370,8 @@ export const CulturalExplorer = () => {
                                             <RoleMediaPlayer
                                                 src={asset.mediaUrl}
                                                 mode="preview"
+                                                assetId={asset.id}
+                                                assetType={asset.type}
                                                 previewSeconds={30}
                                                 label={`🎵 ${t('explorer.voicePreview', 'Voice Recording Preview')}`}
                                             />
@@ -419,6 +421,8 @@ export const CulturalExplorer = () => {
                                             <RoleMediaPlayer
                                                 src={asset.mediaUrl}
                                                 mode="preview"
+                                                assetId={asset.mediaFileId}
+                                                assetType={asset.type}
                                                 previewSeconds={30}
                                                 label={`🎵 ${t('explorer.sonicPreview', 'Sonic Preview (30s)')}`}
                                             />

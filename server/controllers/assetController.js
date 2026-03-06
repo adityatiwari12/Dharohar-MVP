@@ -97,6 +97,9 @@ const processAsset = async (req, res, next) => {
         if (asset.aiProcessed) {
             return res.status(409).json({ message: 'Asset has already been AI-processed', asset });
         }
+        if (asset.type === 'SONIC') {
+            return res.status(400).json({ message: 'SONIC assets bypass transcription and Bedrock analysis' });
+        }
 
         logger.info(`[processAsset] Starting AI pipeline for asset ${assetId} (file: ${asset.mediaFileId})`);
 

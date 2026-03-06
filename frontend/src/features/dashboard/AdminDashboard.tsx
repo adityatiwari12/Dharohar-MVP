@@ -132,6 +132,8 @@ export const AdminDashboard = () => {
                                         <RoleMediaPlayer
                                             src={(asset as any).mediaUrl}
                                             mode="full"
+                                            assetId={(asset as any).type === 'SONIC' ? (asset as any).mediaFileId : (asset as any).id}
+                                            assetType={(asset as any).type}
                                             label={(asset as any)?.type === 'SONIC' ? `🎵 ${t('admin.listenSonic', 'Listen to Asset:')}` : `🎙 ${t('admin.listenVoice', 'Voice Archive:')}`}
                                         />
                                     </div>
