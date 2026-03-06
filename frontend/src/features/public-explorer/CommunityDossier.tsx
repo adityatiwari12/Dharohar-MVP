@@ -1,20 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import type { Community } from '../../data/mockData';
 import heroImage from '../../assets/beautiful.png';
+import { RoleMediaPlayer } from '../../components/RoleMediaPlayer';
 import './CommunityDetail.css';
-
-const AttributionBlock = ({ text }: { text: string }) => {
-    const parts = text.split('\n');
-    return (
-        <div className="attribution-block">
-            {parts.map((part, index) => (
-                <span key={index}>{part}</span>
-            ))}
-            <strong>License Required for: Commercial / Research / Media Use</strong>
-        </div>
-    );
-};
 
 interface CommunityDossierProps {
     community: Community;
@@ -24,38 +14,60 @@ interface CommunityDossierProps {
 
 export const CommunityDossier: React.FC<CommunityDossierProps> = ({ community, isModal, onClose }) => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [modalData, setModalData] = useState<any | null>(null);
+
+    const translatedName = t(`communities.${community.id}.name`, community.name);
 
     const content = (
         <div className={`community-dossier ${isModal ? 'modal-view' : ''}`}>
             {/* Header Section */}
-            <header className="community-header" style={{ backgroundImage: `linear-gradient(rgba(244, 237, 228, 0.9), rgba(244, 237, 228, 0.95)), url(${heroImage})` }}>
+            <header className="community-header" style={{ backgroundImage: `linear-gradient(rgba(244, 237, 228, 0.9), rgba(244, 237, 228, 0.95)), url(${community.coverImage || heroImage})` }}>
                 <div className="header-content">
                     {isModal && <button className="close-btn" onClick={onClose} style={{ position: 'absolute', top: '20px', right: '20px', fontSize: '1.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-burnt-umber)' }}>✕</button>}
-                    <h1 className="hero-title" style={{ color: 'var(--color-burnt-umber)', textShadow: 'none', fontSize: isModal ? '2.5rem' : '3.5rem' }}>{community.name}</h1>
+                    <h1 className="hero-title" style={{ color: 'var(--color-burnt-umber)', textShadow: 'none', fontSize: isModal ? '2.5rem' : '3.5rem' }}>{translatedName}</h1>
                     <div className="decorative-divider"><span className="diamond"></span></div>
                     <div className="community-meta">
-                        <span>{community.region}</span>
+                        <span>{t(`communities.${community.id}.region`, community.region)}</span>
                         <span className="dot">•</span>
-                        <span>{community.culturalIdentity}</span>
+                        <span>{t(`communities.${community.id}.culturalIdentity`, community.culturalIdentity)}</span>
                     </div>
-                    <p className="header-attribution">Knowledge preserved and submitted by the {community.name} Council</p>
+                    <p className="header-attribution">{t('dossier.attribution', 'Knowledge preserved and submitted by the {{name}} Council', { name: translatedName })}</p>
                 </div>
             </header>
 
             <main className="explorer-container" style={{ paddingTop: '2rem' }}>
                 <section className="dossier-section">
                     <div className="section-header">
-                        <h2>Cultural Overview</h2>
+                        <h2>{t('dossier.culturalOverview', 'Cultural Overview')}</h2>
                         <div className="governance-tags">
-                            <span className="tag status" style={{ animation: 'badgePop var(--transition-base)' }}>Governance Status: APPROVED</span>
+                            <span className="tag status" style={{ animation: 'badgePop var(--transition-base)' }}>{t('dossier.statusApproved', 'Governance Status: APPROVED')}</span>
                         </div>
                     </div>
 
                     <div className="overview-content framed-section">
                         <img src={community.image} alt={community.name} className="overview-image" />
                         <div className="overview-text">
-                            <p>{community.description}</p>
+                            {community.description.split('\n\n').map((para, i) => {
+                                const colonIdx = para.indexOf(':');
+                                if (colonIdx > 0 && colonIdx < 30) {
+                                    return (
+                                        <p key={i} style={{ marginBottom: '1rem', lineHeight: '1.6' }}>
+                                            <strong style={{ color: 'var(--color-burnt-umber)' }}>{para.substring(0, colonIdx + 1)}</strong>
+                                            {para.substring(colonIdx + 1)}
+                                        </p>
+                                    );
+                                }
+                                return <p key={i} style={{ marginBottom: '1rem', lineHeight: '1.6' }}>{para}</p>;
+                            })}
+
+                            {community.gallery && community.gallery.length > 0 && (
+                                <div style={{ marginTop: '2rem', marginBottom: '2rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                                    {community.gallery.map((img, i) => (
+                                        <img key={i} src={img} alt={`${community.name} gallery image`} style={{ flex: '1', minWidth: '200px', height: '200px', borderRadius: '4px', objectFit: 'cover', border: '1px solid var(--color-muted-gold)', boxShadow: 'var(--shadow-soft)' }} />
+                                    ))}
+                                </div>
+                            )}
                             <div className="knowledge-areas">
                                 <strong>Core Knowledge Domains:</strong>
                                 <ul>
@@ -89,23 +101,71 @@ export const CommunityDossier: React.FC<CommunityDossierProps> = ({ community, i
                     <h2>Folk Music Library</h2>
                     <div className="audio-list">
                         {community.music.map(track => (
-                            <div key={track.id} className="audio-row framed-section">
-                                <div className="audio-info">
-                                    <h4>{track.title}</h4>
-                                    <span className="duration">{track.duration}</span>
+                            <div key={track.id} className="audio-row framed-section flex-row-layout">
+                                {/* Left Section: Player & Title */}
+                                <div className="audio-left-section">
+                                    <h4 className="audio-track-title">{track.title}</h4>
+                                    <div className="player-placeholder">
+                                        <RoleMediaPlayer
+                                            src={track.audioFile}
+                                            mode="full"
+                                            label=""
+                                        />
+                                    </div>
                                 </div>
-                                <div className="player-placeholder">
-                                    <span>▶ Play Archive</span>
-                                    <div className="progress-bar"></div>
+
+                                {/* Center Section: Description & Notice */}
+                                <div className="audio-center-section">
+                                    <h5 className="audio-center-heading">Full Audio Archive</h5>
+                                    <p className="audio-center-desc">
+                                        {track.attribution.split('\n')[0]}<br />
+                                        <span className="audio-center-preserved">{track.attribution.split('\n')[1] || `Preserved by the ${community.name} Community.`}</span>
+                                    </p>
+                                    <div className="audio-center-license-notice">
+                                        <strong>License Required for:</strong> Commercial / Research / Media Use
+                                    </div>
                                 </div>
-                                <div className="audio-actions">
-                                    <AttributionBlock text={track.attribution} />
-                                    <button className="primary-btn small" onClick={() => navigate('/marketplace')}>Apply for License</button>
+
+                                {/* Right Section: Action Button */}
+                                <div className="audio-right-section">
+                                    <button className="primary-btn" onClick={() => navigate('/marketplace')}>Apply for License</button>
                                 </div>
                             </div>
                         ))}
                     </div>
                 </section>
+                {community.videos && community.videos.length > 0 && (
+                    <section className="dossier-section">
+                        <h2>Documentary & Video Archives</h2>
+                        <div className="grid-layout">
+                            {community.videos.map(video => (
+                                <div key={video.id} className="media-card structured-card">
+                                    <h4 className="card-title" style={{ marginBottom: '1rem' }}>{video.title}</h4>
+
+                                    {video.url ? (
+                                        <div className="media-frame" style={{ height: '220px', borderRadius: '4px', overflow: 'hidden' }}>
+                                            <iframe
+                                                width="100%"
+                                                height="100%"
+                                                src={video.url}
+                                                title={video.title}
+                                                frameBorder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                            ></iframe>
+                                        </div>
+                                    ) : (
+                                        <div className="media-frame" style={{ height: '220px', borderRadius: '4px', overflow: 'hidden' }}>
+                                            <img src={video.thumbnail} alt={video.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            <div className="play-overlay">▶</div>
+                                        </div>
+                                    )}
+                                    <p className="card-desc" style={{ marginTop: '1rem' }}>{video.description}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
             </main>
 
             {/* Internal Detail Modal */}
