@@ -9,6 +9,7 @@ import { RoleMediaPlayer } from '../../components/RoleMediaPlayer';
 import { FiVolume2, FiVolumeX } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../../components/Navigation/LanguageSwitcher';
+import { HowItWorks } from './HowItWorks';
 import './CulturalExplorer.css';
 
 const PAGE_SIZE = 8;
@@ -113,9 +114,21 @@ export const CulturalExplorer = () => {
 
             {/* ═══════════════ SECTION 1 — Video Hero ═══════════════ */}
             <section style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: '2rem', right: '2rem', zIndex: 10 }}>
-                    <LanguageSwitcher variant="dark" />
-                </div>
+                {/* ── Top Navigation Bar ── */}
+                <header style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    padding: '1.5rem 2rem',
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                    zIndex: 50,
+                    background: 'linear-gradient(to bottom, rgba(10,6,3,0.7) 0%, rgba(10,6,3,0) 100%)'
+                }}>
+                    <LanguageSwitcher variant="transparent" />
+                </header>
                 {/* Background video */}
                 <video
                     ref={videoRef}
@@ -176,7 +189,7 @@ export const CulturalExplorer = () => {
                         lineHeight: 1,
                         margin: 0,
                         textShadow: '0 4px 24px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.8)'
-                    }}>DHAROHAR</h1>
+                    }}>{t('explorer.dharohar', 'DHAROHAR')}</h1>
 
                     <div style={{
                         width: '80px',
@@ -300,9 +313,9 @@ export const CulturalExplorer = () => {
                                 onClick={() => setSelectedCommunityId(community.id)}
                             >
                                 <div className="card-header">
-                                    <h4 className="card-title">{community.name}</h4>
+                                    <h4 className="card-title">{t(`communities.${community.id}.name`, community.name)}</h4>
                                 </div>
-                                <h5 className="card-subtitle">{community.region}</h5>
+                                <h5 className="card-subtitle">{t(`communities.${community.id}.region`, community.region)}</h5>
 
                                 {community.image && (
                                     <div style={{ width: '100%', height: '160px', overflow: 'hidden', borderRadius: '2px', marginBottom: '1rem' }}>
@@ -310,7 +323,7 @@ export const CulturalExplorer = () => {
                                     </div>
                                 )}
 
-                                <p className="card-desc">{community.culturalIdentity}</p>
+                                <p className="card-desc">{t(`communities.${community.id}.culturalIdentity`, community.culturalIdentity)}</p>
 
                                 <button
                                     className="minimal-btn"
@@ -328,7 +341,10 @@ export const CulturalExplorer = () => {
                     </div>
                 </section>
 
-                {/* SECTION 4 - Live Approved BIO Knowledge */}
+                {/* SECTION 4 - How Dharohar Works */}
+                <HowItWorks />
+
+                {/* SECTION 5 - Live Approved BIO Knowledge */}
                 <section style={{ marginBottom: '6rem' }}>
                     <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem', textAlign: 'center' }}>{t('explorer.knowledgeArchives', 'Knowledge Archives')}</h3>
                     <p style={{ textAlign: 'center', color: 'var(--color-text-light)', marginBottom: '2rem', fontSize: '0.9rem' }}>

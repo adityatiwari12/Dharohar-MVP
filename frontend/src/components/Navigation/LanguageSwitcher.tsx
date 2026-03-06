@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FiGlobe } from 'react-icons/fi';
+import './LanguageSwitcher.css';
 
 const LANGUAGES = [
     { code: 'en', label: 'English' },
@@ -23,7 +24,7 @@ interface LanguageSwitcherProps {
 }
 
 const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
-    position = 'up',
+    position = 'down',
     className = '',
     variant = 'transparent'
 }) => {
@@ -35,6 +36,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
     const changeLanguage = (lngCode: string) => {
         i18n.changeLanguage(lngCode);
+        localStorage.setItem('dharohar_lang', lngCode);
         setIsOpen(false);
     };
 
@@ -46,63 +48,47 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
-            document.addEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
 
     const currentLang = LANGUAGES.find(l => l.code === i18n.language) || LANGUAGES[0];
 
-    const getVariantStyles = () => {
-        switch (variant) {
-            case 'light': return 'bg-white text-gray-800 border border-gray-200 hover:bg-gray-50';
-            case 'dark': return 'bg-slate-800 text-white border border-slate-700 hover:bg-slate-700';
-            case 'transparent': return 'bg-transparent text-gray-700 hover:bg-gray-100 hover:text-indigo-600';
-            default: return '';
-        }
-    };
-
-    const getDropdownVariantStyles = () => {
-        switch (variant) {
-            case 'dark': return 'bg-slate-800 border border-slate-700 text-white shadow-xl shadow-slate-900/50';
-            default: return 'bg-white border border-gray-100 text-gray-800 shadow-xl';
-        }
-    };
-
     return (
-        <div className={`relative inline-block text-left ${className}`} ref={dropdownRef}>
+        <div className={`language-switcher-container ${className}`} ref={dropdownRef}>
             <button
                 type="button"
                 onClick={toggleDropdown}
-                className={`inline-flex items-center justify-center w-full px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${getVariantStyles()}`}
+                className={`language-switcher-btn variant-${variant}`}
                 aria-expanded={isOpen}
                 aria-haspopup="true"
             >
-                <FiGlobe className="mr-2 h-4 w-4" aria-hidden="true" />
-                <span className="hidden sm:inline-block">{currentLang.label}</span>
-                <span className="sm:hidden">{currentLang.code.toUpperCase()}</span>
+                <FiGlobe className="language-switcher-icon" aria-hidden="true" />
+                <span>{currentLang.label}</span>
+                <span className="language-switcher-arrow">▼</span>
             </button>
 
             {isOpen && (
                 <div
-                    className={`absolute z-50 w-48 rounded-md ${getDropdownVariantStyles()} ring-1 ring-black ring-opacity-5 focus:outline-none ${position === 'up' ? 'bottom-full mb-2' : 'top-full mt-2'} right-0 sm:left-0 sm:right-auto`}
+                    className={`language-dropdown pos-${position}`}
                     role="menu"
                     aria-orientation="vertical"
-                    aria-labelledby="language-menu-button"
                 >
-                    <div className="py-1 max-h-60 overflow-y-auto" role="none">
-                        {LANGUAGES.map((lang) => (
-                            <button
-                                key={lang.code}
-                                onClick={() => changeLanguage(lang.code)}
-                                className={`block w-full text-left px-4 py-2 text-sm transition-colors ${i18n.language === lang.code
-                                        ? (variant === 'dark' ? 'bg-slate-700 text-indigo-300 font-semibold' : 'bg-indigo-50 text-indigo-700 font-semibold')
-                                        : (variant === 'dark' ? 'text-gray-300 hover:bg-slate-700 hover:text-white' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600')
-                                    }`}
-                                role="menuitem"
-                            >
-                                {lang.label}
-                            </button>
-                        ))}
+                    <div className="language-dropdown-list" role="none">
+                        {LANGUAGES.map((lang) => {
+                            const isActive = i18n.language === lang.code;
+                            return (
+                                <button
+                                    key={lang.code}
+                                    onClick={() => changeLanguage(lang.code)}
+                                    className={`language-dropdown-item ${isActive ? 'active' : ''}`}
+                                    role="menuitem"
+                                >
+                                    <span>{lang.label}</span>
+                                    {isActive && <span className="language-check-icon">✓</span>}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
             )}
@@ -111,3 +97,4 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 };
 
 export default LanguageSwitcher;
+
