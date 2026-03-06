@@ -3,10 +3,10 @@ import apiClient from './apiClient';
 export type LicenseStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'MODIFICATION_REQUIRED';
 
 export interface License {
-    _id: string;
-    assetId: { _id: string; title: string; type: string; communityName: string } | string;
-    applicantId: { _id: string; name: string; email: string } | string;
-    licenseType: 'RESEARCH' | 'COMMERCIAL' | 'MEDIA';
+    id: string;
+    assetId: { id: string; title: string; type: string; communityName: string } | string;
+    applicantId: { id: string; name: string; email: string } | string;
+    licenseType: 'RESEARCH' | 'COMMERCIAL' | 'MEDIA' | 'BIO_KNOWLEDGE';
     purpose: string;
     documentation?: string;
     fee?: number;
@@ -19,7 +19,7 @@ export interface License {
 
 export interface ApplyLicensePayload {
     assetId: string;
-    licenseType: 'RESEARCH' | 'COMMERCIAL' | 'MEDIA';
+    licenseType: 'RESEARCH' | 'COMMERCIAL' | 'MEDIA' | 'BIO_KNOWLEDGE';
     purpose: string;
     documentation?: string;
     documentationFileId?: string;
@@ -31,6 +31,8 @@ export interface ApplyLicensePayload {
     organizationName?: string;
     gstNumber?: string;
     intendedUse?: string;
+    // Bio-knowledge specific
+    bioKnowledgeDetails?: string;
     // Allow additional license-type specific fields
     [key: string]: unknown;
 }

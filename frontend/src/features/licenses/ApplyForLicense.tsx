@@ -3,13 +3,17 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { applyForLicense } from '../../services/licenseService';
 import { LicenseApplicationDoc } from '../dashboard/LicenseApplicationDoc';
 import type { ApplicationData } from '../dashboard/LicenseApplicationDoc';
+import { BioKnowledgeApplicationDoc } from '../dashboard/BioKnowledgeApplicationDoc';
+import type { BioKnowledgeDocData } from '../dashboard/BioKnowledgeApplicationDoc';
+import { BioKnowledgeLicenseForm, defaultBioKnowledgeData, isBioConfirmed } from './BioKnowledgeLicenseForm';
+import type { BioKnowledgeFormData } from './BioKnowledgeLicenseForm';
 import { useAuth } from '../auth/AuthContext';
 import apiClient from '../../services/apiClient';
 import { useNotificationSound } from '../../hooks/useNotificationSound';
 import { useTranslation } from 'react-i18next';
 import { t } from 'i18next'; // We import 't' directly for the standalone validateCommon function
 
-type LicenseType = 'RESEARCH' | 'COMMERCIAL' | 'MEDIA';
+type LicenseType = 'RESEARCH' | 'COMMERCIAL' | 'MEDIA' | 'BIO_KNOWLEDGE';
 
 // ── Validation helpers ────────────────────────────────────────────────────────
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -457,6 +461,7 @@ export const ApplyForLicense = () => {
     const communityName = searchParams.get('community') || '';
     const navigate = useNavigate();
     const playSound = useNotificationSound();
+    const formRef = useRef<HTMLFormElement>(null);
 
     const defaultType: LicenseType = assetType === 'SONIC' ? 'MEDIA' : 'RESEARCH';
     const [licenseType, setLicenseType] = useState<LicenseType>(defaultType);
@@ -476,6 +481,11 @@ export const ApplyForLicense = () => {
 
     // Sub-form data
     const [formData, setFormData] = useState<Record<string, string>>({});
+
+    // ── Bio-Knowledge specific state ──────────────────────────────────────────
+    const [bioData, setBioData] = useState<BioKnowledgeFormData>(defaultBioKnowledgeData);
+    const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
+    const [bioPdfPreview, setBioPdfPreview] = useState<BioKnowledgeDocData | null>(null);
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
@@ -501,7 +511,7 @@ export const ApplyForLicense = () => {
 
     const isFormValid = Object.keys(commonErrors).length === 0;
 
-    // Build ApplicationData for PDF preview
+    // Build ApplicationData for PDF preview (Research / Commercial / Media)
     const buildDocData = (): ApplicationData => ({
         applicantName: common.fullName || formData.leadResearcher || formData.companyName || 'Applicant',
         organizationName: common.organizationName || formData.institutionName || formData.companyName || '',
@@ -517,9 +527,101 @@ export const ApplyForLicense = () => {
         signedDate: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' }),
     });
 
+    // Build BioKnowledgeDocData for Bio-Knowledge PDF preview
+    const buildBioDocData = (): BioKnowledgeDocData => ({
+        applicantName: common.fullName || 'Applicant',
+        email: common.email || user?.email || '',
+        phone: common.phone || '',
+        assetTitle,
+        communityName: communityName || bioData.communityOfOrigin || 'Originating Community',
+        signedDate: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' }),
+        bioDetails: bioData,
+        evidenceFileName: evidenceFile?.name,
+    });
+
+    // Validate Bio-Knowledge required fields
+    const isBioFormValid = () => {
+        const checks = {
+            fullName: common.fullName.trim().length >= 3,
+            phone: PHONE_RE.test(common.phone),
+            age: bioData.age !== '',
+            gender: bioData.gender !== '',
+            address: bioData.address.trim().length > 5,
+            specialisation: bioData.specialisation !== '',
+            knowledgeDomains: bioData.knowledgeDomains.length > 0,
+            yearsExperience: bioData.yearsExperience !== '',
+            acquisitionMethod: bioData.acquisitionMethod.trim().length > 10,
+            practiceDescription: bioData.practiceDescription.trim().length > 30,
+            geographicalRegion: bioData.geographicalRegion.trim().length > 2,
+            sourceType: bioData.sourceType !== '',
+            communityOfOrigin: bioData.communityOfOrigin.trim().length > 2,
+            isSacredKnowledge: bioData.isSacredKnowledge !== '',
+            communityStatus: bioData.communityStatus !== '',
+            recognitionType: bioData.recognitionType.length > 0,
+            confirmed: isBioConfirmed(formRef.current)
+        };
+        const failedChecks = Object.entries(checks).filter(([_, passed]) => !passed);
+        if (failedChecks.length > 0) {
+            console.error('Bio form validation failed on:', failedChecks.map(f => f[0]));
+        }
+        return failedChecks.length === 0;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        // Guard against broken URLs (e.g. from before the _id -> id refactor)
+        if (!assetId || assetId === 'undefined') {
+            setError(t('applyLicense.invalidAsset', 'Invalid asset ID. Please return to the marketplace and try applying again.'));
+            return;
+        }
+
+        // ── Bio-Knowledge submission path ────────────────────────────────────
+        if (licenseType === 'BIO_KNOWLEDGE') {
+            if (!isBioConfirmed(formRef.current)) {
+                setError('Please agree to the Declaration & Confirmation on the final step before submitting.');
+                return;
+            }
+            if (!isBioFormValid()) {
+                setError('Please fill in all required fields in the Bio-Knowledge Application form.');
+                return;
+            }
+            setIsSubmitting(true);
+            setError('');
+            try {
+                let evidenceFileId: string | undefined;
+                if (evidenceFile) {
+                    const fd = new FormData();
+                    fd.append('file', evidenceFile);
+                    const uploadRes = await apiClient.post<{ fileId: string }>('/storage/upload', fd, {
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                    });
+                    evidenceFileId = uploadRes.data.fileId;
+                }
+                await applyForLicense({
+                    assetId: assetId!,
+                    licenseType: 'BIO_KNOWLEDGE',
+                    purpose: bioData.practiceDescription,
+                    fullName: common.fullName,
+                    email: common.email,
+                    phone: common.phone,
+                    organizationName: common.organizationName || '',
+                    gstNumber: common.gstNumber || '',
+                    intendedUse: bioData.practiceDescription,
+                    ...(evidenceFileId && { documentationFileId: evidenceFileId }),
+                    bioKnowledgeDetails: JSON.stringify(bioData),
+                });
+                playSound();
+                setSuccess(true);
+            } catch (err: any) {
+                setError(err.response?.data?.message || t('applyLicense.submissionFailed', 'Submission failed. Please try again.'));
+            } finally {
+                setIsSubmitting(false);
+            }
+            return;
+        }
+
+        // ── Standard Research / Commercial / Media submission path ─────────
         // Touch all common fields to surface errors
         const allCommonKeys: (keyof CommonFields)[] = ['fullName', 'email', 'phone', 'organizationName', 'gstNumber', 'intendedUse'];
         setTouched(new Set([...allCommonKeys, 'docFile']));
@@ -586,7 +688,12 @@ export const ApplyForLicense = () => {
                     <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✅</div>
                     <h3>{t('applyLicense.successTitle', 'License Application Submitted')}</h3>
                     <p style={{ color: 'var(--color-text-light)' }}>
-                        {t('applyLicense.successMsg1', 'Your')} <strong>{licenseType === 'RESEARCH' ? t('applyLicense.researchLicense', 'Research License') : licenseType === 'COMMERCIAL' ? t('applyLicense.commercialLicense', 'Commercial License') : t('applyLicense.mediaLicense', 'Media License')}</strong> {t('applyLicense.successMsg2', 'license application for')} <em>{assetTitle}</em> {t('applyLicense.successMsg3', 'has been received and is now under admin review.')}
+                        {t('applyLicense.successMsg1', 'Your')} <strong>{
+                            licenseType === 'BIO_KNOWLEDGE' ? 'Bio-Knowledge Application' :
+                                licenseType === 'RESEARCH' ? t('applyLicense.researchLicense', 'Research License') :
+                                    licenseType === 'COMMERCIAL' ? t('applyLicense.commercialLicense', 'Commercial License') :
+                                        t('applyLicense.mediaLicense', 'Media License')
+                        }</strong> {t('applyLicense.successMsg2', 'license application for')} <em>{assetTitle}</em> {t('applyLicense.successMsg3', 'has been received and is now under admin review.')}
                     </p>
                     <p style={{ fontSize: '0.85rem', color: 'var(--color-text-light)', marginTop: '0.5rem' }}>
                         {t('applyLicense.trackStatus', 'Track your application status in your dashboard.')}
@@ -595,7 +702,13 @@ export const ApplyForLicense = () => {
                         <p style={{ fontSize: '0.85rem', color: 'var(--color-text-main)', margin: '0 0 0.75rem', fontWeight: 600 }}>
                             📄 {t('applyLicense.downloadCopy', 'Download a copy of your application?')}
                         </p>
-                        <button type="button" className="minimal-btn" style={{ fontSize: '0.85rem' }} onClick={() => setPreviewDoc(buildDocData())}>
+                        <button type="button" className="minimal-btn" style={{ fontSize: '0.85rem' }} onClick={() => {
+                            if (licenseType === 'BIO_KNOWLEDGE') {
+                                setBioPdfPreview(buildBioDocData());
+                            } else {
+                                setPreviewDoc(buildDocData());
+                            }
+                        }}>
                             ⬇ {t('applyLicense.previewDownload', 'Preview & Download Application Document')}
                         </button>
                     </div>
@@ -605,6 +718,7 @@ export const ApplyForLicense = () => {
                     </div>
                 </div>
                 {previewDoc && <LicenseApplicationDoc data={previewDoc} onClose={() => setPreviewDoc(null)} />}
+                {bioPdfPreview && <BioKnowledgeApplicationDoc data={bioPdfPreview} onClose={() => setBioPdfPreview(null)} />}
             </div>
         );
     }
@@ -634,6 +748,9 @@ export const ApplyForLicense = () => {
                                 <button type="button" className={licenseType === 'COMMERCIAL' ? 'primary-btn' : 'minimal-btn'} onClick={() => setLicenseType('COMMERCIAL')}>
                                     🏢 {t('applyLicense.commercialLicense', 'Commercial License')}
                                 </button>
+                                <button type="button" className={licenseType === 'BIO_KNOWLEDGE' ? 'primary-btn' : 'minimal-btn'} onClick={() => setLicenseType('BIO_KNOWLEDGE')}>
+                                    📜 Bio-Knowledge Application
+                                </button>
                             </>
                         )}
                         {assetType === 'SONIC' && (
@@ -641,25 +758,91 @@ export const ApplyForLicense = () => {
                         )}
                     </div>
 
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        {/* ── Common Identity Fields ── */}
-                        <CommonApplicantFields
-                            fields={common}
-                            errors={commonErrors}
-                            touched={touched}
-                            docFile={docFile}
-                            onFieldChange={handleCommonChange}
-                            onFileChange={setDocFile}
-                            onBlur={handleBlur}
-                        />
+                    <form ref={formRef} onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-                        {/* ── License-type specific fields ── */}
-                        {licenseType === 'RESEARCH' && <ResearchForm data={formData} onChange={handleFieldChange} />}
-                        {licenseType === 'COMMERCIAL' && <CommercialForm data={formData} onChange={handleFieldChange} />}
-                        {licenseType === 'MEDIA' && <MediaForm data={formData} onChange={handleFieldChange} />}
+                        {/* ── Bio-Knowledge Application (has its own full layout) ── */}
+                        {licenseType === 'BIO_KNOWLEDGE' ? (
+                            <>
+                                {/* Minimal identity header for Bio-Knowledge (no GST / org required) */}
+                                <div style={{
+                                    padding: '0.8rem 1rem',
+                                    background: 'rgba(176,141,87,0.07)',
+                                    border: '1px solid var(--color-muted-gold)',
+                                    borderRadius: '4px',
+                                    fontSize: '0.85rem',
+                                    fontWeight: 600,
+                                    color: 'var(--color-burnt-umber)',
+                                }}>👤 Applicant Identity</div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                                        <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Full Name <span style={{ color: '#ef4444' }}>*</span></label>
+                                        <input
+                                            style={{ width: '100%', padding: '0.75rem', border: '1.5px solid var(--color-muted-gold)', borderRadius: '4px', background: 'white', fontSize: '0.9rem', boxSizing: 'border-box' }}
+                                            value={common.fullName}
+                                            placeholder="e.g. Ramprasad Tekam"
+                                            onChange={e => handleCommonChange('fullName', e.target.value)}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                                        <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Phone Number <span style={{ color: '#ef4444' }}>*</span></label>
+                                        <input
+                                            style={{ width: '100%', padding: '0.75rem', border: '1.5px solid var(--color-muted-gold)', borderRadius: '4px', background: 'white', fontSize: '0.9rem', boxSizing: 'border-box' }}
+                                            value={common.phone}
+                                            placeholder="10-digit mobile"
+                                            maxLength={10}
+                                            onChange={e => handleCommonChange('phone', e.target.value.replace(/\D/g, ''))}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                                        <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Email Address</label>
+                                        <input
+                                            type="email"
+                                            style={{ width: '100%', padding: '0.75rem', border: '1.5px solid var(--color-muted-gold)', borderRadius: '4px', background: 'white', fontSize: '0.9rem', boxSizing: 'border-box' }}
+                                            value={common.email}
+                                            placeholder="optional"
+                                            onChange={e => handleCommonChange('email', e.target.value)}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                                        <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Organisation / Institution</label>
+                                        <input
+                                            style={{ width: '100%', padding: '0.75rem', border: '1.5px solid var(--color-muted-gold)', borderRadius: '4px', background: 'white', fontSize: '0.9rem', boxSizing: 'border-box' }}
+                                            value={common.organizationName}
+                                            placeholder="optional (AYUSH clinic, NGO, etc.)"
+                                            onChange={e => handleCommonChange('organizationName', e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                                <div style={{ borderTop: '1px dashed var(--color-muted-gold)' }} />
+                                <BioKnowledgeLicenseForm
+                                    data={bioData}
+                                    onChange={updates => setBioData(prev => ({ ...prev, ...updates }))}
+                                    evidenceFile={evidenceFile}
+                                    onEvidenceFileChange={setEvidenceFile}
+                                />
+                            </>
+                        ) : (
+                            <>
+                                {/* ── Common Identity Fields (Research/Commercial/Media) ── */}
+                                <CommonApplicantFields
+                                    fields={common}
+                                    errors={commonErrors}
+                                    touched={touched}
+                                    docFile={docFile}
+                                    onFieldChange={handleCommonChange}
+                                    onFileChange={setDocFile}
+                                    onBlur={handleBlur}
+                                />
 
-                        {/* Validation summary bar */}
-                        {!isFormValid && touched.size > 0 && (
+                                {/* ── License-type specific fields ── */}
+                                {licenseType === 'RESEARCH' && <ResearchForm data={formData} onChange={handleFieldChange} />}
+                                {licenseType === 'COMMERCIAL' && <CommercialForm data={formData} onChange={handleFieldChange} />}
+                                {licenseType === 'MEDIA' && <MediaForm data={formData} onChange={handleFieldChange} />}
+                            </>
+                        )}
+
+                        {/* Validation summary / Error bar */}
+                        {!isFormValid && touched.size > 0 && licenseType !== 'BIO_KNOWLEDGE' && (
                             <div style={{
                                 padding: '0.75rem 1rem',
                                 background: 'rgba(239,68,68,0.06)',
@@ -685,7 +868,18 @@ export const ApplyForLicense = () => {
                                     <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-burnt-umber)' }}>📄 {t('applyLicense.generateDoc', 'Generate Application Document')}</p>
                                     <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: 'var(--color-text-light)' }}>{t('applyLicense.generateDocDesc', 'Preview and download a DHAROHAR-branded PDF before submitting.')}</p>
                                 </div>
-                                <button type="button" className="minimal-btn" style={{ fontSize: '0.82rem', flexShrink: 0 }} onClick={() => setPreviewDoc(buildDocData())}>
+                                <button
+                                    type="button"
+                                    className="minimal-btn"
+                                    style={{ fontSize: '0.82rem', flexShrink: 0 }}
+                                    onClick={() => {
+                                        if (licenseType === 'BIO_KNOWLEDGE') {
+                                            setBioPdfPreview(buildBioDocData());
+                                        } else {
+                                            setPreviewDoc(buildDocData());
+                                        }
+                                    }}
+                                >
                                     {t('applyLicense.previewDocBtn', 'Preview Document →')}
                                 </button>
                             </div>
@@ -693,20 +887,24 @@ export const ApplyForLicense = () => {
                             <button
                                 type="submit"
                                 className="primary-btn"
-                                disabled={isSubmitting || (!isFormValid && touched.size > 0)}
+                                disabled={isSubmitting || (licenseType !== 'BIO_KNOWLEDGE' && !isFormValid && touched.size > 0)}
                                 style={{
                                     padding: '0.9rem',
                                     fontSize: '1rem',
-                                    opacity: (!isFormValid && touched.size > 0) ? 0.55 : 1,
-                                    cursor: (!isFormValid && touched.size > 0) ? 'not-allowed' : 'pointer',
+                                    opacity: (licenseType !== 'BIO_KNOWLEDGE' && !isFormValid && touched.size > 0) ? 0.55 : 1,
+                                    cursor: (licenseType !== 'BIO_KNOWLEDGE' && !isFormValid && touched.size > 0) ? 'not-allowed' : 'pointer',
                                     transition: 'opacity 200ms',
                                 }}
-                                title={!isFormValid && touched.size > 0 ? t('applyLicense.completeToSubmit', 'Complete all required fields to submit') : ''}
                             >
-                                {isSubmitting ? t('applyLicense.submitting', 'Submitting Application...') : t('applyLicense.submitBtn', 'Submit License Application')}
+                                {isSubmitting
+                                    ? t('applyLicense.submitting', 'Submitting Application...')
+                                    : licenseType === 'BIO_KNOWLEDGE'
+                                        ? '📜 Submit Bio-Knowledge Application'
+                                        : t('applyLicense.submitBtn', 'Submit License Application')
+                                }
                             </button>
 
-                            {!isFormValid && touched.size > 0 && (
+                            {!isFormValid && touched.size > 0 && licenseType !== 'BIO_KNOWLEDGE' && (
                                 <p style={{ textAlign: 'center', fontSize: '0.78rem', color: '#dc2626', margin: 0 }}>
                                     {t('applyLicense.fieldsNeedAttention', '{{count}} field(s) need attention above ↑', { count: Object.keys(commonErrors).length })}
                                 </p>
@@ -717,6 +915,7 @@ export const ApplyForLicense = () => {
             </div>
 
             {previewDoc && <LicenseApplicationDoc data={previewDoc} onClose={() => setPreviewDoc(null)} />}
+            {bioPdfPreview && <BioKnowledgeApplicationDoc data={bioPdfPreview} onClose={() => setBioPdfPreview(null)} />}
         </div>
     );
 };

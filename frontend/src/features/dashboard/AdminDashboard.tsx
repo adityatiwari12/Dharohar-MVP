@@ -37,7 +37,7 @@ export const AdminDashboard = () => {
         try {
             await approveLicense(id);
             playSound();
-            setLicenses(prev => prev.filter(l => l._id !== id));
+            setLicenses(prev => prev.filter(l => l.id !== id));
         } catch (e: any) {
             setActionError(prev => ({ ...prev, [id]: e.response?.data?.message || t('admin.approvalFailed', 'Approval failed') }));
         } finally {
@@ -55,7 +55,7 @@ export const AdminDashboard = () => {
         try {
             await rejectLicense(id, comment);
             playSound();
-            setLicenses(prev => prev.filter(l => l._id !== id));
+            setLicenses(prev => prev.filter(l => l.id !== id));
         } catch (e: any) {
             setActionError(prev => ({ ...prev, [id]: e.response?.data?.message || t('admin.rejectionFailed', 'Rejection failed') }));
         } finally {
@@ -72,7 +72,7 @@ export const AdminDashboard = () => {
         try {
             await requestModification(id, comment);
             playSound();
-            setLicenses(prev => prev.filter(l => l._id !== id));
+            setLicenses(prev => prev.filter(l => l.id !== id));
         } catch (e: any) {
             setActionError(prev => ({ ...prev, [id]: e.response?.data?.message || t('admin.modificationFailed', 'Failed to send modification request') }));
         }
@@ -110,7 +110,7 @@ export const AdminDashboard = () => {
                     const applicant = typeof license.applicantId === 'object' ? license.applicantId : null;
 
                     return (
-                        <div key={license._id} className="request-card framed-section">
+                        <div key={license.id} className="request-card framed-section">
                             <div className="request-header">
                                 <div className="applicant-info">
                                     <h4>{applicant?.name || t('admin.unknownApplicant', 'Unknown Applicant')}</h4>
@@ -161,30 +161,30 @@ export const AdminDashboard = () => {
                                     <textarea
                                         placeholder={t('admin.commentPlaceholder', 'Provide feedback, rejection reason, or describe what needs to be changed...')}
                                         style={{ width: '100%', padding: '0.75rem', border: '1px solid var(--color-muted-gold)', borderRadius: '2px', minHeight: '80px' }}
-                                        value={adminComments[license._id] || ''}
-                                        onChange={e => setAdminComments(prev => ({ ...prev, [license._id]: e.target.value }))}
+                                        value={adminComments[license.id] || ''}
+                                        onChange={e => setAdminComments(prev => ({ ...prev, [license.id]: e.target.value }))}
                                     />
                                 </div>
 
-                                {actionError[license._id] && (
+                                {actionError[license.id] && (
                                     <p style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '0.5rem' }}>
-                                        ⚠ {actionError[license._id]}
+                                        ⚠ {actionError[license.id]}
                                     </p>
                                 )}
                             </div>
 
                             <div className="request-actions">
-                                <button className="minimal-btn danger-text" onClick={() => handleReject(license._id)}>
+                                <button className="minimal-btn danger-text" onClick={() => handleReject(license.id)}>
                                     {t('admin.denyLicense', 'Deny License')}
                                 </button>
                                 <button
                                     className="minimal-btn"
-                                    onClick={() => handleRequestModification(license._id)}
+                                    onClick={() => handleRequestModification(license.id)}
                                     style={{ borderColor: '#3b82f6', color: '#1e3a5f' }}
                                 >
                                     {t('admin.requestModification', 'Request Modification')}
                                 </button>
-                                <button className="primary-btn" onClick={() => handleApprove(license._id)}>
+                                <button className="primary-btn" onClick={() => handleApprove(license.id)}>
                                     {t('admin.approveContract', 'Approve & Issue Contract')}
                                 </button>
                             </div>

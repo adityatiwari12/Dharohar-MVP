@@ -20,4 +20,7 @@ router.get('/reviewed', roleGuard(['review']), assetController.getReviewedAssets
 router.patch('/:id/approve', roleGuard(['review']), assetController.approveAsset);
 router.patch('/:id/reject', roleGuard(['review']), assetController.rejectAsset);
 
+// AI processing (review + admin can trigger)
+router.patch('/:id/process', roleGuard(['review', 'admin']), assetController.processAsset);
+
 module.exports = router;

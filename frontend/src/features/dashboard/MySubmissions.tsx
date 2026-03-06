@@ -54,7 +54,7 @@ export const MySubmissions = () => {
 
                 <div className="audio-list">
                     {assets.map(asset => (
-                        <div key={asset._id} className="audio-row framed-section" style={{ padding: '1.5rem', flexDirection: 'column', gap: '1rem' }}>
+                        <div key={asset.id} className="audio-row framed-section" style={{ padding: '1.5rem', flexDirection: 'column', gap: '1rem' }}>
                             {/* Top row: info + controls */}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
                                 <div className="audio-info" style={{ flex: 1 }}>
@@ -84,11 +84,11 @@ export const MySubmissions = () => {
                                         <button
                                             className="minimal-btn"
                                             style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                                            onClick={() => setExpandedMediaId(prev => prev === asset._id ? null : asset._id)}
-                                            title={expandedMediaId === asset._id ? t('submissions.hideMedia', 'Hide media') : t('submissions.playMedia', 'Play media')}
+                                            onClick={() => setExpandedMediaId(prev => prev === asset.id ? null : asset.id)}
+                                            title={expandedMediaId === asset.id ? t('submissions.hideMedia', 'Hide media') : t('submissions.playMedia', 'Play media')}
                                         >
-                                            {expandedMediaId === asset._id ? <FiChevronUp size={14} /> : <FiChevronDown size={14} />}
-                                            {expandedMediaId === asset._id ? t('submissions.hide', 'Hide') : t('submissions.play', 'Play')}
+                                            {expandedMediaId === asset.id ? <FiChevronUp size={14} /> : <FiChevronDown size={14} />}
+                                            {expandedMediaId === asset.id ? t('submissions.hide', 'Hide') : t('submissions.play', 'Play')}
                                         </button>
                                     )}
                                     <button
@@ -103,7 +103,7 @@ export const MySubmissions = () => {
                             </div>
 
                             {/* Inline media player (expanded on demand) */}
-                            {asset.mediaUrl && expandedMediaId === asset._id && (
+                            {asset.mediaUrl && expandedMediaId === asset.id && (
                                 <div style={{ padding: '0.75rem', background: 'rgba(0,0,0,0.02)', border: '1px solid var(--color-muted-gold)', borderRadius: '4px' }}>
                                     <RoleMediaPlayer
                                         src={asset.mediaUrl}

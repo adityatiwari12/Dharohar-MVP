@@ -1,55 +1,104 @@
-const User = require('../models/User');
-const bcrypt = require('bcryptjs'); // Assuming bcryptjs is used
-const jwt = require('jsonwebtoken');
+/**
+ * Auth service — Cognito auth + DynamoDB user profile storage.
+ * Replaces the MongoDB User model usage in the former authService.js.
+ */
+const {
+    CognitoIdentityProviderClient,
+    SignUpCommand,
+    AdminConfirmSignUpCommand,
+    InitiateAuthCommand
+} = require('@aws-sdk/client-cognito-identity-provider');
+const userDynamoService = require('./userDynamoService');
+
+// Initialize Cognito Client
+const cognito = new CognitoIdentityProviderClient({
+    region: process.env.AWS_REGION || 'ap-south-1'
+});
 
 const register = async (userData) => {
-    // Check if user exists
-    const existingUser = await User.findOne({ email: userData.email });
+    // Guard: ensure body was parsed correctly
+    if (!userData || !userData.email || !userData.password || !userData.name) {
+        const error = new Error('name, email and password are required');
+        error.statusCode = 400;
+        throw error;
+    }
+
+    // 1. Check if user already has a profile in DynamoDB
+    const existingUser = await userDynamoService.findByEmail(userData.email);
     if (existingUser) {
         const error = new Error('User already exists');
         error.statusCode = 400;
         throw error;
     }
 
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(userData.password, salt);
+    // 2. Register user in AWS Cognito
+    try {
+        const signUpParams = {
+            ClientId: process.env.COGNITO_CLIENT_ID,
+            Username: userData.email,
+            Password: userData.password,
+            UserAttributes: [
+                { Name: 'email', Value: userData.email },
+                { Name: 'name', Value: userData.name || 'Unknown' }
+            ]
+        };
+        await cognito.send(new SignUpCommand(signUpParams));
 
-    const user = new User({
+        // Auto-confirm so users don't need a verification code in this MVP
+        if (process.env.COGNITO_USER_POOL_ID) {
+            await cognito.send(new AdminConfirmSignUpCommand({
+                UserPoolId: process.env.COGNITO_USER_POOL_ID,
+                Username: userData.email
+            }));
+        }
+    } catch (err) {
+        const error = new Error(`Cognito Registration Failed: ${err.message}`);
+        error.statusCode = 400;
+        throw error;
+    }
+
+    // 3. Save user profile in DynamoDB (Cognito manages the password)
+    const user = await userDynamoService.createUser({
         name: userData.name,
         email: userData.email,
-        passwordHash,
-        role: userData.role,
+        role: userData.role || 'community',
         communityName: userData.communityName
     });
 
-    await user.save();
-    return { id: user._id, email: user.email, role: user.role };
+    return { id: user.id, email: user.email, role: user.role };
 };
 
 const login = async (email, password) => {
-    // passwordHash is select: false, so we must explicitly select it
-    const user = await User.findOne({ email }).select('+passwordHash');
-    if (!user) {
-        const error = new Error('Invalid credentials');
-        error.statusCode = 401;
-        throw error;
+    try {
+        // 1. Authenticate with Cognito
+        const response = await cognito.send(new InitiateAuthCommand({
+            AuthFlow: 'USER_PASSWORD_AUTH',
+            ClientId: process.env.COGNITO_CLIENT_ID,
+            AuthParameters: {
+                USERNAME: email,
+                PASSWORD: password
+            }
+        }));
+        const token = response.AuthenticationResult.IdToken;
+
+        // 2. Lookup user profile in DynamoDB
+        const user = await userDynamoService.findByEmail(email);
+        if (!user) {
+            const error = new Error('User profile not found in database');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        return { token, user: { id: user.id, role: user.role, name: user.name } };
+
+    } catch (err) {
+        if (err.name === 'NotAuthorizedException' || err.name === 'UserNotFoundException') {
+            const error = new Error('Invalid credentials');
+            error.statusCode = 401;
+            throw error;
+        }
+        throw err;
     }
-
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
-    if (!isMatch) {
-        const error = new Error('Invalid credentials');
-        error.statusCode = 401;
-        throw error;
-    }
-
-    const token = jwt.sign(
-        { id: user._id, role: user.role, communityName: user.communityName },
-        process.env.JWT_SECRET || 'fallback_secret_key',
-        { expiresIn: '1d' }
-    );
-
-    return { token, user: { id: user._id, role: user.role, name: user.name } };
 };
 
 module.exports = { register, login };
