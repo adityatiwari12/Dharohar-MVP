@@ -2,8 +2,11 @@ import * as cdk from 'aws-cdk-lib';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as qldb from 'aws-cdk-lib/aws-qldb';
+import * as sns from 'aws-cdk-lib/aws-sns';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
-
 export class DharoharMvpStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -119,49 +122,83 @@ export class DharoharMvpStack extends cdk.Stack {
     // ─────────────────────────────────────────────────
 
     // Users Table — primary store for registered users
-    const usersTable = new dynamodb.Table(this, 'UsersTable', {
+    const usersTable = dynamodb.Table.fromTableAttributes(this, 'UsersTable', {
       tableName: 'UsersTable',
-      partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.RETAIN, // protect live data
-    });
-
-    // GSI: look up user by email (for login)
-    usersTable.addGlobalSecondaryIndex({
-      indexName: 'email-index',
-      partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING },
-      projectionType: dynamodb.ProjectionType.ALL,
+      globalIndexes: ['email-index'],
     });
 
     // Assets Table — heritage asset metadata
-    const assetsTable = new dynamodb.Table(this, 'AssetsTable', {
+    const assetsTable = dynamodb.Table.fromTableAttributes(this, 'AssetsTable', {
       tableName: 'AssetsTable',
-      partitionKey: { name: 'assetId', type: dynamodb.AttributeType.STRING },
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
-    });
-
-    // GSI: list all assets by a specific creator
-    assetsTable.addGlobalSecondaryIndex({
-      indexName: 'creatorId-index',
-      partitionKey: { name: 'creatorId', type: dynamodb.AttributeType.STRING },
-      projectionType: dynamodb.ProjectionType.ALL,
+      globalIndexes: ['creatorId-index'],
     });
 
     // Licenses Table — licensing & royalty records
-    const licensesTable = new dynamodb.Table(this, 'LicensesTable', {
-      tableName: 'LicensesTable',
-      partitionKey: { name: 'licenseId', type: dynamodb.AttributeType.STRING },
+    const licensesTable = dynamodb.Table.fromTableAttributes(this, 'LicensesTable', {
+      tableName: 'licensesTable',
+      globalIndexes: ['assetId-index'],
+    });
+
+    // ─────────────────────────────────────────────────
+    // DECENTRALIZED GOVERNANCE (SMART CONTRACT LOGS & SNS)
+    // ─────────────────────────────────────────────────
+    // AWS QLDB is deprecated for new accounts as of July 2024.
+    // We simulate an append-only ledger using DynamoDB tables.
+    const licenseContractsTable = new dynamodb.Table(this, 'LicenseContractsTable', {
+      tableName: 'LicenseContractsV2',
+      partitionKey: { name: 'contractId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
 
-    // GSI: list all licenses for a specific asset
-    licensesTable.addGlobalSecondaryIndex({
-      indexName: 'assetId-index',
-      partitionKey: { name: 'assetId', type: dynamodb.AttributeType.STRING },
-      projectionType: dynamodb.ProjectionType.ALL,
+    const certContractsTable = new dynamodb.Table(this, 'CertificationContractsTable', {
+      tableName: 'CertificationContractsV2',
+      partitionKey: { name: 'passportId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
+
+    const notificationsTopic = new sns.Topic(this, 'DharoharNotifications', {
+      topicName: `dharohar-notifications-${this.account}`,
+    });
+
+    // ─────────────────────────────────────────────────
+    // SMART CONTRACT LAMBDAS
+    // ─────────────────────────────────────────────────
+
+    const licenseContractLambda = new lambda.Function(this, 'LicenseContractLambda', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      code: lambda.Code.fromAsset('backend/lambdas/license-contract'),
+      handler: 'index.handler',
+      environment: {
+        LEDGER_TABLE: licenseContractsTable.tableName,
+        NOTIFICATION_TOPIC_ARN: notificationsTopic.topicArn,
+        LICENSES_TABLE: licensesTable.tableName,
+      },
+    });
+
+    const certificationContractLambda = new lambda.Function(this, 'CertificationContractLambda', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      code: lambda.Code.fromAsset('backend/lambdas/certification-contract'),
+      handler: 'index.handler',
+      environment: {
+        LEDGER_TABLE: certContractsTable.tableName,
+        NOTIFICATION_TOPIC_ARN: notificationsTopic.topicArn,
+        ASSETS_TABLE: assetsTable.tableName,
+      },
+    });
+
+    // Grant permissions to the simulated Ledger tables
+    licenseContractsTable.grantReadWriteData(licenseContractLambda);
+    certContractsTable.grantReadWriteData(certificationContractLambda);
+
+    // Grant Lambda permissions to publish to SNS
+    notificationsTopic.grantPublish(licenseContractLambda);
+    notificationsTopic.grantPublish(certificationContractLambda);
+
+    // Grant DynamoDB Table permissions
+    licensesTable.grantReadWriteData(licenseContractLambda);
+    assetsTable.grantReadWriteData(certificationContractLambda);
 
     // ─────────────────────────────────────────────────
     // OUTPUTS
@@ -198,6 +235,19 @@ export class DharoharMvpStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'LicensesTableName', {
       value: licensesTable.tableName,
       description: 'DynamoDB Licenses Table',
+    });
+
+    new cdk.CfnOutput(this, 'LicenseContractsLedgerTableName', {
+      value: licenseContractsTable.tableName,
+      description: 'DynamoDB License Contracts Ledger',
+    });
+    new cdk.CfnOutput(this, 'CertificationContractsLedgerTableName', {
+      value: certContractsTable.tableName,
+      description: 'DynamoDB Certification Contracts Ledger',
+    });
+    new cdk.CfnOutput(this, 'NotificationsTopicArn', {
+      value: notificationsTopic.topicArn,
+      description: 'SNS Notifications Topic ARN',
     });
   }
 }
