@@ -127,7 +127,7 @@ export const CulturalExplorer = () => {
                     zIndex: 50,
                     background: 'linear-gradient(to bottom, rgba(10,6,3,0.7) 0%, rgba(10,6,3,0) 100%)'
                 }}>
-                    <LanguageSwitcher variant="transparent" />
+                    <LanguageSwitcher variant="dark" />
                 </header>
                 {/* Background video */}
                 <video
