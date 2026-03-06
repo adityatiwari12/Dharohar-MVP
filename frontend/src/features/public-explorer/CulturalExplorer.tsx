@@ -127,7 +127,7 @@ export const CulturalExplorer = () => {
                     zIndex: 50,
                     background: 'linear-gradient(to bottom, rgba(10,6,3,0.7) 0%, rgba(10,6,3,0) 100%)'
                 }}>
-                    <LanguageSwitcher variant="transparent" />
+                    <LanguageSwitcher variant="dark" />
                 </header>
                 {/* Background video */}
                 <video
@@ -370,6 +370,8 @@ export const CulturalExplorer = () => {
                                             <RoleMediaPlayer
                                                 src={asset.mediaUrl}
                                                 mode="preview"
+                                                assetId={asset.id}
+                                                assetType={asset.type}
                                                 previewSeconds={30}
                                                 label={`🎵 ${t('explorer.voicePreview', 'Voice Recording Preview')}`}
                                             />
@@ -419,6 +421,8 @@ export const CulturalExplorer = () => {
                                             <RoleMediaPlayer
                                                 src={asset.mediaUrl}
                                                 mode="preview"
+                                                assetId={asset.mediaFileId}
+                                                assetType={asset.type}
                                                 previewSeconds={30}
                                                 label={`🎵 ${t('explorer.sonicPreview', 'Sonic Preview (30s)')}`}
                                             />

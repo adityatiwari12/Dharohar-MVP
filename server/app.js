@@ -8,6 +8,8 @@ const authRoutes = require('./routes/authRoutes');
 const assetRoutes = require('./routes/assetRoutes');
 const licenseRoutes = require('./routes/licenseRoutes');
 const storageRoutes = require('./routes/storageRoutes');
+const sonicRoutes = require('./routes/sonicRoutes');
+
 
 const app = express();
 
@@ -40,6 +42,8 @@ app.use('/auth', authRoutes);
 app.use('/assets', assetRoutes);
 app.use('/licenses', licenseRoutes);
 app.use('/storage', storageRoutes);
+app.use('/sonic', sonicRoutes);
+
 
 // 404 Handler
 app.use((req, res, next) => {

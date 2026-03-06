@@ -108,6 +108,8 @@ export const MySubmissions = () => {
                                     <RoleMediaPlayer
                                         src={asset.mediaUrl}
                                         mode="full"
+                                        assetId={asset.type === 'SONIC' ? asset.mediaFileId : asset.id}
+                                        assetType={asset.type}
                                         label={asset.type === 'SONIC' ? `🎵 ${t('submissions.sonicArchive', 'Your Sonic Archive')}` : `🎙 ${t('submissions.voiceRecording', 'Your Voice Recording')}`}
                                     />
                                 </div>
@@ -215,6 +217,8 @@ export const MySubmissions = () => {
                                         <RoleMediaPlayer
                                             src={selectedAsset.mediaUrl}
                                             mode="full"
+                                            assetId={selectedAsset.type === 'SONIC' ? selectedAsset.mediaFileId : selectedAsset.id}
+                                            assetType={selectedAsset.type}
                                             label={selectedAsset.type === 'SONIC' ? `🎵 ${t('submissions.sonicArchive', 'Your Sonic Archive')}` : `🎙 ${t('submissions.voiceRecording', 'Your Voice Recording')}`}
                                         />
                                     </div>
