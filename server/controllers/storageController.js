@@ -1,14 +1,14 @@
 const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const logger = require('../utils/logger');
-const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
 const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { v4: uuidv4 } = require('uuid');
 
-ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+// Use system ffmpeg — @ffmpeg-installer/ffmpeg is unreliable on some Linux distros
+ffmpeg.setFfmpegPath('ffmpeg');
 
 const s3 = new S3Client({ region: process.env.AWS_REGION || 'ap-south-1' });
 const BUCKET_NAME = process.env.MEDIA_BUCKET || 'dharohar-media'; // Set in .env
