@@ -11,7 +11,7 @@ cdk.out
 node_modules/
 
 # Environment secrets — NEVER commit these
-.env
+**/.env
 *.env.local
 *.env.production
 
