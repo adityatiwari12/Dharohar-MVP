@@ -6,7 +6,7 @@ import { mockCommunities } from '../../data/mockData';
 import { getPublicAssets } from '../../services/assetService';
 import type { Asset } from '../../services/assetService';
 import { RoleMediaPlayer } from '../../components/RoleMediaPlayer';
-import { FiVolume2, FiVolumeX } from 'react-icons/fi';
+import { FiVolume2, FiVolumeX, FiGithub } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../../components/Navigation/LanguageSwitcher';
 import { HowItWorks } from './HowItWorks';
@@ -447,6 +447,23 @@ export const CulturalExplorer = () => {
                 </section>
 
             </main>
+
+            <footer className="homepage-footer">
+                <div className="footer-content">
+                    <p className="footer-attribution">
+                        Built by Team MLOps 4.0 for the Indigenious communities of India
+                    </p>
+                    <a
+                        href="https://github.com/adityatiwari12/Dharohar-MVP"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="footer-github-link"
+                        aria-label="GitHub Repository"
+                    >
+                        <FiGithub />
+                    </a>
+                </div>
+            </footer>
 
             {/* Community Modal */}
             {selectedCommunity && (

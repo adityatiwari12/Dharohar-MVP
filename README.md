@@ -19,7 +19,6 @@
 [🚀 Live Demo](#-demo) • [📖 Documentation](#-documentation) • [🏗️ Architecture](#-architecture) • [👥 Team](#-team)
 
 </div>
-![Dharohar Hero](dashboard.png)
 
 ---
 
@@ -162,6 +161,34 @@ graph LR
 
 ---
 
+## 📸 Platform Gallery
+
+<div align="center">
+
+### Authentication & Dashboard
+<img src="Assets/images/auth.png" width="45%" style="margin-right: 20px" alt="Authentication"/>
+<img src="Assets/images/dashboard.png" width="45%" alt="Dashboard"/>
+
+### Key Features
+<img src="Assets/images/howitworks.png" width="45%" style="margin-right: 20px" alt="How It Works"/>
+<img src="Assets/images/community.png" width="45%" alt="Community Hub"/>
+
+### Licensing & Assets
+<img src="Assets/images/asset.png" width="45%" style="margin-right: 20px" alt="Asset View"/>
+<img src="Assets/images/archives.png" width="45%" alt="Archives"/>
+
+### Certificate Generation
+<img src="Assets/images/apply%20for%20license.png" width="30%" alt="Apply License"/>
+<img src="Assets/images/licensing.png" width="30%" style="margin: 0 10px" alt="Licensing"/>
+<img src="Assets/images/pdf.png" width="30%" alt="Generated PDF"/>
+
+### Easy Upload Flow
+<img src="Assets/images/upload.png" width="80%" alt="Upload Media"/>
+
+</div>
+
+---
+
 ## 🏗️ Architecture
 
 <div align="center">
@@ -297,41 +324,20 @@ graph TB
 git clone https://github.com/adityatiwari12/Dharohar-MVP.git
 cd Dharohar-MVP
 
-# 2. Install dependencies
+# 2. Start the Backend Server
+cd server
 npm install
+npm run dev
 
-# 3. Set up environment variables
-cp .env.example .env
-# Edit .env with your AWS credentials
+# 3. Start the Frontend Application
+cd ../frontend
+npm install
+npm run dev
 
-# 4. Start LocalStack (local AWS simulation)
-docker-compose up -d
-
-# 5. Deploy infrastructure to LocalStack
-npm run setup-local
-
-# 6. Run tests
-npm test
-
-# 7. Start mobile app
-cd mobile-app
+# 4. Start the Mobile App
+cd ../mobile-app
 npm install
 npm start
-```
-
-### Deploy to AWS
-
-```bash
-# Bootstrap CDK (first time only)
-cdk bootstrap
-
-# Deploy infrastructure
-cdk deploy
-
-# Deploy mobile app
-cd mobile-app
-expo build:android
-expo build:ios
 ```
 
 ---
@@ -413,20 +419,6 @@ sequenceDiagram
     Market->>Creator: 80% royalty payment
     Market->>Vault: Record transaction
 ```
-
-### Screenshots
-
-<div align="center">
-
-| Home Screen | Voice Recording | Audio Heritage | QR Scanner |
-|-------------|----------------|----------------|------------|
-| ![Home](https://via.placeholder.com/200x400?text=Home) | ![Voice](https://via.placeholder.com/200x400?text=Voice) | ![Audio](https://via.placeholder.com/200x400?text=Audio) | ![QR](https://via.placeholder.com/200x400?text=QR) |
-
-| Marketplace | Profile | Digital Passport | Verification |
-|-------------|---------|------------------|--------------|
-| ![Market](https://via.placeholder.com/200x400?text=Market) | ![Profile](https://via.placeholder.com/200x400?text=Profile) | ![Passport](https://via.placeholder.com/200x400?text=Passport) | ![Verify](https://via.placeholder.com/200x400?text=Verify) |
-
-</div>
 
 ---
 
@@ -1077,64 +1069,6 @@ Dharohar-MVP/
 
 ---
 
-## 🚦 Project Status
-
-### ✅ Completed (Task 1)
-- [x] AWS CDK Infrastructure Setup
-- [x] React Native Mobile App Foundation
-- [x] LocalStack Development Environment
-- [x] Core AWS Services Configuration
-  - S3 Buckets (Media & Dossiers)
-  - DynamoDB Tables (Assets & Creators)
-  - Cognito User Pool
-  - API Gateway
-  - QLDB Ledger
-- [x] Mobile App Screens (6 screens)
-- [x] Jest Testing Framework
-- [x] Infrastructure Tests (7/7 passing)
-
-### 🔄 In Progress
-- [ ] Task 2: Authentication and User Management
-- [ ] Task 3: Heritage-Bio Service Implementation
-- [ ] Task 4: Heritage-Sonic Service Implementation
-
-### 📋 Upcoming
-- [ ] Task 5: Digital Passport Service
-- [ ] Task 6: Checkpoint - Core AI Features
-- [ ] Task 7: Sovereignty Vault Implementation
-- [ ] Task 8: Expert Verification Workflow
-- [ ] Task 9: License Marketplace Implementation
-- [ ] Task 10: Mobile App UI/UX Enhancement
-- [ ] Task 11: Testing and Quality Assurance
-- [ ] Task 12: Performance Optimization
-- [ ] Task 13: Final Integration & Demo Prep
-
----
-
-## 🤝 Contributing
-
-We welcome contributions from the community! Here's how you can help:
-
-1. **Fork the repository**
-2. **Create a feature branch** (`git checkout -b feature/AmazingFeature`)
-3. **Commit your changes** (`git commit -m 'Add some AmazingFeature'`)
-4. **Push to the branch** (`git push origin feature/AmazingFeature`)
-5. **Open a Pull Request**
-
-### Development Guidelines
-- Follow TypeScript best practices
-- Write tests for new features
-- Update documentation as needed
-- Follow the existing code style
-- Ensure all tests pass before submitting PR
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
 
 ## 🙏 Acknowledgments
 
@@ -1189,4 +1123,3 @@ If you find this project interesting or useful, please consider giving it a ⭐ 
 **#AIForBharat #HeritagePreservation #DigitalSovereignty #AWS #Blockchain**
 
 </div>
-

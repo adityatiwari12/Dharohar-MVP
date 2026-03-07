@@ -282,3 +282,63 @@
         padding: 1.25rem;
     }
 }
+
+/* Homepage Footer Style */
+.homepage-footer {
+    padding: 1rem 2rem;
+    background-color: var(--color-parchment);
+    border-top: 1px solid var(--color-muted-gold);
+    margin-top: 2rem;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    text-align: center;
+}
+
+.footer-attribution {
+    font-family: var(--font-serif);
+    color: var(--color-burnt-umber);
+    font-size: 0.95rem;
+    margin: 0;
+    line-height: 1;
+}
+
+.footer-github-link {
+    color: var(--color-muted-gold);
+    font-size: 1.25rem;
+    transition: color var(--transition-base), transform var(--transition-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.footer-github-link:hover {
+    color: var(--color-terracotta);
+    transform: scale(1.1);
+}
+
+@media (max-width: 767px) {
+    .homepage-footer {
+        padding: 1rem;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .footer-attribution {
+        font-size: 0.85rem;
+    }
+
+    .footer-github-link {
+        font-size: 1.1rem;
+    }
+}
