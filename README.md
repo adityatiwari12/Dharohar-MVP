@@ -166,8 +166,9 @@ graph LR
 <div align="center">
 
 ### Authentication & Dashboard
-<img src="Assets/images/auth.png" width="45%" style="margin-right: 20px" alt="Authentication"/>
-<img src="Assets/images/dashboard.png" width="45%" alt="Dashboard"/>
+<img src="Assets/images/dashboard.png" width="90%" alt="Dashboard"/>
+<br/><br/>
+<img src="Assets/images/auth.png" width="45%" alt="Authentication"/>
 
 ### Key Features
 <img src="Assets/images/howitworks.png" width="45%" style="margin-right: 20px" alt="How It Works"/>
@@ -186,6 +187,40 @@ graph LR
 <img src="Assets/images/upload.png" width="80%" alt="Upload Media"/>
 
 </div>
+
+---
+
+## 🤖 How AI is used in Dharohar?
+
+AI is essential in this solution because the core challenge Dharohar addresses is not only technological but also structural: indigenous communities often possess rich traditional knowledge but lack the legal, technical, and documentation capacity required to formally protect and manage it. Most of this knowledge exists in oral form and communities typically do not have access to lawyers, researchers, or institutions that can help them convert their cultural knowledge into structured legal or archival documents.
+
+AI acts as a bridge between indigenous knowledge systems and formal governance frameworks.
+
+First, AI helps convert oral knowledge into documented records. Communities can simply record their songs, rituals, or traditional practices through voice input. AI automatically transcribes these recordings into structured text, making it possible to archive knowledge that would otherwise remain undocumented.
+
+Second, AI assists in generating structured documentation. Indigenous contributors often cannot draft formal descriptions, contextual documentation, or structured records that institutions require. AI helps organize the submission by extracting metadata such as cultural category, keywords, location, and summary. This transforms raw cultural input into a well-documented digital record that can be reviewed, archived, and licensed.
+
+Third, AI supports the governance process. When a submission is made, AI can provide advisory insights for reviewers by summarizing long narratives, identifying sensitive cultural content, and suggesting appropriate licensing categories. This reduces the workload for review boards while ensuring that human experts retain final authority over approval decisions.
+
+Fourth, AI enables multilingual accessibility. Many indigenous communities speak regional languages and dialects. AI can transcribe and translate content so that researchers, institutions, and policymakers can understand the submissions while preserving the original language of the community.
+
+By performing transcription, structuring documentation, and assisting governance workflows, AI removes the barrier of legal drafting and technical documentation for indigenous contributors. This allows communities to focus on sharing their knowledge while the system ensures that it is preserved, credited, and protected through a structured and transparent process.
+
+---
+
+## ☁️ How AWS Services are leveraged in Dharohar?
+
+- **Amazon EC2** – Hosts the backend application (Node/Express APIs) that manages authentication, asset submission, review workflows, and licensing logic.
+- **Amazon Cognito** – Handles secure user authentication and role-based access for different users (community contributors, reviewers, administrators, and general users).
+- **Amazon S3** – Stores uploaded media assets such as audio recordings, images, and documents submitted by communities. The application stores the file URL and metadata in the database.
+- **Amazon Transcribe** – Converts recorded voice submissions into text transcripts automatically, allowing oral cultural knowledge to be documented and searchable.
+- **Amazon Bedrock** – Provides the AI layer to generate structured insights such as summaries, metadata extraction, risk classification, and suggested licensing categories from submitted cultural content.
+- **AWS Lambda** – Executes serverless background tasks such as triggering transcription jobs, processing AI metadata generation, and handling asynchronous workflows.
+- **Amazon DynamoDB** – Stores fast-access structured metadata or workflow states related to submissions and licensing processes.
+- **Amazon QLDB** – Maintains an immutable ledger of approvals, licensing transactions, and governance decisions to ensure transparency and tamper-proof records.
+- **AWS Kiro** – Used to support AI-assisted development and workflow automation during the implementation of the platform’s intelligent features.
+
+Together, these AWS services provide secure storage, scalable computing, AI processing, authentication, and transparent governance for the Dharohar platform.
 
 ---
 
