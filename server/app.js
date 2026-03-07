@@ -37,6 +37,11 @@ app.use(express.json());
 // Request logging via Winston
 app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
 
+// Health Check
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'healthy', service: 'dharohar-api' });
+});
+
 // Routes
 app.use('/auth', authRoutes);
 app.use('/assets', assetRoutes);

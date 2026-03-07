@@ -1,0 +1,30 @@
+# Dharohar MVP Project Structure
+
+Here is the directory structure for the **Dharohar-MVP** project:
+
+```text
+Dharohar-MVP/
+├── frontend/               # React + Vite + TypeScript frontend application
+│   ├── src/                # Component logic, hooks, and pages
+│   └── public/             # Static assets (images, icons)
+├── server/                 # Express.js backend server
+│   ├── routes/             # API endpoint definitions
+│   ├── controllers/        # Business logic for API routes
+│   ├── models/             # Database schemas (DynamoDB/MongoDB)
+│   └── services/           # External service integrations (AWS, Gemini)
+├── SONIC/                  # AWS CDK Infrastructure as Code
+│   ├── backend/            # Lambda functions and cloud-native logic
+│   ├── lib/                # CDK stack definitions
+│   └── bin/                # CDK app entry point
+├── docs/                   # Project documentation and guides
+├── dharohar-smart-contracts.md # Smart contract implementation details
+└── package.json            # Root project dependencies and scripts
+```
+
+## Description of Key Components
+
+1.  **frontend/**: The user interface built with React, Vite, and TypeScript. It handles the map-based GIS interface, user authentication (Cognito), and asset submission forms.
+2.  **server/**: A Node.js/Express backend that acts as the primary API layer. It manages data persistence, authentication middleware, and integrates with AI services like Gemini.
+3.  **SONIC/**: Contains the AWS Cloud Development Kit (CDK) code used to provision and manage AWS resources like S3, Lambda, DynamoDB, and Cognito.
+4.  **docs/**: Centralized storage for project requirements, design documents, and setup guides.
+5.  **Smart Contracts**: Documentation and logic related to blockchain integration for asset verification and licensing.
