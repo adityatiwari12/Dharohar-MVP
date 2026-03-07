@@ -19,6 +19,7 @@
 [🚀 Live Demo](#-demo) • [📖 Documentation](#-documentation) • [🏗️ Architecture](#-architecture) • [👥 Team](#-team)
 
 </div>
+![Dharohar Hero](dashboard.png)
 
 ---
 
